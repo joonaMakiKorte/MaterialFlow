@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum, auto
 from typing import Dict
-from simulator.core.item import Item
+from simulator.core.items.item import Item
 
 class OrderStatus(Enum):
     """Enumeration of possible order states."""
@@ -59,13 +59,13 @@ class RefillOrder(Order):
     ----------
     item : Item
         Item contained in the pallet
-    item_count : int
+    qty : int
         Amount of items in the pallet / quantity requested
     """
     def __init__(self, order_id: int, item: Item, qty_requested: int):
         super().__init__(order_id)
         self._item = item
-        self._item_count = qty_requested
+        self._qty = qty_requested
 
     def process(self):
         """TODO"""

@@ -4,22 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Implementing Order-class logic">
-      <change afterPath="$PROJECT_DIR$/simulator/core/components/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/items/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/items/loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/location.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/orders/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/orders/order_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/pallets/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/pallets/system_pallet.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Core class modelling, json for items">
+      <change afterPath="$PROJECT_DIR$/simulator/core/components/pallet_conveyor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_conveyor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" beforeDir="false" afterPath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/item.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/items/item.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/order.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/system_pallet.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/location.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/pallets/system_pallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/pallets/system_pallet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,7 +108,23 @@
       <option name="project" value="LOCAL" />
       <updated>1757344179168</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Core class modelling, json for items">
+      <option name="closed" value="true" />
+      <created>1757445387674</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1757445387674</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Core class modelling, json for items">
+      <option name="closed" value="true" />
+      <created>1757445482666</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1757445482666</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -132,6 +142,7 @@
     <MESSAGE value="Add gitignore" />
     <MESSAGE value="Core class modelling" />
     <MESSAGE value="Implementing Order-class logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implementing Order-class logic" />
+    <MESSAGE value="Core class modelling, json for items" />
+    <option name="LAST_COMMIT_MESSAGE" value="Core class modelling, json for items" />
   </component>
 </project>

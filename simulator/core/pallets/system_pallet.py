@@ -1,6 +1,4 @@
-from simulator.core.location import Location
-from typing import Optional
-
+from typing import Tuple, Optional
 
 class SystemPallet:
     """
@@ -13,13 +11,18 @@ class SystemPallet:
         Unique identifier.
     order_id : int
         Id of the assigned order. Value is 'None' if no order assigned.
-    desired_dest: Location
-        Destination to transport the pallet to. Value is 'None' if no requested transportation orders.
-    actual_dest: Location
+    desired_dest: Tuple[float,float]
+        Destination to transport the pallet to. A pair of component id and slot id (e.g., 'Conveyor-01, slot 2')
+    actual_dest: Tuple[float,float]
         Current destination of the pallet.
     """
-    def __init(self, pallet_id: int, current_dest: Location):
-        self._pallet_id = pallet_id
-        self._order_id: Optional[int] = None
-        self._desired_dest: Optional[Location] = None
-        self._current_dest = current_dest
+    def __init__(self, pallet_id: int, actual_dest: Tuple[float,float]):
+        self.pallet_id = pallet_id
+        self.order_id: Optional[int] = None
+        self.desired_dest: Optional[Tuple[float,float]] = None
+        self.actual_dest = actual_dest
+
+
+
+    def __repr__(self):
+        return f"Pallet({self.pallet_id})"

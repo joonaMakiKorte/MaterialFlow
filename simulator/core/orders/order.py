@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum, auto
 from typing import Dict
-from simulator.core.items.item import Item
 
 class OrderStatus(Enum):
     """Enumeration of possible order states."""
@@ -44,7 +43,7 @@ class Order(ABC):
 
     @abstractmethod
     def process(self):
-        # Orders are processed differently depending on the type
+        """General method for order processing."""
         pass
 
     def __repr__(self):
@@ -57,14 +56,14 @@ class RefillOrder(Order):
 
     Additional attributes
     ----------
-    item : Item
-        Item contained in the pallet
+    item_id : int
+        Id of the Item contained in the pallet
     qty : int
         Amount of items in the pallet / quantity requested
     """
-    def __init__(self, order_id: int, item: Item, qty_requested: int):
+    def __init__(self, order_id: int, item_id: int, qty_requested: int):
         super().__init__(order_id)
-        self._item = item
+        self._item_id = item_id
         self._qty = qty_requested
 
     def process(self):
@@ -77,10 +76,10 @@ class OpmOrder(Order):
 
     Additional attributes
     ----------
-    requested_items: Dict[Item, int]
-        Contents of the order with counts
+    requested_items: Dict[int, int]
+        Contents of the order with quantities
     """
-    def __init__(self, order_id: int, requested_items: Dict[Item, int]):
+    def __init__(self, order_id: int, requested_items: Dict[int, int]):
         super().__init__(order_id)
         self._requested_items = requested_items
 

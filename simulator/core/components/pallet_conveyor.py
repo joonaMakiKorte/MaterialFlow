@@ -29,14 +29,13 @@ class PalletConveyor(Component):
     """
     def __init__(self, env: simpy.Environment, conveyor_id: int, name: str,
                  start: Tuple[float, float], end: Tuple[float, float], num_slots: int,
-                 cycle_time: float, next_component: List[object]=None):
+                 cycle_time: float):
         super().__init__(env, conveyor_id, name)
         self.start = start
         self.end = end
         self.num_slots = num_slots
         self.cycle_time = cycle_time
         self.slots: List[Optional[SystemPallet]] = [None] * num_slots
-        self.next_component = next_component
 
         def calculate_slots(start: Tuple[float,float], end: Tuple[float,float], num_slots: int) -> List[Tuple[float,float]]:
             """Return evenly spaced slot coordinates"""
@@ -68,18 +67,20 @@ class PalletConveyor(Component):
             pallet.actual_dest = self.slot_coords[0]
             print(f"[{self.env.now}] {self.name}: Loaded {pallet}")
 
+    def _handoff(self, pallet: SystemPallet, downstream):
+        """Schedule pallet unloading for the downstream elements next event turn"""
+        yield self.env.timeout(0)  # schedule for "next event turn"
+        downstream.load(pallet)
+        print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
+
     def shift(self):
         """Shift pallets one slot forward if possible."""
-        # If the last slot is occupied the pallet must be unloaded before shifting
         # Try to unload the last slot into downstream
         if self.downstream and self.slots[-1] is not None:
             pallet = self.slots[-1]
-            accepted = self.downstream[0].can_load()
-            if accepted:
-                print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
-                self.slots[-1] = None  # remove pallet if accepted
-            else: # Unloading not possible -> shifting not possible
-                return
+            if self.downstream[0].can_load():
+                self.env.process(self._handoff(pallet, self.downstream[0]))
+                self.slots[-1] = None
 
         # Traverse backwards to not overwrite slots
         for i in reversed(range(1, self.num_slots)):
@@ -88,7 +89,6 @@ class PalletConveyor(Component):
                 pallet.actual_dest = self.slot_coords[i]
                 self.slots[i] = self.slots[i - 1]
                 self.slots[i - 1] = None
-
 
     def run(self):
         """Main conveyor loop."""

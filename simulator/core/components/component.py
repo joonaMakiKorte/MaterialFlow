@@ -16,8 +16,6 @@ class Component(ABC):
         Human-readable name of the component.
     downstream : List[Component]
         List of linked downstream components.
-    process : simpy.Process
-        SimPy process instance for this component.
     """
     def __init__(self, env: simpy.Environment, component_id : int, name: str):
         self.env = env
@@ -25,16 +23,9 @@ class Component(ABC):
         self.name = name
         self.downstream: List["Component"] = []
 
-        # Register run loop
-        self.process = env.process(self.run())
-
     def connect(self, downstream_components: List["Component"]):
         """Link component's output to another components (can be overridden)."""
         self.downstream.extend(downstream_components)
-
-    @abstractmethod
-    def run(self):
-        """Main component loop for the SimPy process."""
 
     @abstractmethod
     def can_load(self) -> bool:

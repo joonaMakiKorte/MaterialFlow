@@ -22,7 +22,5 @@ class SystemPallet:
         self.desired_dest: Optional[Tuple[float,float]] = None
         self.actual_dest = actual_dest
 
-
-
     def __repr__(self):
         return f"Pallet({self.pallet_id})"

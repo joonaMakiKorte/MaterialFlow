@@ -4,9 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Conveyor logic, conveyor tests">
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Testing for connected conveyors">
+      <change afterPath="$PROJECT_DIR$/simulator/core/components/warehouse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/core/transportation_units/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" beforeDir="false" afterPath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/pallet_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/pallet_conveyor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/pallets/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/pallets/system_pallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_conveyor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -126,7 +133,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757516386453</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Testing for connected conveyors">
+      <option name="closed" value="true" />
+      <created>1757538886818</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1757538886818</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -146,6 +161,7 @@
     <MESSAGE value="Implementing Order-class logic" />
     <MESSAGE value="Core class modelling, json for items" />
     <MESSAGE value="Conveyor logic, conveyor tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Conveyor logic, conveyor tests" />
+    <MESSAGE value="Testing for connected conveyors" />
+    <option name="LAST_COMMIT_MESSAGE" value="Testing for connected conveyors" />
   </component>
 </project>

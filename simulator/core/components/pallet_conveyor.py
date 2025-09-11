@@ -1,6 +1,6 @@
 import simpy
 from simulator.core.components.component import Component
-from simulator.core.pallets.system_pallet import SystemPallet
+from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import List, Tuple, Optional
 
 class PalletConveyor(Component):
@@ -12,16 +12,16 @@ class PalletConveyor(Component):
 
     Additional Attributes
     ----------
-    start : Tuple[int,int]
-        Entry point of the conveyor for pallets.
-    end : Tuple[int,int]
+    process : simpy.Process
+        SimPy process instance for this component.
+    start : Tuple[float,float]
+        Entry point of the conveyor for transportation_units.
+    end : Tuple[float,float]
         Pallet output from conveyor.
     num_slots : int
-        The amount of pallets the conveyor can fit.
+        The amount of transportation_units the conveyor can fit.
     cycle_time : float
         Time in simulation units per movement cycle.
-    next_component : int
-        Id of the component that receives pallets at the end.
     slots : List[Optional[SystemPallet]]
         List of either 'None' or pallet IDs. Conveyor length == num of slots.
     slot_coords : List[Tuple[float,float]]
@@ -31,6 +31,7 @@ class PalletConveyor(Component):
                  start: Tuple[float, float], end: Tuple[float, float], num_slots: int,
                  cycle_time: float):
         super().__init__(env, conveyor_id, name)
+        self.process = env.process(self.run()) # Register run loop
         self.start = start
         self.end = end
         self.num_slots = num_slots
@@ -54,7 +55,7 @@ class PalletConveyor(Component):
 
                 return slots
 
-        self.slot_coords = calculate_slots(start, end, num_slots)
+        self.slot_coords = calculate_slots(start, end, num_slots) # Calculate slot coordinates
 
     def can_load(self) -> bool:
         """Check if first slot is free for loading"""
@@ -62,10 +63,12 @@ class PalletConveyor(Component):
 
     def load(self, pallet: SystemPallet):
         """Place pallet at start if free"""
-        if self.can_load():
-            self.slots[0] = pallet
-            pallet.actual_dest = self.slot_coords[0]
-            print(f"[{self.env.now}] {self.name}: Loaded {pallet}")
+        if not self.can_load():
+            print(f"[{self.env.now}] {self.name}: Conveyor full!")
+            return
+        self.slots[0] = pallet
+        pallet.actual_dest = self.slot_coords[0]
+        print(f"[{self.env.now}] {self.name}: Loaded {pallet}")
 
     def _handoff(self, pallet: SystemPallet, downstream):
         """Schedule pallet unloading for the downstream elements next event turn"""
@@ -74,7 +77,7 @@ class PalletConveyor(Component):
         print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
 
     def shift(self):
-        """Shift pallets one slot forward if possible."""
+        """Shift transportation_units one slot forward if possible."""
         # Try to unload the last slot into downstream
         if self.downstream and self.slots[-1] is not None:
             pallet = self.slots[-1]

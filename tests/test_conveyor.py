@@ -1,6 +1,6 @@
 import simpy
 from simulator.core.components.pallet_conveyor import PalletConveyor
-from simulator.core.pallets.system_pallet import SystemPallet
+from simulator.core.transportation_units.system_pallet import SystemPallet
 
 def test_conveyor_one_pallet():
     env = simpy.Environment()
@@ -27,7 +27,7 @@ def test_conveyor_two_pallets():
     # Create a conveyor with a length of 3
     conveyor = PalletConveyor(env, conveyor_id=1, name="C1", start=(0, 0), end=(0, 2), num_slots=3,
                               cycle_time=1)
-    # Create two pallets
+    # Create two transportation_units
     pallet1 = SystemPallet(pallet_id=10000001, actual_dest=(0, 0))
     pallet2 = SystemPallet(pallet_id=10000002, actual_dest=(0, 0))
 

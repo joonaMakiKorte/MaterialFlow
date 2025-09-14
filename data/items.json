@@ -3,168 +3,224 @@
         "item_id": 1001,
         "name": "Organic Whole Milk",
         "weight": 1.0,
-        "category": "Dairy"
+        "category": "Dairy",
+        "volume": 1.0,
+        "stackable": true
     },
     {
         "item_id": 1002,
         "name": "Cheddar Cheese Block",
         "weight": 0.5,
-        "category": "Dairy"
+        "category": "Dairy",
+        "volume": 0.5,
+        "stackable": true
     },
     {
         "item_id": 1003,
         "name": "Greek Yogurt, Plain",
         "weight": 0.5,
-        "category": "Dairy"
+        "category": "Dairy",
+        "volume": 0.5,
+        "stackable": true
     },
     {
         "item_id": 1004,
         "name": "Salted Butter",
         "weight": 0.25,
-        "category": "Dairy"
+        "category": "Dairy",
+        "volume": 0.25,
+        "stackable": true
     },
     {
         "item_id": 2001,
         "name": "Bananas",
         "weight": 1.2,
-        "category": "Produce"
+        "category": "Produce",
+        "volume": 1.5,
+        "stackable": false
     },
     {
         "item_id": 2002,
         "name": "Granny Smith Apples",
         "weight": 1.5,
-        "category": "Produce"
+        "category": "Produce",
+        "volume": 2.0,
+        "stackable": false
     },
     {
         "item_id": 2003,
         "name": "Romaine Lettuce",
         "weight": 0.4,
-        "category": "Produce"
+        "category": "Produce",
+        "volume": 3.0,
+        "stackable": false
     },
     {
         "item_id": 2004,
         "name": "Beefsteak Tomatoes",
         "weight": 0.8,
-        "category": "Produce"
+        "category": "Produce",
+        "volume": 1.0,
+        "stackable": false
     },
     {
         "item_id": 2005,
         "name": "Baby Carrots",
         "weight": 0.5,
-        "category": "Produce"
+        "category": "Produce",
+        "volume": 0.6,
+        "stackable": true
     },
     {
         "item_id": 3001,
         "name": "Whole Wheat Bread",
         "weight": 0.7,
-        "category": "Bakery"
+        "category": "Bakery",
+        "volume": 2.5,
+        "stackable": false
     },
     {
         "item_id": 3002,
         "name": "Bagels, Plain (6-pack)",
         "weight": 0.6,
-        "category": "Bakery"
+        "category": "Bakery",
+        "volume": 2.0,
+        "stackable": false
     },
     {
         "item_id": 3003,
         "name": "Chocolate Chip Cookies",
         "weight": 0.4,
-        "category": "Bakery"
+        "category": "Bakery",
+        "volume": 1.0,
+        "stackable": true
     },
     {
         "item_id": 4001,
         "name": "Ground Beef (80/20)",
         "weight": 1.0,
-        "category": "Meat"
+        "category": "Meat",
+        "volume": 1.0,
+        "stackable": true
     },
     {
         "item_id": 4002,
         "name": "Boneless Chicken Breast",
         "weight": 1.2,
-        "category": "Meat"
+        "category": "Meat",
+        "volume": 1.2,
+        "stackable": true
     },
     {
         "item_id": 4003,
         "name": "Pork Chops",
         "weight": 0.9,
-        "category": "Meat"
+        "category": "Meat",
+        "volume": 1.0,
+        "stackable": true
     },
     {
         "item_id": 5001,
         "name": "All-Purpose Flour",
         "weight": 2.2,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 2.5,
+        "stackable": true
     },
     {
         "item_id": 5002,
         "name": "Cane Sugar",
         "weight": 1.8,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 2.0,
+        "stackable": true
     },
     {
         "item_id": 5003,
         "name": "Pasta, Spaghetti",
         "weight": 0.5,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 0.7,
+        "stackable": true
     },
     {
         "item_id": 5004,
         "name": "Canned Diced Tomatoes",
         "weight": 0.4,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 0.4,
+        "stackable": true
     },
     {
         "item_id": 5005,
         "name": "Olive Oil",
         "weight": 0.9,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 1.0,
+        "stackable": false
     },
     {
         "item_id": 5006,
         "name": "Breakfast Cereal",
         "weight": 0.5,
-        "category": "Pantry"
+        "category": "Pantry",
+        "volume": 4.0,
+        "stackable": true
     },
     {
         "item_id": 6001,
         "name": "Frozen Peas",
         "weight": 0.45,
-        "category": "Frozen"
+        "category": "Frozen",
+        "volume": 0.5,
+        "stackable": true
     },
     {
         "item_id": 6002,
         "name": "Frozen Pizza, Pepperoni",
         "weight": 0.8,
-        "category": "Frozen"
+        "category": "Frozen",
+        "volume": 2.5,
+        "stackable": true
     },
     {
         "item_id": 6003,
         "name": "Vanilla Ice Cream",
         "weight": 1.4,
-        "category": "Frozen"
+        "category": "Frozen",
+        "volume": 1.5,
+        "stackable": true
     },
     {
         "item_id": 6004,
         "name": "Frozen French Fries",
         "weight": 0.9,
-        "category": "Frozen"
+        "category": "Frozen",
+        "volume": 1.0,
+        "stackable": true
     },
     {
         "item_id": 7001,
         "name": "Bottled Water (24-pack)",
         "weight": 12.5,
-        "category": "Beverages"
+        "category": "Beverages",
+        "volume": 12.0,
+        "stackable": true
     },
     {
         "item_id": 7002,
         "name": "Orange Juice",
         "weight": 1.8,
-        "category": "Beverages"
+        "category": "Beverages",
+        "volume": 1.8,
+        "stackable": true
     },
     {
         "item_id": 7003,
         "name": "Cola (12-pack)",
         "weight": 4.5,
-        "category": "Beverages"
+        "category": "Beverages",
+        "volume": 4.5,
+        "stackable": true
     }
 ]

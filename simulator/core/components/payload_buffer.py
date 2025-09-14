@@ -1,5 +1,5 @@
 import simpy
-from simulator.core.components.component import Component
+from component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import Tuple, Optional
 
@@ -17,6 +17,8 @@ class PayloadBuffer(Component):
         Time in simulation units per movement cycle (processing delay).
     payload : SystemPallet
         SystemPallet occupying the buffer.
+    on_load_event : simpy.events.Event
+        Event triggered by loading a pallet on the buffer.
     """
 
     def __init__(self, env: simpy.Environment, buffer_id: int, name: str,
@@ -25,6 +27,7 @@ class PayloadBuffer(Component):
         self.coordinate = coordinate
         self.cycle_time = cycle_time
         self.payload: Optional[SystemPallet] = None
+        self.on_load_event = None
 
     def can_load(self) -> bool:
         """No payload -> can load."""
@@ -32,13 +35,14 @@ class PayloadBuffer(Component):
 
     def load(self, pallet: SystemPallet):
         """Update pallet on buffer."""
-        if not self.can_load():
-            print(f"[{self.env.now}] {self.name}: Buffer occupied!")
-            return False
-        self.payload = pallet
-        pallet.actual_dest = self.coordinate
-        print(f"[{self.env.now}] {self.name}: Loaded {pallet}")
-        return True
+        if self.can_load():
+            self.payload = pallet
+            print(f"[{self.env.now}] {self}: Loaded {pallet}")
+
+            # Fire event if buffer owner is waiting
+            if self.on_load_event and not self.on_load_event.triggered:
+                self.on_load_event.succeed(pallet)
+                self.on_load_event = None
 
     def handoff(self, downstream_idx: int):
         """Unload pallet to selected downstream."""

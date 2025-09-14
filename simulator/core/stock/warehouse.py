@@ -1,0 +1,48 @@
+from simulator.core.orders.order import RefillOrder, OrderStatus
+from simulator.core.stock.stock import Stock
+from simulator.core.components.payload_buffer import PayloadBuffer
+import simpy
+
+class Warehouse(Stock):
+    """
+    Manages item refills to ItemWarehouse (RefillOrder).
+    Contains an I/O component (PayloadBuffer) where orders get merged on pallets.
+
+    Additional Attributes
+    ----------
+    buffer : PayloadBuffer
+        I/O component where orders get merged on pallets.
+    process_time : float
+        Time to process an order
+    """
+    def __init(self, env: simpy.Environment, warehouse_id: int, name: str, buffer: PayloadBuffer, process_time: float):
+        super().__init__(env, warehouse_id, name)
+        self.buffer = buffer
+        self.process_time = process_time
+
+    def process_order(self, order: RefillOrder):
+        """Process order by merging it on the pallet on buffer."""
+        self.buffer.payload.merge_order(order)
+        # TODO assign a new destination for the pallet
+        order.status = OrderStatus.IN_PROGRESS # Update order status to pending
+        yield self.env.timeout(self.process_time)
+
+    def run(self):
+        """Main order processing loop"""
+        while True:
+            # wait until buffer is loaded
+            self.buffer.on_load_event = self.env.event()
+            pallet = yield self.buffer.on_load_event
+
+            print(f"[{self.env.now}] Warehouse: Buffer has {pallet}")
+
+            if self.has_orders():
+                order = self.next_order()
+                print(f"[{self.env.now}] {self}: Processing order {order}")
+                self.process_order(order)
+
+                # Trigger buffer handoff to downstream
+                yield self.env.timeout(0)  # next event cycle
+                self.buffer.handoff(0) # downstream idx is '0' since only one output channel from Warehouse
+            else:
+                print(f"[{self.env.now}] Warehouse: No orders in queue!")

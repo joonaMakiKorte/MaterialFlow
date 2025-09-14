@@ -1,6 +1,7 @@
 from pathlib import Path
 from simulator.core.items.loader import load_items_from_json
 from simulator.core.items.item import Item
+from simulator.core.items.catalogue import Catalogue
 
 def test_load_items_from_json(tmp_path):
     # Path to JSON file
@@ -23,3 +24,16 @@ def test_load_items_from_json(tmp_path):
     assert hasattr(first_item, "item_id")
     assert hasattr(first_item, "name")
 
+def test_catalogue():
+    # Init catalogue
+    catalogue = Catalogue()
+
+    # Assert basic properties
+    assert isinstance(catalogue.items, dict)
+    assert len(catalogue.items) > 0
+
+    # Check that entities have basic attributes and methods work
+    first_item_id = next(iter(catalogue.items.values())).item_id
+    assert isinstance(catalogue.get_item(first_item_id), Item)
+    assert isinstance(catalogue.get_volume(first_item_id), float)
+    assert isinstance(catalogue.is_stackable(first_item_id), bool)

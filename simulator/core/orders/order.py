@@ -10,7 +10,6 @@ class OrderStatus(Enum):
     COMPLETED = auto()
     CANCELLED = auto()
 
-
 class Order(ABC):
     """
     Abstract base class for all orders in the material flow system.
@@ -26,13 +25,13 @@ class Order(ABC):
     """
 
     def __init__(self, order_id: int):
-        self._order_id = order_id
-        self._order_time = datetime.now()
+        self.order_id = order_id
+        self.order_time = datetime.now()
         self._status = OrderStatus.PENDING
 
     @property
     def status(self) -> OrderStatus:
-        return self._order_status
+        return self._status
 
     @status.setter
     def status(self, new_status):
@@ -40,11 +39,6 @@ class Order(ABC):
         if not isinstance(new_status, OrderStatus):
             raise ValueError("status must be an OrderStatus enum")
         self._status = new_status
-
-    @abstractmethod
-    def process(self):
-        """General method for order processing."""
-        pass
 
     def __repr__(self):
         return f"{self.__class__.__name__}(id={self.order_id}, status={self.status.name})"
@@ -61,13 +55,10 @@ class RefillOrder(Order):
     qty : int
         Amount of items in the pallet / quantity requested
     """
-    def __init__(self, order_id: int, item_id: int, qty_requested: int):
+    def __init__(self, order_id: int, item_id: int, qty: int):
         super().__init__(order_id)
-        self._item_id = item_id
-        self._qty = qty_requested
-
-    def process(self):
-        """TODO"""
+        self.item_id = item_id
+        self.qty = qty
 
 
 class OpmOrder(Order):
@@ -81,7 +72,4 @@ class OpmOrder(Order):
     """
     def __init__(self, order_id: int, requested_items: Dict[int, int]):
         super().__init__(order_id)
-        self._requested_items = requested_items
-
-    def process(self):
-        """TODO"""
+        self.requested_items = requested_items

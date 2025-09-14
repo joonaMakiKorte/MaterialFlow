@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class Component(ABC):
     """
-    Abstract base class for all factory system components.
+    Abstract base class for all factory systems physical flow elements.
 
     Attributes
     ----------
@@ -36,3 +36,6 @@ class Component(ABC):
     def load(self, payload: object):
         """Load payload on component. Implementation depends on component type"""
         pass
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(id={self.component_id}, name={self.name})"

@@ -1,5 +1,5 @@
 import simpy
-from component import Component
+from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import List, Tuple, Optional
 

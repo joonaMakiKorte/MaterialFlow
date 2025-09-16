@@ -1,5 +1,5 @@
 import simpy
-from component import Component
+from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import Tuple, Optional
 
@@ -37,6 +37,7 @@ class PayloadBuffer(Component):
         """Update pallet on buffer."""
         if self.can_load():
             self.payload = pallet
+            pallet.actual_dest = self.coordinate
             print(f"[{self.env.now}] {self}: Loaded {pallet}")
 
             # Fire event if buffer owner is waiting
@@ -52,8 +53,9 @@ class PayloadBuffer(Component):
         if downstream_idx >= len(self.downstream):
             raise IndexError(f"{self.name}: Invalid downstream index {downstream_idx}")
 
-        pallet = self.payload
-        self.payload = None
-        yield self.env.timeout(self.cycle_time)  # process delay
-        self.downstream[downstream_idx].load(pallet)
-        print(f"[{self.env.now}] {self.name}: Handed off {pallet} to {self.downstream[downstream_idx].name}")
+        if len(self.downstream) != 0:
+            pallet = self.payload
+            self.payload = None
+            yield self.env.timeout(self.cycle_time)  # process delay
+            self.downstream[downstream_idx].load(pallet)
+            print(f"[{self.env.now}] {self.name}: Handed off {pallet} to {self.downstream[downstream_idx].name}")

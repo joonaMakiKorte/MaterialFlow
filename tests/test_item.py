@@ -1,7 +1,6 @@
 from pathlib import Path
 from simulator.core.items.loader import load_items_from_json
 from simulator.core.items.item import Item
-from simulator.core.items.catalogue import Catalogue
 
 def test_load_items_from_json(tmp_path):
     # Path to JSON file
@@ -24,10 +23,7 @@ def test_load_items_from_json(tmp_path):
     assert hasattr(first_item, "item_id")
     assert hasattr(first_item, "name")
 
-def test_catalogue():
-    # Init catalogue
-    catalogue = Catalogue()
-
+def test_catalogue(catalogue):
     # Assert basic properties
     assert isinstance(catalogue.items, dict)
     assert len(catalogue.items) > 0

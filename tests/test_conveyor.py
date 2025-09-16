@@ -1,13 +1,7 @@
-import simpy
-from simulator.core.components.pallet_conveyor import PalletConveyor
-from simulator.core.transportation_units.system_pallet import SystemPallet
-
-def test_conveyor_one_pallet():
-    env = simpy.Environment()
-    # Create a conveyor with a length of 3
-    conveyor = PalletConveyor(env,conveyor_id=1, name="C1", start=(0,0), end=(0,1),num_slots=3,
-                              cycle_time=1)
-    pallet = SystemPallet(pallet_id=10000000, actual_dest=(0,0))
+def test_conveyor_one_pallet(env, conveyor_factory, pallet_factory):
+    """Load one conveyor with pallet."""
+    conveyor = conveyor_factory(1,(0,0),(0,1))
+    pallet = pallet_factory(10000000)
 
     # load pallet at t=0
     def loader(env, conveyor):
@@ -22,14 +16,11 @@ def test_conveyor_one_pallet():
     assert slots == [None, None, 10000000]
     assert pallet.actual_dest == (0,1)
 
-def test_conveyor_two_pallets():
-    env = simpy.Environment()
-    # Create a conveyor with a length of 3
-    conveyor = PalletConveyor(env, conveyor_id=1, name="C1", start=(0, 0), end=(0, 2), num_slots=3,
-                              cycle_time=1)
-    # Create two transportation_units
-    pallet1 = SystemPallet(pallet_id=10000001, actual_dest=(0, 0))
-    pallet2 = SystemPallet(pallet_id=10000002, actual_dest=(0, 0))
+def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
+    """Load one conveyor with two pallets"""
+    conveyor = conveyor_factory(1,(0,0),(0,2))
+    pallet1 = pallet_factory(10000001)
+    pallet2 = pallet_factory(10000002)
 
     # load pallet at t=0
     def loader(env, conveyor):
@@ -47,14 +38,12 @@ def test_conveyor_two_pallets():
     assert pallet1.actual_dest == (0, 2)
     assert pallet2.actual_dest == (0, 1)
 
-def test_two_conveyors_one_pallet():
-    env = simpy.Environment()
-    # Create two conveyor and one pallet
-    conveyor1 = PalletConveyor(env, conveyor_id=1, name="C1", start=(0, 0), end=(0, 2), num_slots=3, cycle_time=2)
-    conveyor2 = PalletConveyor(env, conveyor_id=2, name="C2", start=(1, 2), end=(2, 2), num_slots=2, cycle_time=1)
+def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
+    """Load one conveyor with pallet and transport to linked conveyor."""
+    conveyor1 = conveyor_factory(1,(0,0),(0,2),3,2)
+    conveyor2 = conveyor_factory(2,(1,2),(2,2),2,1)
     conveyor1.connect([conveyor2]) # Join conveyors together
-
-    pallet = SystemPallet(pallet_id=10000001, actual_dest=(0, 0))
+    pallet = pallet_factory(10000001)
 
     # load pallet at t=0
     def loader(env, conveyor):

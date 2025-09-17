@@ -14,7 +14,7 @@ def test_conveyor_one_pallet(env, conveyor_factory, pallet_factory):
     # At the end, pallet should be in last slot
     slots = [p.pallet_id if p else None for p in conveyor.slots]
     assert slots == [None, None, 10000000]
-    assert pallet.actual_dest == (0,1)
+    assert pallet.actual_location.coordinates == (0,1)
 
 def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
     """Load one conveyor with two pallets"""
@@ -35,8 +35,8 @@ def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
     # At the end, first pallet should be in last slot and second pallet in the middle
     slots = [p.pallet_id if p else None for p in conveyor.slots]
     assert slots == [None, 10000002, 10000001]
-    assert pallet1.actual_dest == (0, 2)
-    assert pallet2.actual_dest == (0, 1)
+    assert pallet1.actual_location.coordinates == (0, 2)
+    assert pallet2.actual_location.coordinates == (0, 1)
 
 def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     """Load one conveyor with pallet and transport to linked conveyor."""
@@ -58,4 +58,5 @@ def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     slots2 = [p.pallet_id if p else None for p in conveyor2.slots]
     assert slots1 == [None, None, None]
     assert slots2 == [None, 10000001]
-    assert pallet.actual_dest == (2,2)
+    assert pallet.actual_location.coordinates == (2,2)
+    assert pallet.actual_location.element_name == f"{conveyor2}"

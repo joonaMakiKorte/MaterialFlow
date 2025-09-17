@@ -2,7 +2,7 @@ import pytest
 import simpy
 from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.pallet_conveyor import PalletConveyor
-from simulator.core.transportation_units.system_pallet import SystemPallet
+from simulator.core.transportation_units.system_pallet import SystemPallet, Location
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.orders.order_service import OrderService
 from simulator.core.stock.warehouse import Warehouse
@@ -22,7 +22,6 @@ def conveyor_factory(env):
         return PalletConveyor(
             env,
             conveyor_id=conveyor_id,
-            name=f"C{conveyor_id}",
             start=start,
             end=end,
             num_slots=num_slots,
@@ -37,7 +36,6 @@ def buffer_factory(env):
         return PayloadBuffer(
             env,
             buffer_id=buffer_id,
-            name=f"B{buffer_id}",
             coordinate=coordinate,
             cycle_time=cycle_time
         )
@@ -47,7 +45,7 @@ def buffer_factory(env):
 def pallet_factory():
     """Create pallet with default destination (0,0)."""
     def _factory(pallet_id, dest=(0,0)):
-        return SystemPallet(pallet_id=pallet_id, actual_dest=dest)
+        return SystemPallet(pallet_id=pallet_id, actual_location=Location("",dest))
     return _factory
 
 @pytest.fixture
@@ -55,7 +53,6 @@ def warehouse(env, buffer_factory):
     return Warehouse(
         env,
         warehouse_id=1,
-        name=f"Warehouse",
         buffer=buffer_factory(buffer_id=1,coordinate=(0,0)),
         process_time=1
     )

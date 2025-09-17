@@ -12,16 +12,29 @@ class Component(ABC):
         Simulation environment.
     component_id : int
         Unique identifier for the component.
-    name : str
-        Human-readable name of the component.
     downstream : List[Component]
         List of linked downstream components.
     """
-    def __init__(self, env: simpy.Environment, component_id : int, name: str):
+    def __init__(self, env: simpy.Environment, component_id : int):
         self.env = env
-        self.component_id = component_id
-        self.name = name
-        self.downstream: List["Component"] = []
+        self._component_id = component_id
+        self._downstream: List["Component"] = []
+
+    # ----------
+    # Properties
+    # ----------
+
+    @property
+    def component_id(self) -> int:
+        return self._component_id
+
+    @property
+    def downstream(self) -> List["Component"]:
+        return self._downstream
+
+    # ---------
+    #   Logic
+    # ---------
 
     def connect(self, downstream_components: List["Component"]):
         """Link component's output to another components (can be overridden)."""
@@ -38,4 +51,4 @@ class Component(ABC):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(id={self.component_id}, name={self.name})"
+        return f"{self.__class__.__name__}(id={self.component_id})"

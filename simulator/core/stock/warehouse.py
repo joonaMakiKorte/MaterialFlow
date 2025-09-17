@@ -15,14 +15,30 @@ class Warehouse(Stock):
     process_time : float
         Time to process an order
     """
-    def __init__(self, env: simpy.Environment, warehouse_id: int, name: str, buffer: PayloadBuffer, process_time: float):
-        super().__init__(env, warehouse_id, name)
-        self.buffer = buffer
-        self.process_time = process_time
+    def __init__(self, env: simpy.Environment, warehouse_id: int, buffer: PayloadBuffer, process_time: float):
+        super().__init__(env, warehouse_id)
+        self._buffer = buffer
+        self._process_time = process_time
+
+    # ----------
+    # Properties
+    # ----------
+
+    @property
+    def buffer(self) -> PayloadBuffer:
+        return self._buffer
+
+    @property
+    def process_time(self) -> float:
+        return self._process_time
+
+    # ----------
+    #   Logic
+    # ----------
 
     def process_order(self, order: RefillOrder):
         """Process order by merging it on the pallet on buffer."""
-        self.buffer.payload.merge_order(order)
+        self.buffer.payload.order = order
         print(f"[{self.env.now}] Warehouse: Processed order {order}")
         # TODO assign a new destination for the pallet
         order.status = OrderStatus.IN_PROGRESS # Update order status to pending
@@ -36,8 +52,8 @@ class Warehouse(Stock):
 
             print(f"[{self.env.now}] Warehouse: Buffer has {pallet}")
 
-            if self.has_orders():
-                order = self.next_order()
+            if self._has_orders():
+                order = self._next_order()
                 print(f"[{self.env.now}] {self}: Processing order {order}")
 
                 # run the order process

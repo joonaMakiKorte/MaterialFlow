@@ -48,9 +48,13 @@ class OrderService:
         # self.process = env.process(self.run())
         self.catalogue = catalogue
         self.warehouse = warehouse
-        self.auto_refill_event = None
+        self._auto_refill_event = None
         self.refill_gen = OrderIdGenerator(1) # Refill = 1xxxxxx
         self.opm_gen = OrderIdGenerator(2)    # OPM    = 2xxxxxx
+
+    # ---------------
+    # Public methods
+    # ---------------
 
     def place_refill_order(self, item_id: int, qty_requested: int):
         """Place refill order(s) to warehouse queue."""

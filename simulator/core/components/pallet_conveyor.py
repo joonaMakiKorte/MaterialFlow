@@ -27,35 +27,78 @@ class PalletConveyor(Component):
     slot_coords : List[Tuple[float,float]]
         List of each slot coordinate.
     """
-    def __init__(self, env: simpy.Environment, conveyor_id: int, name: str,
-                 start: Tuple[float, float], end: Tuple[float, float], num_slots: int,
-                 cycle_time: float):
-        super().__init__(env, conveyor_id, name)
-        self.process = env.process(self.run()) # Register run loop
-        self.start = start
-        self.end = end
-        self.num_slots = num_slots
-        self.cycle_time = cycle_time
-        self.slots: List[Optional[SystemPallet]] = [None] * num_slots
+    def __init__(self, env: simpy.Environment, conveyor_id: int,
+                 start: Tuple[float, float], end: Tuple[float, float],
+                 num_slots: int, cycle_time: float):
+        super().__init__(env, conveyor_id)
 
-        def calculate_slots(start: Tuple[float,float], end: Tuple[float,float], num_slots: int) -> List[Tuple[float,float]]:
-            """Return evenly spaced slot coordinates"""
-            if num_slots == 2:
-                return [start, end]
-            else:
-                x1, y1 = float(start[0]), float(start[1])
-                x2, y2 = float(end[0]), float(end[1])
+        self.process = env.process(self.run())  # Register run loop
+        self._start = start
+        self._end = end
+        self._num_slots = num_slots
+        self._cycle_time = cycle_time
 
-                slots = []
-                for i in range(num_slots):
-                    t = i / (num_slots - 1)  # normalized 0..1
-                    x = x1 + t * (x2 - x1)
-                    y = y1 + t * (y2 - y1)
-                    slots.append((x, y))
+        # Internal slots
+        self._slots: List[Optional[SystemPallet]] = [None] * num_slots
+        self._slot_coords = self._calculate_slots(start, end, num_slots)
 
-                return slots
+    # ----------
+    # Properties
+    # ----------
 
-        self.slot_coords = calculate_slots(start, end, num_slots) # Calculate slot coordinates
+    @property
+    def start(self) -> Tuple[float, float]:
+        return self._start
+
+    @property
+    def end(self) -> Tuple[float, float]:
+        return self._end
+
+    @property
+    def num_slots(self) -> int:
+        return self._num_slots
+
+    @property
+    def cycle_time(self) -> float:
+        return self._cycle_time
+
+    @property
+    def slots(self) -> List[Optional[SystemPallet]]:
+        """Read-only view of slot contents"""
+        return self._slots
+
+    @property
+    def slot_coords(self) -> List[Tuple[float, float]]:
+        """Read-only slot coordinates"""
+        return self._slot_coords
+
+
+    # ---------------
+    # Private Helpers
+    # ---------------
+
+    def _calculate_slots(self, start: Tuple[float, float],
+                         end: Tuple[float, float],
+                         num_slots: int) -> List[Tuple[float, float]]:
+        """Return evenly spaced slot coordinates"""
+        if num_slots == 2:
+            return [start, end]
+
+        x1, y1 = map(float, start)
+        x2, y2 = map(float, end)
+
+        slots = []
+        for i in range(num_slots):
+            t = i / (num_slots - 1)  # normalized 0..1
+            x = x1 + t * (x2 - x1)
+            y = y1 + t * (y2 - y1)
+            slots.append((x, y))
+
+        return slots
+
+    # -------
+    #  Logic
+    # -------
 
     def can_load(self) -> bool:
         """Check if first slot is free for loading"""
@@ -65,14 +108,8 @@ class PalletConveyor(Component):
         """Place pallet at start if free"""
         if self.can_load():
             self.slots[0] = pallet
-            pallet.actual_dest = self.slot_coords[0]
+            pallet.actual_location.update(coordinates=self.slot_coords[0], element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {pallet}")
-
-    def _handoff(self, pallet: SystemPallet, downstream):
-        """Schedule pallet unloading for the downstream elements next event turn"""
-        yield self.env.timeout(0)  # schedule for "next event turn"
-        downstream.load(pallet)
-        print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
 
     def shift(self):
         """Shift transportation_units one slot forward if possible."""
@@ -87,9 +124,15 @@ class PalletConveyor(Component):
         for i in reversed(range(1, self.num_slots)):
             if self.slots[i] is None and self.slots[i - 1] is not None:
                 pallet = self.slots[i - 1]
-                pallet.actual_dest = self.slot_coords[i]
+                pallet.actual_location.update(coordinates=self.slot_coords[i])
                 self.slots[i] = self.slots[i - 1]
                 self.slots[i - 1] = None
+
+    def _handoff(self, pallet: SystemPallet, downstream):
+        """Schedule pallet unloading for the downstream elements next event turn"""
+        yield self.env.timeout(0)  # schedule for "next event turn"
+        downstream.load(pallet)
+        print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
 
     def run(self):
         """Main conveyor loop."""

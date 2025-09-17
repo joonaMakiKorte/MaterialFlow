@@ -25,11 +25,11 @@ def test_load_items_from_json(tmp_path):
 
 def test_catalogue(catalogue):
     # Assert basic properties
-    assert isinstance(catalogue.items, dict)
-    assert len(catalogue.items) > 0
+    assert isinstance(catalogue._items, dict)
+    assert len(catalogue) > 0
 
     # Check that entities have basic attributes and methods work
-    first_item_id = next(iter(catalogue.items.values())).item_id
-    assert isinstance(catalogue.get_item(first_item_id), Item)
-    assert isinstance(catalogue.get_volume(first_item_id), float)
-    assert isinstance(catalogue.is_stackable(first_item_id), bool)
+    first_item = next(iter(catalogue))
+    assert isinstance(first_item, Item)
+    assert isinstance(first_item.volume, float)
+    assert isinstance(first_item.stackable, bool)

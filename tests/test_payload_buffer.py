@@ -18,7 +18,7 @@ def test_conveyor_with_buffers(env, conveyor_factory, buffer_factory, pallet_fac
     env.run(until=8)
 
     # Assert pallet is on output buffer and other elements are free
-    assert pallet.actual_dest == (4,0)
+    assert pallet.actual_location.coordinates == (4,0)
     assert input_buffer.payload is None
     slots = [p.pallet_id if p else None for p in conveyor.slots]
     assert slots == [None, None, None]

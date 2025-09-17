@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import datetime
 from enum import Enum, auto
 from typing import Dict
@@ -25,9 +25,21 @@ class Order(ABC):
     """
 
     def __init__(self, order_id: int):
-        self.order_id = order_id
-        self.order_time = datetime.now()
+        self._order_id = order_id
+        self._order_time = datetime.now()
         self._status = OrderStatus.PENDING
+
+    # ----------
+    # Properties
+    # ----------
+
+    @property
+    def order_id(self) -> int:
+        return self._order_id
+
+    @property
+    def order_time(self) -> datetime:
+        return self._order_time
 
     @property
     def status(self) -> OrderStatus:
@@ -57,8 +69,20 @@ class RefillOrder(Order):
     """
     def __init__(self, order_id: int, item_id: int, qty: int):
         super().__init__(order_id)
-        self.item_id = item_id
-        self.qty = qty
+        self._item_id = item_id
+        self._qty = qty
+
+    # ----------
+    # Properties
+    # ----------
+
+    @property
+    def item_id(self) -> int:
+        return self._item_id
+
+    @property
+    def qty(self) -> int:
+        return self._qty
 
 
 class OpmOrder(Order):

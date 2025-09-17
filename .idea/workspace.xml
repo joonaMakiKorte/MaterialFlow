@@ -4,17 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Stock and order logic">
-      <change afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_payload_buffer.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Refill orders working, updated tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" beforeDir="false" afterPath="$PROJECT_DIR$/docs/uml/class_diagram.drawio" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/pallet_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/pallet_conveyor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/items/catalogue.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/items/catalogue.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/items/item.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/items/item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_conveyor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_item.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_payload_buffer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757887565172</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Refill orders working, updated tests">
+      <option name="closed" value="true" />
+      <created>1758022624467</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1758022624467</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -180,6 +194,7 @@
     <MESSAGE value="Testing for connected conveyors" />
     <MESSAGE value="Implementing payload buffer" />
     <MESSAGE value="Stock and order logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Stock and order logic" />
+    <MESSAGE value="Refill orders working, updated tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refill orders working, updated tests" />
   </component>
 </project>

@@ -13,7 +13,7 @@ class Warehouse(Stock):
     buffer : PayloadBuffer
         I/O component where orders get merged on pallets.
     process_time : float
-        Time to process an order
+        Time to process an order.
     """
     def __init__(self, env: simpy.Environment, warehouse_id: int, buffer: PayloadBuffer, process_time: float):
         super().__init__(env, warehouse_id)
@@ -38,19 +38,18 @@ class Warehouse(Stock):
 
     def process_order(self, order: RefillOrder):
         """Process order by merging it on the pallet on buffer."""
-        self.buffer.payload.order = order
-        print(f"[{self.env.now}] Warehouse: Processed order {order}")
-        # TODO assign a new destination for the pallet
+        # After processing pallet is routed to depalletizers
+        self.buffer.payload.merge_order(new_order=order, destination_type="depalletizer")
         order.status = OrderStatus.IN_PROGRESS # Update order status to pending
         yield self.env.timeout(self.process_time)
+        print(f"[{self.env.now}] Warehouse: Processed order {order}")
 
     def run(self):
         """Main order processing loop"""
         while True:
             self.buffer.on_load_event = self.env.event()
             pallet = yield self.buffer.on_load_event  # wait for pallet
-
-            print(f"[{self.env.now}] Warehouse: Buffer has {pallet}")
+            print(f"[{self.env.now}] {self}: Buffer has {pallet}")
 
             if self._has_orders():
                 order = self._next_order()
@@ -60,7 +59,6 @@ class Warehouse(Stock):
                 yield self.env.process(self.process_order(order))
 
                 # trigger buffer handoff
-                #yield self.env.process(self.buffer.handoff(0))
+                yield self.env.process(self.buffer.handoff())
             else:
-                print(f"[{self.env.now}] Warehouse: No orders in queue!")
-
+                print(f"[{self.env.now}] {self}: No orders in queue!")

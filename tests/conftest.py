@@ -4,6 +4,7 @@ from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.pallet_conveyor import PalletConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location
 from simulator.core.components.payload_buffer import PayloadBuffer
+from simulator.core.components.depalletizer import Depalletizer
 from simulator.core.orders.order_service import OrderService
 from simulator.core.stock.warehouse import Warehouse
 
@@ -31,13 +32,26 @@ def conveyor_factory(env):
 
 @pytest.fixture
 def buffer_factory(env):
-    """Factory to create payload buffers """
-    def _factory(buffer_id, coordinate, cycle_time=1):
+    """Factory to create payload buffers."""
+    def _factory(buffer_id, coordinate, process_time=1):
         return PayloadBuffer(
             env,
             buffer_id=buffer_id,
             coordinate=coordinate,
-            cycle_time=cycle_time
+            process_time=process_time
+        )
+    return _factory
+
+@pytest.fixture
+def depalletizer_factory(env):
+    """Factory to create depalletizers"""
+    def _factory(depalletizer_id, coordinate, item_cycle_time=1, pallet_unload_time=1):
+        return Depalletizer(
+            env,
+            depalletizer_id=depalletizer_id,
+            coordinate=coordinate,
+            item_cycle_time=item_cycle_time,
+            pallet_unload_time=pallet_unload_time
         )
     return _factory
 

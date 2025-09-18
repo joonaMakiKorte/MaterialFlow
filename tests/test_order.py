@@ -1,8 +1,10 @@
 from simulator.core.orders.order import RefillOrder
 
-def test_refill_order_gen(env, catalogue, warehouse, order_service, pallet_factory):
+def test_refill_order_gen(env, catalogue, warehouse, order_service, pallet_factory, conveyor_factory):
     """Test placing a refill order to warehouse queue."""
     pallet = pallet_factory(10000000)
+    conveyor = conveyor_factory(1, (1,0), (3,0))
+    warehouse.buffer.connect(conveyor)
 
     first_item = next(iter(catalogue))
     order_service.place_refill_order(item_id=first_item.item_id, qty_requested=100)
@@ -22,3 +24,4 @@ def test_refill_order_gen(env, catalogue, warehouse, order_service, pallet_facto
     # Make sure order is merged on pallet and order queue is empty
     assert pallet.order.order_id == order.order_id
     assert len(warehouse._order_queue) == 0
+    assert pallet.actual_location.coordinates == conveyor.end

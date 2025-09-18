@@ -1,5 +1,5 @@
 import simpy
-from typing import List
+from typing import Optional
 from abc import ABC, abstractmethod
 
 class Component(ABC):
@@ -12,33 +12,39 @@ class Component(ABC):
         Simulation environment.
     component_id : int
         Unique identifier for the component.
-    downstream : List[Component]
-        List of linked downstream components.
+    output : Component
+        A default single output for component.
+    outputs : dict[str,Component]
+        Allow named outputs for components with multiple.
     """
     def __init__(self, env: simpy.Environment, component_id : int):
         self.env = env
         self._component_id = component_id
-        self._downstream: List["Component"] = []
+        self._output: Optional["Component"] = None
+        self._outputs: dict[str, "Component"] = {}
 
     # ----------
     # Properties
     # ----------
 
     @property
-    def component_id(self) -> int:
+    def id(self) -> int:
         return self._component_id
 
     @property
-    def downstream(self) -> List["Component"]:
-        return self._downstream
+    def output(self) -> "Component":
+        return self._output
 
     # ---------
     #   Logic
     # ---------
 
-    def connect(self, downstream_components: List["Component"]):
-        """Link component's output to another components (can be overridden)."""
-        self.downstream.extend(downstream_components)
+    def connect(self, component: "Component", port: str = "out"):
+        """Link component's output to another components."""
+        if port == "out":
+            self._output = component
+        else:
+            self._outputs[port] = component
 
     @abstractmethod
     def can_load(self) -> bool:
@@ -51,4 +57,4 @@ class Component(ABC):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(id={self.component_id})"
+        return f"{self.__class__.__name__}(id={self._component_id})"

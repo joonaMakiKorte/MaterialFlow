@@ -112,12 +112,12 @@ class PalletConveyor(Component):
             print(f"[{self.env.now}] {self}: Loaded {pallet}")
 
     def shift(self):
-        """Shift transportation_units one slot forward if possible."""
+        """Shift transportation units one slot forward if possible."""
         # Try to unload the last slot into downstream
-        if self.downstream and self.slots[-1] is not None:
+        if self._output and self.slots[-1] is not None:
             pallet = self.slots[-1]
-            if self.downstream[0].can_load():
-                self.env.process(self._handoff(pallet, self.downstream[0]))
+            if self._output.can_load():
+                self.env.process(self._handoff(pallet, self._output))
                 self.slots[-1] = None
 
         # Traverse backwards to not overwrite slots
@@ -131,16 +131,11 @@ class PalletConveyor(Component):
     def _handoff(self, pallet: SystemPallet, downstream):
         """Schedule pallet unloading for the downstream elements next event turn"""
         yield self.env.timeout(0)  # schedule for "next event turn"
+        print(f"[{self.env.now}] {self}: Unloaded {pallet}")
         downstream.load(pallet)
-        print(f"[{self.env.now}] {self.component_id}: Passed {pallet} downstream")
 
     def run(self):
         """Main conveyor loop."""
         while True:
             yield self.env.timeout(self.cycle_time)
             self.shift()
-            self.print_state()
-
-    def print_state(self):
-        slots_repr = [p.pallet_id if p else "." for p in self.slots]
-        print(f"[{self.env.now}] {self.component_id} slots: {slots_repr}")

@@ -1,7 +1,8 @@
+import simpy
 from simulator.core.orders.order import RefillOrder, OrderStatus
 from simulator.core.stock.stock import Stock
 from simulator.core.components.payload_buffer import PayloadBuffer
-import simpy
+from simulator.config import ORDER_MERGE_TIME
 
 class Warehouse(Stock):
     """
@@ -15,7 +16,7 @@ class Warehouse(Stock):
     process_time : float
         Time to process an order.
     """
-    def __init__(self, env: simpy.Environment, warehouse_id: int, buffer: PayloadBuffer, process_time: float):
+    def __init__(self, env: simpy.Environment, warehouse_id: int, buffer: PayloadBuffer, process_time: float = ORDER_MERGE_TIME):
         super().__init__(env, warehouse_id)
         self._buffer = buffer
         self._process_time = process_time
@@ -44,7 +45,7 @@ class Warehouse(Stock):
         yield self.env.timeout(self.process_time)
         print(f"[{self.env.now}] Warehouse: Processed order {order}")
 
-    def run(self):
+    def _run(self):
         """Main order processing loop"""
         while True:
             self.buffer.on_load_event = self.env.event()

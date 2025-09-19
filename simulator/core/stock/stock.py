@@ -20,7 +20,7 @@ class Stock(ABC):
     """
     def __init__(self, env: simpy.Environment, stock_id: int):
         self.env = env
-        self.process = env.process(self.run())  # Register run loop
+        self.process = env.process(self._run())  # Register run loop
         self._stock_id = stock_id
         self._order_queue = []
 
@@ -59,7 +59,7 @@ class Stock(ABC):
         pass
 
     @abstractmethod
-    def run(self):
+    def _run(self):
         pass
 
     def __repr__(self):

@@ -2,6 +2,7 @@ import simpy
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import List, Tuple, Optional
+from simulator.config import CONVEYOR_CYCLE_TIME
 
 class PalletConveyor(Component):
     """
@@ -29,10 +30,10 @@ class PalletConveyor(Component):
     """
     def __init__(self, env: simpy.Environment, conveyor_id: int,
                  start: Tuple[float, float], end: Tuple[float, float],
-                 num_slots: int, cycle_time: float):
+                 num_slots: int, cycle_time: float = CONVEYOR_CYCLE_TIME):
         super().__init__(env, conveyor_id)
 
-        self.process = env.process(self.run())  # Register run loop
+        self.process = env.process(self._run())  # Register run loop
         self._start = start
         self._end = end
         self._num_slots = num_slots
@@ -59,18 +60,9 @@ class PalletConveyor(Component):
         return self._num_slots
 
     @property
-    def cycle_time(self) -> float:
-        return self._cycle_time
-
-    @property
     def slots(self) -> List[Optional[SystemPallet]]:
         """Read-only view of slot contents"""
         return self._slots
-
-    @property
-    def slot_coords(self) -> List[Tuple[float, float]]:
-        """Read-only slot coordinates"""
-        return self._slot_coords
 
 
     # ---------------
@@ -108,7 +100,7 @@ class PalletConveyor(Component):
         """Place pallet at start if free"""
         if self.can_load():
             self.slots[0] = pallet
-            pallet.actual_location.update(coordinates=self.slot_coords[0], element_name=f"{self}")
+            pallet.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {pallet}")
 
     def shift(self):
@@ -124,7 +116,7 @@ class PalletConveyor(Component):
         for i in reversed(range(1, self.num_slots)):
             if self.slots[i] is None and self.slots[i - 1] is not None:
                 pallet = self.slots[i - 1]
-                pallet.actual_location.update(coordinates=self.slot_coords[i])
+                pallet.actual_location.update(coordinates=self._slot_coords[i])
                 self.slots[i] = self.slots[i - 1]
                 self.slots[i - 1] = None
 
@@ -134,8 +126,8 @@ class PalletConveyor(Component):
         print(f"[{self.env.now}] {self}: Unloaded {pallet}")
         downstream.load(pallet)
 
-    def run(self):
+    def _run(self):
         """Main conveyor loop."""
         while True:
-            yield self.env.timeout(self.cycle_time)
+            yield self.env.timeout(self._cycle_time)
             self.shift()

@@ -5,7 +5,7 @@ from simulator.core.components.pallet_conveyor import PalletConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.components.depalletizer import Depalletizer
-from simulator.core.orders.order_service import OrderService
+from simulator.core.orders.inventory_manager import OrderService
 from simulator.core.stock.warehouse import Warehouse
 
 @pytest.fixture

@@ -2,6 +2,7 @@ from typing import Tuple, Optional
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.orders.order import OrderStatus, RefillOrder
+from simulator.config import BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME
 
 import simpy
 
@@ -19,7 +20,7 @@ class Depalletizer(Component):
         +this component.
     coordinate : Tuple[float,float]
         Physical location of the depalletizer.
-    item_cycle_time : float
+    item_process_time : float
         Time in simulation units per movement cycle (processing delay for one item).
     pallet_unload_time : float
         Time in simulation units to unload a pallet.
@@ -33,11 +34,11 @@ class Depalletizer(Component):
         Event to trigger depalletizing process on loading.
     """
     def __init__(self, env: simpy.Environment, depalletizer_id: int, coordinate: Tuple[float,float],
-                 item_cycle_time: float, pallet_unload_time: float):
+                 item_process_time: float = ITEM_PROCESS_TIME, pallet_unload_time: float = BUFFER_PROCESS_TIME):
         super().__init__(env, depalletizer_id)
-        self.process = env.process(self.run())
+        self.process = env.process(self._run())
         self._coordinate = coordinate
-        self._item_cycle_time = item_cycle_time
+        self._item_process_time = item_process_time
         self._pallet_unload_time = pallet_unload_time
         self._payload: Optional[SystemPallet] = None
         self._current_item_id: Optional[int] = None
@@ -53,6 +54,10 @@ class Depalletizer(Component):
         return self._coordinate
 
     @property
+    def payload(self) -> SystemPallet:
+        return self._payload
+
+    @property
     def current_item_id(self) -> int:
         return self._current_item_id
 
@@ -64,16 +69,12 @@ class Depalletizer(Component):
     #  Logic
     # --------
 
-    def expected_process_time(self, qty: int) -> float:
-        """Calculate the expected time to process a pallet with given item qty. (Time in simulation units)"""
-        return qty * self._item_cycle_time + self._pallet_unload_time
-
     def current_process_time_left(self) -> float:
         """Calculate the expected time to left process the current order."""
         if self._payload is None:
             return 0.0
 
-        item_time = self._remaining_qty * self._item_cycle_time
+        item_time = self._remaining_qty * self._item_process_time
         total_time = item_time + self._pallet_unload_time
         return total_time
 
@@ -108,11 +109,11 @@ class Depalletizer(Component):
 
     def _process_item(self):
         """Load item into item conveyor infeed"""
-        yield self.env.timeout(self._item_cycle_time)
+        yield self.env.timeout(self._item_process_time)
         # TODO load item on conveyor
 
 
-    def run(self):
+    def _run(self):
         """Main depalletizing loop."""
         while True:
             self._on_load_event = self.env.event()

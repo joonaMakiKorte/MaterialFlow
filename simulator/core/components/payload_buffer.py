@@ -2,7 +2,7 @@ import simpy
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from typing import Tuple, Optional
-
+from simulator.config import BUFFER_PROCESS_TIME
 
 class PayloadBuffer(Component):
     """
@@ -21,7 +21,7 @@ class PayloadBuffer(Component):
         Event triggered by loading a pallet on the buffer.
     """
     def __init__(self, env: simpy.Environment, buffer_id: int,
-                 coordinate: Tuple[float,float], process_time: float):
+                 coordinate: Tuple[float,float], process_time: float = BUFFER_PROCESS_TIME):
         super().__init__(env, buffer_id)
         self._coordinate = coordinate
         self._process_time = process_time

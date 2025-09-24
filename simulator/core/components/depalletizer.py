@@ -16,8 +16,7 @@ class Depalletizer(Component):
     Additional Attributes
     ----------
     process : simpy.Process
-        SimPy process instance for
-        +this component.
+        SimPy process instance for this component.
     coordinate : Tuple[float,float]
         Physical location of the depalletizer.
     item_process_time : float
@@ -33,10 +32,10 @@ class Depalletizer(Component):
     on_load_event : simpy.events.Event
         Event to trigger depalletizing process on loading.
     """
-    def __init__(self, env: simpy.Environment, depalletizer_id: int, coordinate: Tuple[float,float],
+    def __init__(self, depalletizer_id: int, coordinate: Tuple[float,float],
                  item_process_time: float = ITEM_PROCESS_TIME, pallet_unload_time: float = BUFFER_PROCESS_TIME):
-        super().__init__(env, depalletizer_id)
-        self.process = env.process(self._run())
+        super().__init__(depalletizer_id)
+        self.process = None
         self._coordinate = coordinate
         self._item_process_time = item_process_time
         self._pallet_unload_time = pallet_unload_time
@@ -44,6 +43,9 @@ class Depalletizer(Component):
         self._current_item_id: Optional[int] = None
         self._remaining_qty: Optional[int] = None
         self._on_load_event = None
+
+        # Calculate process time
+        self._static_process_time = self._get_static_process_time()
 
     # ----------
     # Properties
@@ -65,9 +67,20 @@ class Depalletizer(Component):
     def remaining_qty(self) -> int:
         return self._remaining_qty
 
+    # ----------------
+    # Private helpers
+    # ----------------
+
+    def _get_static_process_time(self) -> float:
+        return self._pallet_unload_time
+
     # --------
     #  Logic
     # --------
+
+    def inject_env(self, env: simpy.Environment):
+        self.env = env
+        self.process = env.process(self._run()) # Register run loop
 
     def current_process_time_left(self) -> float:
         """Calculate the expected time to left process the current order."""

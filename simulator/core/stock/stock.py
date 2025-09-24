@@ -18,9 +18,9 @@ class Stock(ABC):
     order_queue : min-heap[int, Order]
         Internal priority queue for handling orders based on priority.
     """
-    def __init__(self, env: simpy.Environment, stock_id: int):
-        self.env = env
-        self.process = env.process(self._run())  # Register run loop
+    def __init__(self, stock_id: int):
+        self.env = None
+        self.process = None
         self._stock_id = stock_id
         self._order_queue = []
 
@@ -48,6 +48,10 @@ class Stock(ABC):
     # ----------
     #   Logic
     # ----------
+
+    def inject_env(self, env: simpy.Environment):
+        self.env = env
+        self.process = env.process(self._run())  # Register run loop
 
     def place_order(self, order: Order, priority: int):
         """Insert an order with given priority (lower = higher priority)."""

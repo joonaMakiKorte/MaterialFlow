@@ -28,12 +28,11 @@ class PalletConveyor(Component):
     slot_coords : List[Tuple[float,float]]
         List of each slot coordinate.
     """
-    def __init__(self, env: simpy.Environment, conveyor_id: int,
+    def __init__(self, conveyor_id: int,
                  start: Tuple[float, float], end: Tuple[float, float],
                  num_slots: int, cycle_time: float = CONVEYOR_CYCLE_TIME):
-        super().__init__(env, conveyor_id)
-
-        self.process = env.process(self._run())  # Register run loop
+        super().__init__(conveyor_id)
+        self.process = None
         self._start = start
         self._end = end
         self._num_slots = num_slots
@@ -42,6 +41,9 @@ class PalletConveyor(Component):
         # Internal slots
         self._slots: List[Optional[SystemPallet]] = [None] * num_slots
         self._slot_coords = self._calculate_slots(start, end, num_slots)
+
+        # Calculate process time
+        self._static_process_time = self._get_static_process_time()
 
     # ----------
     # Properties
@@ -88,9 +90,17 @@ class PalletConveyor(Component):
 
         return slots
 
+    def _get_static_process_time(self):
+        """Process time is determined by number of slots and cycle time."""
+        return self._num_slots * self._cycle_time
+
     # -------
     #  Logic
     # -------
+
+    def inject_env(self, env: simpy.Environment):
+        self.env = env
+        self.process = env.process(self._run())  # Register run loop
 
     def can_load(self) -> bool:
         """Check if first slot is free for loading"""

@@ -18,7 +18,7 @@ class OrderIdGenerator:
     def next_id(self) -> int:
         return int(f"{self.type_digit}{next(self.counter):06d}")
 
-class OrderService:
+class InventoryManager:
     """
     Interface for placing orders in the material flow system.
     Handles manual order placing from Warehouse->ItemWarehouse (RefillOrder) and ItemWarehouse->OPM (OpmOrder).

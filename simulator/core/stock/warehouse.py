@@ -16,9 +16,9 @@ class Warehouse(Stock):
     process_time : float
         Time to process an order.
     """
-    def __init__(self, env: simpy.Environment, warehouse_id: int, buffer: PayloadBuffer, process_time: float = ORDER_MERGE_TIME):
-        super().__init__(env, warehouse_id)
-        self._buffer = buffer
+    def __init__(self, warehouse_id: int, process_time: float = ORDER_MERGE_TIME):
+        super().__init__(warehouse_id)
+        self._buffer = None
         self._process_time = process_time
 
     # ----------
@@ -28,6 +28,13 @@ class Warehouse(Stock):
     @property
     def buffer(self) -> PayloadBuffer:
         return self._buffer
+
+    @buffer.setter
+    def buffer(self, buffer):
+        """Dependency inject a buffer for the warehouse."""
+        if not isinstance(buffer, PayloadBuffer):
+            raise ValueError("buffer must be PayloadBuffer object")
+        self._buffer = buffer
 
     @property
     def process_time(self) -> float:

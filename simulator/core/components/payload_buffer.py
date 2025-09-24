@@ -20,13 +20,16 @@ class PayloadBuffer(Component):
     on_load_event : simpy.events.Event
         Event triggered by loading a pallet on the buffer.
     """
-    def __init__(self, env: simpy.Environment, buffer_id: int,
+    def __init__(self, buffer_id: int,
                  coordinate: Tuple[float,float], process_time: float = BUFFER_PROCESS_TIME):
-        super().__init__(env, buffer_id)
+        super().__init__(buffer_id)
         self._coordinate = coordinate
         self._process_time = process_time
         self._payload: Optional[SystemPallet] = None
         self.on_load_event = None
+
+        # Calculate process time
+        self._static_process_time = self._get_static_process_time()
 
     # ----------
     # Properties
@@ -40,9 +43,19 @@ class PayloadBuffer(Component):
     def payload(self) -> Optional[SystemPallet]:
         return self._payload
 
+    # ---------------
+    # Private helpers
+    # ---------------
+
+    def _get_static_process_time(self) -> float:
+        return self._process_time
+
     # ---------
     #   Logic
     # ---------
+
+    def inject_env(self, env: simpy.Environment):
+        self.env = env
 
     def can_load(self) -> bool:
         """No payload -> can load."""

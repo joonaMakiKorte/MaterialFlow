@@ -1,11 +1,11 @@
 """Simulation-wide constants"""
 
-# -----------------
-# Pallet properties
-# -----------------
+# -----------
+# Data paths
+# -----------
 
-EURO_PALLET_MAX_WEIGHT = 1000.0    # kg
-EURO_PALLET_MAX_VOLUME = 2112.0    # dm^3 (Area x Height = 0.8m x 1.2m x 2.2m)
+ITEM_JSON_PATH = "items.json"
+COMPONENT_JSON_PATH = "component_layout.json"
 
 # ---------------------------------------------------
 # Operation times for elements in simulation units
@@ -23,4 +23,12 @@ ORDER_MERGE_TIME = 5.0
 # -------------------------------
 # Transportation unit constraints
 # -------------------------------
+
 MAX_ITEM_BATCH = 10
+
+# -----------------
+# Pallet properties
+# -----------------
+
+EURO_PALLET_MAX_WEIGHT = 1000.0    # kg
+EURO_PALLET_MAX_VOLUME = 2112.0    # dm^3 (Area x Height = 0.8m x 1.2m x 2.2m)

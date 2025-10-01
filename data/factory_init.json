@@ -1,0 +1,99 @@
+{
+	"components": [
+      {
+		"id": "wh_buff_out",
+		"type": "PayloadBuffer",
+		"coordinate" : "[1,7]"
+      },
+      {
+		"id": "pallet_conv1",
+		"type": "PayloadConveyor",
+		"start" : "[1,6]",
+		"end" : "[1,3]",
+		"num_slots" : 4
+      },
+	  {
+		"id" : "pallet_conv2",
+		"type" : "PayloadConveyor",
+		"start" : "[1,2]",
+		"end" : "[6,2]",
+		"num_slots" : 6
+	  },
+      {
+        "id" : "depal1",
+        "type" : "Depalletizer",
+        "coordinate" : "[7,2]"
+      },
+	  {
+        "id" : "bb1",
+		"type" : "BatchBuilder",
+		"coordinate" : "[7,1]"
+	  },
+	  {
+		"id" : "item_conv1",
+		"type" : "PayloadConveyor",
+		"start" : "[8,1]",
+		"end" : "[15,1]",
+		"num_slots" : 8
+      },
+      {
+        "id" : "pallet_conv3",
+		"type" : "PayloadConveyor",
+		"start" : "[7,3]",
+		"end" : "[7,6]",
+		"num_slots" : 4
+      },
+      {
+        "id" : "wh_buff_in",
+        "type" : "PayloadBuffer",
+        "coordinate" : "[7,7]"
+      }
+    ],
+	"connections" : [
+	  {
+		"from" : "wh_buff_out",
+		"to" : "pallet_conv1",
+		"port" : "out"
+	  },
+	  {
+		"from" : "pallet_conv1",
+		"to" : "pallet_conv2",
+		"port" : "out"
+	  },
+	  {
+		"from" : "pallet_conv2",
+		"to" : "depal1",
+		"port" : "out"
+	  },
+	  {
+		"from" : "depal1",
+		"to" : "bb1",
+		"port" : "item_out"
+	  },
+	  {
+		"from" : "bb1",
+		"to" : "item_conv1",
+		"port" : "out"
+	  },
+      {
+        "from" : "depal1",
+        "to" : "pallet_conv3",
+        "port" : "pallet_out"
+      },
+      {
+        "from" : "pallet_conv3",
+        "to" : "wh_buff_in",
+        "port" : "out"
+      }
+    ],
+    "stock" : {
+      "warehouse" : {
+        "input_buffer" : "wh_buff_in",
+        "output_buffer" : "wh_buff_out"
+      },
+      "item_warehouse" : {
+        "input_buffers" : [],
+        "output_buffers" : []
+      }
+    }
+}

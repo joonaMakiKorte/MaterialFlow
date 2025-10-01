@@ -1,0 +1,113 @@
+import simpy
+from simulator.core.components.component import Component
+from simulator.core.components.payload_buffer import PayloadBuffer
+from simulator.core.transportation_units.transportation_unit import Location
+from simulator.core.transportation_units.item_batch import ItemBatch
+from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
+from simulator.core.factory.id_gen import IDGenerator
+from typing import Tuple, Optional
+
+class BatchBuilder(Component):
+    """
+    Builds ItemBatches from individual items.
+    Batches are build on a payload buffer and handed downstream when ready.
+    A new Batch is created when the item is loaded on an empty buffer.
+
+    Additional Attributes
+    ---------------------
+    id_gen : IDGenerator
+        For accessing central ID-generator.
+    process : simpy.Process
+        SimPy process instance for this component.
+    coordinate : Tuple[float,float]
+        Physical location of the batch builder.
+    buffer : PayloadBuffer
+        Buffer for Batch building.
+    current_batch : ItemBatch
+        Current batch being built
+    """
+    def __init__(self, env: simpy.Environment, id_gen: IDGenerator, builder_id: str,
+                 coordinate : Tuple[float,float],
+                 batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
+        super().__init__(env, component_id=builder_id, static_process_time=batch_process_time)
+        self._id_gen = id_gen
+        self.process = env.process(self._run()) # Register run loop
+        self._coordinate = coordinate
+        self._batch_process_time = batch_process_time
+
+        # Internal batch buffer
+        self._buffer = PayloadBuffer(env=env,
+                                     buffer_id=f"{builder_id}_buf",
+                                     coordinate=coordinate,
+                                     process_time=batch_process_time)
+
+        self._current_batch : Optional[ItemBatch] = None
+
+    # ----------
+    # Properties
+    # ----------
+
+    @property
+    def coordinate(self) -> Tuple[float, float]:
+        return self._coordinate
+
+    @property
+    def buffer(self) -> PayloadBuffer:
+        return self._buffer
+
+    @property
+    def payload(self) -> Optional[ItemBatch]:
+        return self._buffer.payload
+
+    # --------
+    #  Logic
+    # --------
+
+    def connect(self, component: "Component", port: str = "out"):
+        """
+        Override base connect.
+        Delegate to internal buffer.
+        """
+        self._buffer.connect(component, port="out")
+
+    def can_load(self) -> bool:
+        """Technically can be loaded any time since has batches built upon."""
+        return True
+
+    def load(self, item_id : int):
+        """
+        If buffer is empty, creates a new ItemBatch to build on,
+        otherwise places items on the existing batch
+        """
+        if self._buffer.can_load():
+            batch_id = self._id_gen.generate_id(type_digit=2, length=8)
+            new_batch = ItemBatch(batch_id=batch_id, actual_location=Location(self._component_id, self._coordinate))
+            self._buffer.load(new_batch)
+            self._current_batch = new_batch # Save instance internally
+            # Event for signaling readiness
+            self._current_batch.ready_event = self.env.event()
+        self._current_batch.add_item(item_id)
+
+    def _handoff_batch(self):
+        """Batch leaves via buffer handoff."""
+        yield from self._buffer.handoff()
+        self._current_batch = None # Clear current batch
+
+    def _run(self):
+        """
+        Wait for batch to be ready to hand it downstream.
+        Can also handoff batch if given wait time has been exceeded.
+        """
+        while True:
+            if self._current_batch is None:
+                # Wait until a batch exists
+                yield self.env.timeout(0.1)
+                continue
+
+            batch = self._current_batch
+            # Wait for either batch ready event OR timeout
+            timeout_event = self.env.timeout(BATCH_MAX_WAIT_TIME)
+            yield batch.ready_event | timeout_event
+
+            # Handoff batch
+            yield self.env.process(self._handoff_batch())

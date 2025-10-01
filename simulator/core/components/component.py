@@ -10,7 +10,7 @@ class Component(ABC):
     ----------
     env : simpy.Environment
         Simulation environment.
-    component_id : int
+    component_id : str
         Unique identifier for the component.
     type : str
         The component type.
@@ -21,11 +21,11 @@ class Component(ABC):
     outputs : dict[str,Component]
         Allow named outputs for components with multiple.
     """
-    def __init__(self, component_id : int):
-        self.env = None
+    def __init__(self, env: simpy.Environment, component_id: str, static_process_time: float):
+        self.env = env
         self._component_id = component_id
         self._type = self.__class__.__name__
-        self._static_process_time = None # Initialized for each component type individually
+        self._static_process_time = static_process_time
         self._output: Optional["Component"] = None
         self._outputs: dict[str, "Component"] = {}
 
@@ -34,7 +34,7 @@ class Component(ABC):
     # ----------
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         return self._component_id
 
     @property
@@ -49,29 +49,16 @@ class Component(ABC):
     def output(self) -> "Component":
         return self._output
 
-    # ---------------
-    # Private helpers
-    # ---------------
-
-    @abstractmethod
-    def _get_static_process_time(self) -> float:
-        """Base process time. Depends on component type"""
-        pass
-
     # ---------
     #   Logic
     # ---------
 
     def connect(self, component: "Component", port: str = "out"):
-        """Link component's output to another components."""
+        """Link component's output to another components. Overridable"""
         if port == "out":
             self._output = component
         else:
             self._outputs[port] = component
-
-    @abstractmethod
-    def inject_env(self, env: simpy.Environment):
-        pass
 
     @abstractmethod
     def can_load(self) -> bool:
@@ -79,7 +66,7 @@ class Component(ABC):
         pass
 
     @abstractmethod
-    def load(self, payload: object):
+    def load(self, payload):
         """Load payload on component. Implementation depends on component type"""
         pass
 

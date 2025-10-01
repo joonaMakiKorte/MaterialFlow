@@ -1,6 +1,5 @@
 from simulator.core.items.loader import load_items_from_json
 from simulator.core.items.item import Item
-from simulator.config import ITEM_JSON_PATH
 from pathlib import Path
 
 class Catalogue:
@@ -14,8 +13,8 @@ class Catalogue:
     items : dict[int,Item]
         Items are stored in a dictionary keyed by item_id
     """
-    def __init__(self):
-        self._items = self._load_items(ITEM_JSON_PATH)
+    def __init__(self, json_name: str):
+        self._items = self._load_items(json_name)
 
     # -----------------
     # Dict-like access

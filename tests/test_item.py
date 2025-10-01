@@ -1,34 +1,43 @@
-from pathlib import Path
+import json
 from simulator.core.items.loader import load_items_from_json
 from simulator.core.items.item import Item
 
-def test_load_items_from_json(tmp_path):
-    # Path to JSON file
-    project_root = Path(__file__).parent.parent
-    json_path = project_root / "data" / "items.json"
 
-    # Make sure JSON exists
-    assert json_path.exists(), f"{json_path} does not exist"
-
+def test_load_items_from_json(mock_items_json):
     # Load items
-    items_dict = load_items_from_json(str(json_path))
+    items_dict = load_items_from_json(str(mock_items_json))
+
+    # Load the reference mock JSON
+    with open(mock_items_json) as f:
+        mock_items = json.load(f)
 
     # Assert basic properties
     assert isinstance(items_dict, dict)
-    assert len(items_dict) > 0
+    assert len(items_dict) == len(mock_items)
 
-    # Check that entities have basic attributes
-    first_item = next(iter(items_dict.values()))
-    assert isinstance(first_item, Item)
-    assert hasattr(first_item, "item_id")
-    assert hasattr(first_item, "name")
+    # Compare items against mock JSON
+    for mock in mock_items:
+        item = items_dict[mock["item_id"]]
+        assert isinstance(item, Item)
 
-def test_catalogue(catalogue):
-    # Assert basic properties
+        # Compare all properties
+        assert item.item_id == mock["item_id"]
+        assert item.name == mock["name"]
+        assert item.weight == mock["weight"]
+        assert item.category == mock["category"]
+        assert item.volume == mock["volume"]
+        assert item.stackable == mock["stackable"]
+
+def test_catalogue(catalogue, mock_items_json):
+    # Load the reference mock JSON
+    with open(mock_items_json) as f:
+        mock_items = json.load(f)
+
+    # Basic catalogue checks
     assert isinstance(catalogue._items, dict)
-    assert len(catalogue) > 0
+    assert len(catalogue) == len(mock_items)
 
-    # Check that entities have basic attributes and methods work
+    # Check that iteration works
     first_item = next(iter(catalogue))
     assert isinstance(first_item, Item)
     assert isinstance(first_item.volume, float)

@@ -1,4 +1,3 @@
-import simpy
 from simulator.core.transportation_units.transportation_unit import TransportationUnit, Location
 from simulator.config import MAX_ITEM_BATCH
 
@@ -59,7 +58,3 @@ class ItemBatch(TransportationUnit):
         # Check if batch is ready
         if (self._item_count >= MAX_ITEM_BATCH) and not self.ready_event.triggered:
             self.ready_event.succeed(self)
-
-    def handoff(self):
-        """ Manually trigger batch-ready event"""
-        self.ready_event.succeed(self)

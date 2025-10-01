@@ -2,21 +2,9 @@ import math
 from simulator.core.orders.order import RefillOrder, OpmOrder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.items.catalogue import Catalogue
+from simulator.core.factory.id_gen import IDGenerator
 from simulator.config import EURO_PALLET_MAX_WEIGHT, EURO_PALLET_MAX_VOLUME
 import simpy
-import itertools
-
-class OrderIdGenerator:
-    """
-    Generate order ids by type and sequence number:
-    [ OrderTypeDigit ][ SequenceNumber ]
-    """
-    def __init__(self, type_digit: int):
-        self.type_digit = type_digit
-        self.counter = itertools.count(1)
-
-    def next_id(self) -> int:
-        return int(f"{self.type_digit}{next(self.counter):06d}")
 
 class InventoryManager:
     """
@@ -38,19 +26,14 @@ class InventoryManager:
 
     auto_refill_event : simpy.events.Event
         Event to trigger automatic RefillOrders
-    refill_gen : OrderIdGenerator
-        Generate RefillOrder IDs.
-    opm_gen : OrderIdGenerator
-        Generate OpmOrder IDs.
     """
-    def __init__(self, env: simpy.Environment, catalogue: Catalogue, warehouse: Warehouse):
+    def __init__(self, env: simpy.Environment, id_gen: IDGenerator, catalogue: Catalogue, warehouse: Warehouse):
         self.env = env
         # self.process = env.process(self.run())
-        self.catalogue = catalogue
-        self.warehouse = warehouse
+        self._id_gen = id_gen
+        self._catalogue = catalogue
+        self._warehouse = warehouse
         self._auto_refill_event = None
-        self.refill_gen = OrderIdGenerator(1) # Refill = 1xxxxxx
-        self.opm_gen = OrderIdGenerator(2)    # OPM    = 2xxxxxx
 
     # ---------------
     # Public methods
@@ -60,14 +43,14 @@ class InventoryManager:
         """Place refill order(s) to warehouse queue."""
         # Calculate how many pallets are needed for order
         # Determined by max qty per pallet
-        qty_per_pallet = self.catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
+        qty_per_pallet = self._catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
         pallets_consumed = math.ceil(qty_requested / qty_per_pallet)
 
         # Generate orders
         for _ in range(pallets_consumed):
-            order_id = self.refill_gen.next_id()
+            order_id = self._id_gen.generate_id(type_digit=5, length=6)
             new_order = RefillOrder(order_id, item_id, qty_per_pallet)
-            self.warehouse.place_order(order=new_order, priority=10)
+            self._warehouse.place_order(order=new_order, priority=10)
 
     # TODO:
     # Implement order priority calculation

@@ -4,8 +4,8 @@
 # Data paths
 # -----------
 
-ITEM_JSON_PATH = "items.json"
-COMPONENT_JSON_PATH = "component_layout.json"
+ITEM_JSON = "items.json"
+FACTORY_JSON = "factory_init.json"
 
 # ---------------------------------------------------
 # Operation times for elements in simulation units
@@ -14,10 +14,20 @@ COMPONENT_JSON_PATH = "component_layout.json"
 
 TIME_SCALE = 0.3 # seconds per simulation unit
 
+# CONVEYOR
 CONVEYOR_CYCLE_TIME = 3.0
-BUFFER_PROCESS_TIME = 3.0
-ITEM_PROCESS_TIME = 2.0
+
+# PAYLOAD BUFFER
+PALLET_BUFFER_PROCESS_TIME = 3.0
+BATCH_BUFFER_PROCESS_TIME = 1.5
+
+# DEPALLETIZER
+DEPALLETIZING_DELAY = 1.0
+ITEM_PROCESS_TIME = 1.0
 ORDER_MERGE_TIME = 5.0
+
+# BATCH BUILDER
+BATCH_MAX_WAIT_TIME = 10.0
 
 
 # -------------------------------
@@ -25,6 +35,8 @@ ORDER_MERGE_TIME = 5.0
 # -------------------------------
 
 MAX_ITEM_BATCH = 10
+
+WAREHOUSE_MAX_PALLET_CAPACITY = 100
 
 # -----------------
 # Pallet properties

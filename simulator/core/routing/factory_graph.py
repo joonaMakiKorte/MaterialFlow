@@ -1,17 +1,13 @@
 from typing import Tuple, List
-from simulator.config import CONVEYOR_CYCLE_TIME, BUFFER_PROCESS_TIME
-from simulator.core.factory.factory import Factory
-from simulator.core.components.component import Component
-
 
 class Edge:
-    def __init__(self, target: Tuple[int,str], base_weight: float = 1.0):
+    def __init__(self, target: Tuple[str,str], base_weight: float = 1.0):
         """
         Definition for the graph-edge.
 
         Attributes
         ----------
-        target : Tuple[int,str]
+        target : Tuple[str,str]
             Id and type of target component.
         base_weight : float
             Static component of edge weight based on geometry and base process times.
@@ -28,15 +24,14 @@ class FactoryGraph:
     ----------
     factory : Factory
         Instance of factory for accessing Component info
-    adjacency : dict[int,List[Edge]]
+    adjacency : dict[str,List[Edge]]
         Adjacency list: component -> edges
     router : Router
         Access routing functions
 
     """
-    def __init__(self, factory: Factory):
-        self._factory = factory
-        self._adjacency: dict[int,List[Edge]] = {}
+    def __init__(self):
+        self._adjacency: dict[str,List[Edge]] = {}
 
     # -----------
     # Properties
@@ -51,12 +46,12 @@ class FactoryGraph:
     # Public methods
     # --------------
 
-    def add_node(self, component_id: int):
+    def add_node(self, component_id: str):
         # Ensure component is not in adjacency
         if component_id not in self._adjacency:
             self._adjacency[component_id] = [] # Empty list for storing edges
 
-    def add_edge(self, source_id: int, target_id: int, target_type: str, base_weight: float):
+    def add_edge(self, source_id: str, target_id: str, target_type: str, base_weight: float):
         """Add directed edge between components."""
         # For safety try creating new nodes
         self.add_node(source_id)

@@ -1,25 +1,31 @@
 from pathlib import Path
 import json
 import simpy
-
 from simulator.core.components.component import Component
 from simulator.core.components.depalletizer import Depalletizer
-from simulator.core.components.item_conveyor import ItemConveyor
-from simulator.core.components.junction import Junction
-from simulator.core.components.pallet_conveyor import PalletConveyor
+#from simulator.core.components.junction import Junction
+from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.components.payload_buffer import PayloadBuffer
+from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.routing.factory_graph import FactoryGraph
+from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.stock.warehouse import Warehouse
 
 # Factory registry for components
 COMPONENT_TYPES = {
-    "PalletConveyor" : PalletConveyor,
-    "ItemConveyor" : ItemConveyor,
+    "PayloadConveyor" : PayloadConveyor,
     "PayloadBuffer" : PayloadBuffer,
     "Depalletizer" : Depalletizer,
-    "Junction" : Junction
+    "BatchBuilder" : BatchBuilder
+    #"Junction" : Junction
 }
 
-def load_components_from_json(file_path: str, factory_graph: FactoryGraph) -> dict[int, Component]:
+def load_factory_from_json(file_path: str,
+                           env: simpy.Environment,
+                           id_gen: IDGenerator,
+                           components: dict[str,Component],
+                           factory_graph: FactoryGraph,
+                           warehouse: Warehouse):
     """
     Load components from JSON file and return dict mapping component_id -> Component.
     Also handles component connecting and inserting to factory graph.
@@ -29,7 +35,6 @@ def load_components_from_json(file_path: str, factory_graph: FactoryGraph) -> di
         config = json.load(f)
 
     # Load components
-    components = {}
     for comp_data in config["components"]:
         comp_type = comp_data["type"]
         comp_id = comp_data["id"]
@@ -38,10 +43,22 @@ def load_components_from_json(file_path: str, factory_graph: FactoryGraph) -> di
             raise ValueError(f"Unknown component type: {comp_type}")
 
         cls = COMPONENT_TYPES[comp_type]
-
-        # Create component instance
         kwargs = {k: v for k, v in comp_data.items() if k not in ("id", "type")}
-        component = cls(comp_id, **kwargs)
+
+        # Convert coordinates to tuple if present
+        for key in ("coordinate", "start", "end"):
+            if key in kwargs:
+                coords = kwargs[key]
+                if isinstance(coords, list) and len(coords) == 2:
+                    kwargs[key] = tuple(coords)
+                else:
+                    raise ValueError(f"Invalid {key} format for {comp_id}: {coords}")
+
+        # Special handling for different classes
+        if comp_type == "BatchBuilder":
+            component = cls(env,id_gen, comp_id, **kwargs)
+        else :
+            component = cls(env,comp_id, **kwargs)
 
         # Add to dict and graph
         components[comp_id] = component
@@ -68,4 +85,19 @@ def load_components_from_json(file_path: str, factory_graph: FactoryGraph) -> di
             target_type=dst.type,
             base_weight=src.static_process_time)
 
-    return components
+    # Load warehouse buffers
+    wh_cfg = config.get("stock", {}).get("warehouse")
+    if not wh_cfg:
+        raise ValueError(f"Warehouse configuration not found in '{file_path}'.")
+
+    input_buffer_id = wh_cfg["input_buffer"]
+    if input_buffer_id not in components:
+        raise ValueError(f"Input buffer ({input_buffer_id}) not found.")
+    warehouse.input_buffer = components[input_buffer_id] # Connect input buffer
+
+    output_buffer_id = wh_cfg["output_buffer"]
+    if output_buffer_id not in components:
+        raise ValueError(f"Output buffer ({output_buffer_id}) not found.")
+    warehouse.output_buffer = components[output_buffer_id] # Connect output buffer
+
+

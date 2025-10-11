@@ -2,6 +2,7 @@ import simpy
 import heapq
 from abc import ABC, abstractmethod
 from simulator.core.orders.order import Order
+from simulator.gui.event_bus import EventBus
 
 class Stock(ABC):
     """
@@ -20,6 +21,7 @@ class Stock(ABC):
         self.env = env
         self.process = env.process(self._run())  # Register run loop
         self._order_queue = []
+        self.event_bus: None | EventBus = None
 
     # ---------------
     # Private helpers

@@ -18,6 +18,8 @@ class Order(ABC):
     ----------
     order_id : int
         Unique identifier for the order.
+    type : str
+        Type of order. (refill/OPM)
     order_time : datetime
         Timestamp of the order creation.
     status : OrderStatus
@@ -26,6 +28,7 @@ class Order(ABC):
 
     def __init__(self, order_id: int):
         self._order_id = order_id
+        self._type = self.__class__.__name__
         self._order_time = datetime.now()
         self._status = OrderStatus.PENDING
 
@@ -36,6 +39,10 @@ class Order(ABC):
     @property
     def order_id(self) -> int:
         return self._order_id
+
+    @property
+    def type(self) -> str:
+        return self._type
 
     @property
     def order_time(self) -> datetime:

@@ -1,7 +1,7 @@
 import simpy
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.transportation_unit import TransportationUnit
-from typing import List, Tuple, Optional
+from typing import List
 from simulator.config import CONVEYOR_CYCLE_TIME
 
 class PayloadConveyor(Component):
@@ -15,43 +15,53 @@ class PayloadConveyor(Component):
     ----------
     process : simpy.Process
         SimPy process instance for this component.
-    start : Tuple[float,float]
+    start : Tuple[int,int]
         Entry point of the conveyor for payloads.
-    end : Tuple[float,float]
+    end : Tuple[int,int]
         payload output from conveyor.
     num_slots : int
         The amount of payloads the conveyor can fit.
     cycle_time : float
         Time in simulation units per movement cycle.
-    slots : List[Optional[TransportationUnit]]
+    slots : List[TransportationUnit]
         List of either 'None' or payload IDs. Conveyor length == num of slots.
-    slot_coords : List[Tuple[float,float]]
+    slot_coords : List[Tuple[int,int]]
         List of each slot coordinate.
+    currently_loaded : bool
+        Flag to track if conveyor got loaded, prevents immediate shifting of loaded payload.
     """
     def __init__(self, env: simpy.Environment, conveyor_id: str,
-                 start: Tuple[float, float], end: Tuple[float, float],
-                 num_slots: int, cycle_time: float = CONVEYOR_CYCLE_TIME):
-        super().__init__(env,component_id=conveyor_id, static_process_time=num_slots * cycle_time)
-        self.process = env.process(self._run())
+                 start: tuple[int,int], end: tuple[int,int],
+                 cycle_time: float = CONVEYOR_CYCLE_TIME):
+        # Make sure conveyor is on x- or y-axis and not of length 1
+        if not (start[0] == end[0] or start[1] == end[1]) and start != end:
+            raise ValueError(f"Conveyor {conveyor_id} must be set along x- or y-axis and longer than 1 slot.")
         self._start = start
         self._end = end
-        self._num_slots = num_slots
+
+        # Calculate number of slots (determined by length)
+        self._num_slots = max(abs(start[0]-end[0]),abs(start[1]-end[1])) + 1
+
+        super().__init__(env,component_id=conveyor_id, static_process_time=self._num_slots * cycle_time)
+        self.process = env.process(self._run())
         self._cycle_time = cycle_time
 
         # Internal slots
-        self._slots: List[Optional[TransportationUnit]] = [None] * num_slots
-        self._slot_coords = self._calculate_slots(start, end, num_slots)
+        self._slots: List[TransportationUnit | None] = [None] * self._num_slots
+        self._slot_coords = self._calculate_slots(start, end, self._num_slots)
+
+        self._currently_loaded = False
 
     # ----------
     # Properties
     # ----------
 
     @property
-    def start(self) -> Tuple[float, float]:
+    def start(self) -> tuple[int,int]:
         return self._start
 
     @property
-    def end(self) -> Tuple[float, float]:
+    def end(self) -> tuple[int,int]:
         return self._end
 
     @property
@@ -59,7 +69,7 @@ class PayloadConveyor(Component):
         return self._num_slots
 
     @property
-    def slots(self) -> List[Optional[TransportationUnit]]:
+    def slots(self) -> List[TransportationUnit | None]:
         """Read-only view of slot contents"""
         return self._slots
 
@@ -68,15 +78,15 @@ class PayloadConveyor(Component):
     # Private Helpers
     # ---------------
 
-    def _calculate_slots(self, start: Tuple[float, float],
-                         end: Tuple[float, float],
-                         num_slots: int) -> List[Tuple[float, float]]:
+    def _calculate_slots(self, start: tuple[int,int],
+                         end: tuple[int,int],
+                         num_slots: int) -> List[tuple[int,int]]:
         """Return evenly spaced slot coordinates"""
         if num_slots == 2:
             return [start, end]
 
-        x1, y1 = map(float, start)
-        x2, y2 = map(float, end)
+        x1, y1 = map(int, start)
+        x2, y2 = map(int, end)
 
         slots = []
         for i in range(num_slots):
@@ -101,6 +111,11 @@ class PayloadConveyor(Component):
             self.slots[0] = payload
             payload.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {payload}")
+            self._currently_loaded = True # Prevent immediate shifting
+
+            # Notify gui of event
+            if self.event_bus is not None:
+                self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[0]})
 
     def shift(self):
         """Shift transportation units one slot forward if possible."""
@@ -114,10 +129,20 @@ class PayloadConveyor(Component):
         # Traverse backwards to not overwrite slots
         for i in reversed(range(1, self.num_slots)):
             if self.slots[i] is None and self.slots[i - 1] is not None:
+                # Don't shift if payload was currently loaded
+                if (i - 1 == 0) and self._currently_loaded:
+                    break
+
                 payload = self.slots[i - 1]
                 payload.actual_location.update(coordinates=self._slot_coords[i])
                 self.slots[i] = self.slots[i - 1]
                 self.slots[i - 1] = None
+
+                # Notify gui of event
+                if self.event_bus is not None:
+                    self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[i]})
+
+        self._currently_loaded = False # Reset flag
 
     def _handoff(self, payload: TransportationUnit, downstream):
         """Schedule payload unloading for the downstream elements next event turn"""

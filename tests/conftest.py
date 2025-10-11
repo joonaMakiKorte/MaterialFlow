@@ -66,8 +66,7 @@ def mock_factory_json(tmp_path):
                 "id": "pallet_conv1",
                 "type": "PayloadConveyor",
                 "start": [0,1],
-                "end": [0,4],
-                "num_slots": 4
+                "end": [0,4]
             }
         ],
         "connections" : [
@@ -107,13 +106,12 @@ def factory_graph():
 @pytest.fixture
 def conveyor_factory(env):
     """Create conveyor with 3 slots and cycle time of 1."""
-    def _factory(conveyor_id, start, end, num_slots=3, cycle_time=1):
+    def _factory(conveyor_id, start, end, cycle_time=1):
         conv = PayloadConveyor(
             env=env,
             conveyor_id=conveyor_id,
             start=start,
             end=end,
-            num_slots=num_slots,
             cycle_time=cycle_time
         )
         return conv

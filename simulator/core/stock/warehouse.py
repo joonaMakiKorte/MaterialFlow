@@ -99,9 +99,9 @@ class Warehouse(Stock):
         # After processing pallet is routed to depalletizers
         pallet = self._output_buffer.payload
         if isinstance(pallet, SystemPallet):
+            yield self.env.timeout(self._order_process_time)
             pallet.merge_order(new_order=order, destination_type="depalletizer")
             order.status = OrderStatus.IN_PROGRESS # Update order status to pending
-            yield self.env.timeout(self._order_process_time)
             print(f"[{self.env.now}] Warehouse: Processed order {order}")
 
     def _listen_for_pallets(self):
@@ -119,18 +119,25 @@ class Warehouse(Stock):
             yield self._pallet_store.put(pallet)
             self._input_buffer.clear() # Clear pallet from buffer
 
+            if self.event_bus is not None:
+                self.event_bus.emit("store_pallet", {"id":pallet.id})
+
             print(f"[{self.env.now}] Warehouse: Stored empty pallet {pallet}")
 
     def _run(self):
         """Main order processing loop"""
         while True:
             # Wait until a pallet is available in warehouse
-            pallet = yield self._pallet_store.get()
+            pallet: SystemPallet = yield self._pallet_store.get()
             print(f"[{self.env.now}] {self}: Took pallet {pallet} from pallet store")
 
             # Load pallet into buffer
+            yield self.env.timeout(PALLET_BUFFER_PROCESS_TIME)
             self._output_buffer.load(pallet)
             print(f"[{self.env.now}] {self}: Loaded {pallet} into buffer")
+
+            if self.event_bus is not None:
+                self.event_bus.emit("dispatch_pallet", {"id":pallet.id})
 
             # Process orders if available
             if self._has_orders():

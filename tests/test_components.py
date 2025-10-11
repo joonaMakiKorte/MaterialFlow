@@ -13,7 +13,7 @@ def test_conveyor_one_pallet(env, conveyor_factory, pallet_factory):
 
     # At the end, pallet should be in last slot
     slots = [p.id if p else None for p in conveyor.slots]
-    assert slots == [None, None, 10000000]
+    assert slots == [None, 10000000]
     assert pallet.actual_location.coordinates == (0,1)
 
 def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
@@ -40,8 +40,8 @@ def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
 
 def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     """Load one conveyor with pallet and transport to linked conveyor."""
-    conveyor1 = conveyor_factory(1,(0,0),(0,2),3,2)
-    conveyor2 = conveyor_factory(2,(1,2),(2,2),2,1)
+    conveyor1 = conveyor_factory(1,(0,0),(0,2),2)
+    conveyor2 = conveyor_factory(2,(1,2),(2,2),1)
     conveyor1.connect(conveyor2) # Join conveyors together
     pallet = pallet_factory(10000001)
 
@@ -96,7 +96,7 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     depal = depalletizer_factory('depal1', (0,3))
     output_conv = conveyor_factory('conv2', (1,3), (1,5))
     builder1 = builder_factory('bb1', (0,4))
-    item_conv = conveyor_factory('conv3', (0,5), (0,10), 5)
+    item_conv = conveyor_factory('conv3', (0,5), (0,9), 1)
     input_conv.connect(depal)
     depal.connect(output_conv, 'pallet_out')
     depal.connect(builder1, 'item_out')

@@ -1,5 +1,4 @@
 import simpy
-
 from simulator.core.components.component import Component
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.orders.inventory_manager import InventoryManager
@@ -10,6 +9,7 @@ from simulator.core.factory.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from pathlib import Path
 from simulator.config import ITEM_JSON, FACTORY_JSON
+from simulator.gui.event_bus import EventBus
 
 class Factory:
     """
@@ -61,6 +61,9 @@ class Factory:
         # Load layout from json
         self._load_factory(layout_json_name)
 
+        # Init simulation
+        self.init_simulation(1)
+
 
     # ----------------
     # Private helpers
@@ -103,3 +106,15 @@ class Factory:
         places initial orders.
         """
         self._init_pallets(pallet_qty)
+
+        self.inventory_manager.place_refill_order(1001,10)
+
+    def inject_eventbus(self, bus: EventBus):
+        """Pass event bus to every object that interacts with gui"""
+        for component in self.components.values():
+            component.inject_event_bus(bus)
+
+        for pallet in self.pallets.values():
+            pallet.event_bus = bus
+
+        self.warehouse.event_bus = bus

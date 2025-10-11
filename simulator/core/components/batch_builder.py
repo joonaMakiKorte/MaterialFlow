@@ -7,6 +7,9 @@ from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
 from simulator.core.factory.id_gen import IDGenerator
 from typing import Tuple, Optional
 
+from simulator.gui.event_bus import EventBus
+
+
 class BatchBuilder(Component):
     """
     Builds ItemBatches from individual items.
@@ -19,7 +22,7 @@ class BatchBuilder(Component):
         For accessing central ID-generator.
     process : simpy.Process
         SimPy process instance for this component.
-    coordinate : Tuple[float,float]
+    coordinate : Tuple[int,int]
         Physical location of the batch builder.
     buffer : PayloadBuffer
         Buffer for Batch building.
@@ -27,7 +30,7 @@ class BatchBuilder(Component):
         Current batch being built
     """
     def __init__(self, env: simpy.Environment, id_gen: IDGenerator, builder_id: str,
-                 coordinate : Tuple[float,float],
+                 coordinate : Tuple[int,int],
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
         super().__init__(env, component_id=builder_id, static_process_time=batch_process_time)
         self._id_gen = id_gen
@@ -48,7 +51,7 @@ class BatchBuilder(Component):
     # ----------
 
     @property
-    def coordinate(self) -> Tuple[float, float]:
+    def coordinate(self) -> Tuple[int,int]:
         return self._coordinate
 
     @property
@@ -69,6 +72,14 @@ class BatchBuilder(Component):
         Delegate to internal buffer.
         """
         self._buffer.connect(component, port="out")
+
+    def inject_event_bus(self, event_bus: EventBus):
+        """
+        Override base event bus injection.
+        Delegate to internal buffer.
+        """
+        self.event_bus = event_bus
+        self._buffer.event_bus = event_bus
 
     def can_load(self) -> bool:
         """Technically can be loaded any time since has batches built upon."""

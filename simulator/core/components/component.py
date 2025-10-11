@@ -1,6 +1,6 @@
 import simpy
-from typing import Optional
 from abc import ABC, abstractmethod
+from simulator.gui.event_bus import EventBus
 
 class Component(ABC):
     """
@@ -20,14 +20,17 @@ class Component(ABC):
         A default single output for component.
     outputs : dict[str,Component]
         Allow named outputs for components with multiple.
+    event_bus : EventBus
+        Bridge to communicate with gui.
     """
     def __init__(self, env: simpy.Environment, component_id: str, static_process_time: float):
         self.env = env
         self._component_id = component_id
         self._type = self.__class__.__name__
         self._static_process_time = static_process_time
-        self._output: Optional["Component"] = None
+        self._output: None | Component = None
         self._outputs: dict[str, "Component"] = {}
+        self.event_bus: None | EventBus = None
 
     # ----------
     # Properties
@@ -69,6 +72,10 @@ class Component(ABC):
     def load(self, payload):
         """Load payload on component. Implementation depends on component type"""
         pass
+
+    def inject_event_bus(self, event_bus: EventBus):
+        """Inject event bus. Overloadable"""
+        self.event_bus = event_bus
 
     def __repr__(self):
         return f"{self._type}(id={self._component_id})"

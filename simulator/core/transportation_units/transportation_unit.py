@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from abc import ABC
 from dataclasses import dataclass
+from simulator.gui.event_bus import EventBus
 
 @dataclass
 class Destination:
@@ -16,9 +16,9 @@ class Destination:
 class Location:
     """Concrete location of the transportation unit"""
     element_name: str  # e.g. "Depalletizer_3"
-    coordinates: Tuple[float, float]  # (x, y)
+    coordinates: tuple[int,int]  # (x, y)
 
-    def update(self, coordinates: Tuple[float, float], element_name: Optional[str] = None):
+    def update(self, coordinates: tuple[int,int], element_name: None | str = None):
         """Update location. Allow element name overriding"""
         self.coordinates = coordinates
         if element_name is not None:
@@ -28,6 +28,7 @@ class TransportationUnit(ABC):
     def __init__(self, unit_id: int, actual_location: Location):
         self._unit_id = unit_id
         self.actual_location = actual_location
+        self.event_bus: None | EventBus = None
 
     @property
     def id(self) -> int:

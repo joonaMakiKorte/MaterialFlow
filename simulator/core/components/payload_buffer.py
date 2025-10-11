@@ -1,7 +1,6 @@
 import simpy
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import TransportationUnit
-from typing import Tuple, Optional
 from simulator.config import PALLET_BUFFER_PROCESS_TIME
 
 class PayloadBuffer(Component):
@@ -11,7 +10,7 @@ class PayloadBuffer(Component):
 
     Additional Attributes
     ----------
-    coordinate : Tuple[float,float]
+    coordinate : Tuple[int,int]
         Physical location of the buffer.
     process_time : float
         Time in simulation units per movement cycle (processing delay).
@@ -21,11 +20,11 @@ class PayloadBuffer(Component):
         Event triggered by loading a payload on the buffer.
     """
     def __init__(self, env: simpy.Environment, buffer_id: str,
-                 coordinate: Tuple[float,float], process_time: float = PALLET_BUFFER_PROCESS_TIME):
+                 coordinate: tuple[int,int], process_time: float = PALLET_BUFFER_PROCESS_TIME):
         super().__init__(env, component_id=buffer_id, static_process_time=process_time)
         self._coordinate = coordinate
         self._process_time = process_time
-        self._payload: Optional[TransportationUnit] = None
+        self._payload: TransportationUnit | None = None
         self.on_load_event = None
 
 
@@ -34,11 +33,11 @@ class PayloadBuffer(Component):
     # ----------
 
     @property
-    def coordinate(self) -> Tuple[float,float]:
+    def coordinate(self) -> tuple[int,int]:
         return self._coordinate
 
     @property
-    def payload(self) -> Optional[TransportationUnit]:
+    def payload(self) -> TransportationUnit | None:
         return self._payload
 
     # ---------
@@ -53,8 +52,12 @@ class PayloadBuffer(Component):
         """Update payload on buffer."""
         if self.can_load():
             self._payload = payload
-            payload.actual_location.update(coordinates=self.coordinate, element_name=f"{self}")
+            payload.actual_location.update(coordinates=self._coordinate, element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {payload}")
+
+            # Notify gui of event
+            if self.event_bus is not None:
+                self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._coordinate})
 
             # Fire event if buffer owner is waiting
             if self.on_load_event and not self.on_load_event.triggered:

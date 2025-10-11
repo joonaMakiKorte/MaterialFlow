@@ -7,6 +7,7 @@
 ITEM_JSON = "items.json"
 FACTORY_JSON = "factory_init.json"
 
+
 # ---------------------------------------------------
 # Operation times for elements in simulation units
 # Simulation time unit = 1 second in simulation world
@@ -38,9 +39,21 @@ MAX_ITEM_BATCH = 10
 
 WAREHOUSE_MAX_PALLET_CAPACITY = 100
 
+
 # -----------------
 # Pallet properties
 # -----------------
 
 EURO_PALLET_MAX_WEIGHT = 1000.0    # kg
 EURO_PALLET_MAX_VOLUME = 2112.0    # dm^3 (Area x Height = 0.8m x 1.2m x 2.2m)
+
+
+# --------------
+# GUI properties
+# --------------
+
+BUFFER_ITEM_WIDTH = 80
+DEPALLETIZER_ITEM_WIDTH = 100
+
+PALLET_ITEM_WIDTH = 60
+BATCH_ITEM_WIDTH = 50

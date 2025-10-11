@@ -7,6 +7,9 @@ from simulator.config import PALLET_BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME, DEPA
 
 import simpy
 
+from simulator.gui.event_bus import EventBus
+
+
 class Depalletizer(Component):
     """
     Unloads items from pallets and transitions items to other processes.
@@ -18,7 +21,7 @@ class Depalletizer(Component):
     ----------
     process : simpy.Process
         SimPy process instance for this component.
-    coordinate : Tuple[float,float]
+    coordinate : Tuple[int,int]
         Physical location of the depalletizer.
     pallet_process_time : float
         Time in simulation units to unload a pallet.
@@ -34,7 +37,7 @@ class Depalletizer(Component):
         The amount of items there are left to process.
     """
     def __init__(self, env: simpy.Environment, depalletizer_id: str,
-                 coordinate: Tuple[float,float],
+                 coordinate: Tuple[int,int],
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  item_process_time: float = ITEM_PROCESS_TIME,
                  start_delay: float = DEPALLETIZING_DELAY):
@@ -59,7 +62,7 @@ class Depalletizer(Component):
     # ----------
 
     @property
-    def coordinate(self) -> Tuple[float, float]:
+    def coordinate(self) -> Tuple[int,int]:
         return self._coordinate
 
     @property
@@ -97,6 +100,14 @@ class Depalletizer(Component):
         else:
             # fallback: use base logic
             super().connect(component, port)
+
+    def inject_event_bus(self, event_bus: EventBus):
+        """
+        Override base event bus injection.
+        Delegate to internal buffer.
+        """
+        self.event_bus = event_bus
+        self._buffer.event_bus = event_bus
 
     def current_process_time_left(self) -> float:
         """Calculate the expected time to left process the current order."""

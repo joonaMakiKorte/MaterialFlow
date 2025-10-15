@@ -27,7 +27,7 @@ class SimulationController(QObject):
 
     def start(self):
         self.running = True
-        self.timer.start(50)  # 20 ticks per second (real time)
+        self.timer.start(20)  # 20 ticks per second (real time)
 
     def stop(self):
         self.running = False

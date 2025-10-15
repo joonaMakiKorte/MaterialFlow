@@ -60,8 +60,6 @@ class InventoryManager:
         new_order = RefillOrder(order_id, item_id, leftover_qty)
         self._warehouse.place_order(order=new_order, priority=10)
 
-        print("order placed")
-
     # TODO:
     # Implement order priority calculation
 

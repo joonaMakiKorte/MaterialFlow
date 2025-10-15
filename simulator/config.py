@@ -15,24 +15,20 @@ FACTORY_JSON = "factory_init.json"
 
 TIME_SCALE = 3.0
 
-def scale_time(t):
-    """Scales a base process time according to the global simulation speed."""
-    return t / TIME_SCALE
-
 # CONVEYOR
-CONVEYOR_CYCLE_TIME = scale_time(3.0)
+CONVEYOR_CYCLE_TIME = 3.0
 
 # PAYLOAD BUFFER
-PALLET_BUFFER_PROCESS_TIME = scale_time(3.0)
-BATCH_BUFFER_PROCESS_TIME = scale_time(2)
+PALLET_BUFFER_PROCESS_TIME = 3.0
+BATCH_BUFFER_PROCESS_TIME = 2
 
 # DEPALLETIZER
-DEPALLETIZING_DELAY = scale_time(1.0)
-ITEM_PROCESS_TIME = scale_time(1.0)
-ORDER_MERGE_TIME = scale_time(5.0)
+DEPALLETIZING_DELAY = 1.0
+ITEM_PROCESS_TIME = 1.0
+ORDER_MERGE_TIME = 5.0
 
 # BATCH BUILDER
-BATCH_MAX_WAIT_TIME = scale_time(10.0)
+BATCH_MAX_WAIT_TIME = 10.0
 
 
 # -------------------------------

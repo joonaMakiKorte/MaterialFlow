@@ -51,7 +51,7 @@ def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
         yield env.timeout(1)
 
     env.process(loader(env, conveyor1))
-    env.run(until=8)
+    env.run(until=10)
 
     # Make sure pallet reached the end of second conveyor
     slots1 = [p.id if p else None for p in conveyor1.slots]

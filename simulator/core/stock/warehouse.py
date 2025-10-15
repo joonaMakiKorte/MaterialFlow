@@ -107,7 +107,7 @@ class Warehouse(Stock):
         self._pallet_count += 1
         return new_pallet
 
-    def place_order(self, order: Order, priority: int):
+    def place_order(self, order: RefillOrder, priority: int):
         """Insert an order with given priority (lower = higher priority)."""
         count = next(self._counter)  # Prevents comparasion errors when priorities match
         heapq.heappush(self._order_queue, (priority, count, order))

@@ -13,8 +13,8 @@ def test_refill_order_gen(env, catalogue, warehouse, inventory_manager, pallet_f
     inventory_manager.place_refill_order(item_id=first_item.item_id, qty_requested=100)
 
     # Check that order is in the queue
-    order = warehouse._order_queue[0][1]
-    assert isinstance(warehouse._order_queue[0][1], RefillOrder)
+    order = warehouse._order_queue[0][2]
+    assert isinstance(order, RefillOrder)
 
     # load pallet at t=0
     def loader(env, buffer):
@@ -22,7 +22,7 @@ def test_refill_order_gen(env, catalogue, warehouse, inventory_manager, pallet_f
         yield env.timeout(0)
 
     env.process(loader(env, input_buffer))
-    env.run(until=6)
+    env.run(until=10)
 
     # Make sure order is merged on pallet and order queue is empty
     assert pallet.order.order_id == order.order_id

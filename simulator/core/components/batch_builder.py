@@ -5,7 +5,7 @@ from simulator.core.transportation_units.transportation_unit import Location
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
 from simulator.core.factory.id_gen import IDGenerator
-from typing import Tuple, Optional
+from simulator.gui.component_items import BatchState
 
 from simulator.gui.event_bus import EventBus
 
@@ -30,7 +30,7 @@ class BatchBuilder(Component):
         Current batch being built
     """
     def __init__(self, env: simpy.Environment, id_gen: IDGenerator, builder_id: str,
-                 coordinate : Tuple[int,int],
+                 coordinate : tuple[int,int],
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
         super().__init__(env, component_id=builder_id, static_process_time=batch_process_time)
         self._id_gen = id_gen
@@ -44,14 +44,14 @@ class BatchBuilder(Component):
                                      coordinate=coordinate,
                                      process_time=batch_process_time)
 
-        self._current_batch : Optional[ItemBatch] = None
+        self._current_batch : ItemBatch | None = None
 
     # ----------
     # Properties
     # ----------
 
     @property
-    def coordinate(self) -> Tuple[int,int]:
+    def coordinate(self) -> tuple[int,int]:
         return self._coordinate
 
     @property
@@ -59,7 +59,7 @@ class BatchBuilder(Component):
         return self._buffer
 
     @property
-    def payload(self) -> Optional[ItemBatch]:
+    def payload(self) -> ItemBatch | None:
         return self._buffer.payload
 
     # --------
@@ -85,23 +85,37 @@ class BatchBuilder(Component):
         """Technically can be loaded any time since has batches built upon."""
         return True
 
-    def load(self, item_id : int):
+    def load(self, item_id : int) -> bool:
         """
         If buffer is empty, creates a new ItemBatch to build on,
-        otherwise places items on the existing batch
+        otherwise places items on the existing batch.
+        Return truth value indicating load success
         """
         if self._buffer.can_load():
             batch_id = self._id_gen.generate_id(type_digit=2, length=8)
             new_batch = ItemBatch(batch_id=batch_id, actual_location=Location(self._component_id, self._coordinate))
+
+            if self.event_bus is not None:
+                self.event_bus.emit("create_batch", {"id": batch_id})
+
             self._buffer.load(new_batch)
             self._current_batch = new_batch # Save instance internally
             # Event for signaling readiness
             self._current_batch.ready_event = self.env.event()
+
+        if self._current_batch.ready_event.triggered:
+            # If ready event is triggered, cannot load
+            return False
         self._current_batch.add_item(item_id)
+        return True
 
     def _handoff_batch(self):
         """Batch leaves via buffer handoff."""
         yield from self._buffer.handoff()
+
+        if self.event_bus is not None:
+            self.event_bus.emit("update_payload_state", {"id": self._current_batch.id, "state": BatchState.READY})
+
         self._current_batch = None # Clear current batch
 
     def _run(self):
@@ -110,15 +124,21 @@ class BatchBuilder(Component):
         Can also handoff batch if given wait time has been exceeded.
         """
         while True:
-            if self._current_batch is None:
+            while self._current_batch is None:
                 # Wait until a batch exists
-                yield self.env.timeout(0.1)
-                continue
+                yield self.env.timeout(0.5)
 
             batch = self._current_batch
+
+            if self.event_bus is not None:
+                self.event_bus.emit("batch_builder_building", {"id":self._component_id})
+
             # Wait for either batch ready event OR timeout
             timeout_event = self.env.timeout(BATCH_MAX_WAIT_TIME)
             yield batch.ready_event | timeout_event
+
+            if self.event_bus is not None:
+                self.event_bus.emit("batch_builder_idle", {"id":self._component_id})
 
             # Handoff batch
             yield self.env.process(self._handoff_batch())

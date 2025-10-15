@@ -43,14 +43,24 @@ class InventoryManager:
         """Place refill order(s) to warehouse queue."""
         # Calculate how many pallets are needed for order
         # Determined by max qty per pallet
-        qty_per_pallet = self._catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
-        pallets_consumed = math.ceil(qty_requested / qty_per_pallet)
+        max_qty_per_pallet = self._catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
 
-        # Generate orders
-        for _ in range(pallets_consumed):
+        # Get full pallets and leftover qty
+        full_pallets_consumed = qty_requested // max_qty_per_pallet
+        leftover_qty = qty_requested - (full_pallets_consumed * max_qty_per_pallet)
+
+        # Generate full orders
+        for _ in range(full_pallets_consumed):
             order_id = self._id_gen.generate_id(type_digit=5, length=6)
-            new_order = RefillOrder(order_id, item_id, qty_per_pallet)
+            new_order = RefillOrder(order_id, item_id, max_qty_per_pallet)
             self._warehouse.place_order(order=new_order, priority=10)
+
+        # Generate the last order from leftover qty
+        order_id = self._id_gen.generate_id(type_digit=5, length=6)
+        new_order = RefillOrder(order_id, item_id, leftover_qty)
+        self._warehouse.place_order(order=new_order, priority=10)
+
+        print("order placed")
 
     # TODO:
     # Implement order priority calculation

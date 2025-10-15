@@ -27,8 +27,8 @@ class PayloadConveyor(Component):
         List of either 'None' or payload IDs. Conveyor length == num of slots.
     slot_coords : List[Tuple[int,int]]
         List of each slot coordinate.
-    currently_loaded : bool
-        Flag to track if conveyor got loaded, prevents immediate shifting of loaded payload.
+    previously_loaded : bool
+        Flag to track if conveyor was previously loaded
     """
     def __init__(self, env: simpy.Environment, conveyor_id: str,
                  start: tuple[int,int], end: tuple[int,int],
@@ -50,7 +50,7 @@ class PayloadConveyor(Component):
         self._slots: List[TransportationUnit | None] = [None] * self._num_slots
         self._slot_coords = self._calculate_slots(start, end, self._num_slots)
 
-        self._currently_loaded = False
+        self.previously_loaded = False
 
     # ----------
     # Properties
@@ -111,11 +111,12 @@ class PayloadConveyor(Component):
             self.slots[0] = payload
             payload.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {payload}")
-            self._currently_loaded = True # Prevent immediate shifting
 
             # Notify gui of event
             if self.event_bus is not None:
                 self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[0]})
+
+            self.previously_loaded = True
 
     def shift(self):
         """Shift transportation units one slot forward if possible."""
@@ -129,8 +130,8 @@ class PayloadConveyor(Component):
         # Traverse backwards to not overwrite slots
         for i in reversed(range(1, self.num_slots)):
             if self.slots[i] is None and self.slots[i - 1] is not None:
-                # Don't shift if payload was currently loaded
-                if (i - 1 == 0) and self._currently_loaded:
+                if i == 0 and self.previously_loaded:
+                    # Skip shifting if pallet was just loaded
                     break
 
                 payload = self.slots[i - 1]
@@ -142,7 +143,7 @@ class PayloadConveyor(Component):
                 if self.event_bus is not None:
                     self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[i]})
 
-        self._currently_loaded = False # Reset flag
+        self.previously_loaded = False
 
     def _handoff(self, payload: TransportationUnit, downstream):
         """Schedule payload unloading for the downstream elements next event turn"""
@@ -153,5 +154,9 @@ class PayloadConveyor(Component):
     def _run(self):
         """Main conveyor loop."""
         while True:
+            while all(slot is None for slot in self._slots):
+                # Wait until conveyor is non-empty
+                yield self.env.timeout(0.5)
+
             yield self.env.timeout(self._cycle_time)
             self.shift()

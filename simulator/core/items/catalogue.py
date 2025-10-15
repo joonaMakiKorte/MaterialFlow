@@ -29,6 +29,11 @@ class Catalogue:
     def __len__(self):
         return len(self._items)
 
+    @property
+    def items(self):
+        """Iterate over (item_id, Item) pairs without exposing private dict."""
+        return self._items.items()
+
     # -----------------
     # Private helpers
     # -----------------
@@ -48,3 +53,7 @@ class Catalogue:
         max_by_volume = pallet_volume // item.volume
         max_by_weight = pallet_weight_limit // item.weight
         return int(min(max_by_volume, max_by_weight))
+
+    def item_ids(self) -> list[int]:
+        """Return a list of all item IDs in the catalogue."""
+        return list(self._items.keys())

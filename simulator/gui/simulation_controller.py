@@ -4,6 +4,9 @@ from simulator.gui.factory_scene import FactoryScene
 from simulator.gui.event_bus import EventBus
 
 class SimulationController(QObject):
+    """
+
+    """
     def __init__(self, env: simpy.Environment, scene: FactoryScene):
         super().__init__()
         self.env = env
@@ -14,13 +17,12 @@ class SimulationController(QObject):
         self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
         self.event_bus.subscribe("store_pallet", self.on_store_pallet)
         self.event_bus.subscribe("move_payload", self.on_move_payload)
-        self.event_bus.subscribe("update_pallet_state", self.on_update_pallet_state)
+        self.event_bus.subscribe("update_payload_state", self.on_update_payload_state)
+        self.event_bus.subscribe("create_batch", self.on_create_batch)
 
         # Timer for stepping the simulation
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
-        self.sim_speed = 1.0  # can scale simulation speed (sim units per real second)
-        self.delta_sim = self.sim_speed * 0.05  # 50 ms per tick -> 0.05 real seconds
         self.running = False
 
     def start(self):
@@ -53,20 +55,28 @@ class SimulationController(QObject):
             print("Simulation completed (empty schedule).")
             self.stop()
 
+    # --------------------------
+    # Connect events to handlers
+    # --------------------------
+
     def on_dispatch_pallet(self, data):
         pallet_id = data["id"]
-        self.scene.toggle_payload_visibility(pallet_id, visible=True)
+        self.scene.create_payload(pallet_id, payload_type="SystemPallet")
 
     def on_store_pallet(self, data):
         pallet_id = data["id"]
-        self.scene.toggle_payload_visibility(pallet_id, visible=False)
+        self.scene.delete_payload(pallet_id)
 
     def on_move_payload(self, data):
         payload_id = data["id"]
         new_pos = data["coords"]
         self.scene.update_payload_position(payload_id, new_pos)
 
-    def on_update_pallet_state(self, data):
-        pallet_id = data["id"]
+    def on_update_payload_state(self, data):
+        payload_id = data["id"]
         new_state = data["state"]
-        self.scene.update_pallet_state(pallet_id, new_state)
+        self.scene.update_payload_state(payload_id, new_state)
+
+    def on_create_batch(self, data):
+        batch_id = data["id"]
+        self.scene.create_payload(batch_id, payload_type="ItemBatch")

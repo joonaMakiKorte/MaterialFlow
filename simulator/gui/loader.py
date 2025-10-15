@@ -1,7 +1,8 @@
-from simulator.gui.component_items import (BaseItem, PayloadBufferItem,
-                                           PayloadConveyorItem, PalletItem, DepalletizerItem, BatchBuilderItem)
-from simulator.core.components.component import Component
-from simulator.core.transportation_units.system_pallet import SystemPallet
+from simulator.gui.component_items import (BaseComponentItem, PayloadBufferItem,
+                                           PayloadConveyorItem, DepalletizerItem, BatchBuilderItem,
+                                           WarehouseItem)
+from simulator.core.stock.warehouse import Warehouse
+from simulator.core.factory.factory import Factory
 
 # Registry for gui components
 COMPONENT_ITEM_TYPES = {
@@ -11,14 +12,13 @@ COMPONENT_ITEM_TYPES = {
     "BatchBuilder" : BatchBuilderItem
 }
 
-def load_component_items(component_items: dict[str, "BaseItem"],
-                         components: dict[str,"Component"],
-                         pallets: dict[int, "SystemPallet"]):
+def load_items(component_items: dict[str, "BaseComponentItem"],
+                         factory: Factory, event_bus):
     """
     Create gui component items from simulator components and pallets.
     """
     # Create components
-    for component in components.values():
+    for component in factory.components.values():
         comp_type = component.type
 
         # Ensure the component has a valid type
@@ -29,15 +29,19 @@ def load_component_items(component_items: dict[str, "BaseItem"],
 
         # Create component item based on attributes
         if hasattr(component, "start") and hasattr(component, "end"):
-            component_item = cls(start=component.start, end=component.end)
+            component_item = cls(component.id, start=component.start, end=component.end, event_bus=event_bus)
         elif hasattr(component, "coordinate"):
-            component_item = cls(coordinate=component.coordinate)
+            component_item = cls(component.id, coordinate=component.coordinate, event_bus=event_bus)
         else:
             raise ValueError(f"Cannot model component: {component.id}")
 
         # Create dict entry
         component_items[component.id] = component_item
 
-    # Create pallets
-    for pallet_id in pallets.keys():
-        component_items[str(pallet_id)] = PalletItem()
+    # Create warehouse
+    warehouse = factory.warehouse
+    warehouse_item = WarehouseItem(input_buffer_pos=warehouse.input_buffer.coordinate,
+                                   output_buffer_pos=warehouse.output_buffer.coordinate,
+                                   event_bus=event_bus)
+    # Create dict entry with 'warehouse'-key
+    component_items["warehouse"] = warehouse_item

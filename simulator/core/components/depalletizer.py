@@ -4,10 +4,9 @@ from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.orders.order import OrderStatus, RefillOrder
 from simulator.config import PALLET_BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME, DEPALLETIZING_DELAY
-
 import simpy
-
 from simulator.gui.event_bus import EventBus
+from simulator.gui.component_items import PALLET_ORDER_STATES
 
 
 class Depalletizer(Component):
@@ -134,7 +133,8 @@ class Depalletizer(Component):
         """Load item on batch builder."""
         if self._output is not None:
             yield self.env.timeout(self._item_process_time)
-            self._output.load(item_id)
+            return self._output.load(item_id) # Indicate loading success
+        return False
 
     def _run(self):
         """Main depalletizing loop."""
@@ -157,8 +157,14 @@ class Depalletizer(Component):
             print(f"[{self.env.now}] {self}: Started depalletizing {pallet.order}")
 
             # Process items
+            if self.event_bus is not None:
+                self.event_bus.emit("depalletizer_operating", {"id":self._component_id})
+
             while self._remaining_qty > 0:
-                yield self.env.process(self._process_item(self._current_item_id))
+                success = yield self.env.process(self._process_item(self._current_item_id))
+                if not success:
+                    # Try processing item until successful
+                    continue
                 self._remaining_qty -= 1
             self._current_item_id = None
 
@@ -166,6 +172,10 @@ class Depalletizer(Component):
             order.status = OrderStatus.COMPLETED
             print(f"[{self.env.now}] {self}: Depalletized {order}")
             pallet.clear_order()
+
+            if self.event_bus is not None:
+                self.event_bus.emit("update_payload_state", {"id": pallet.id, "state": PALLET_ORDER_STATES["Empty"]})
+                self.event_bus.emit("depalletizer_idle", {"id":self._component_id})
 
             # Send empty pallet downstream
             yield self.env.process(self._handoff_pallet())

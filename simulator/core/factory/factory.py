@@ -8,7 +8,7 @@ from simulator.core.factory.loader import load_factory_from_json
 from simulator.core.factory.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from pathlib import Path
-from simulator.config import ITEM_JSON, FACTORY_JSON
+from simulator.config import ITEM_JSON, FACTORY_JSON, WAREHOUSE_MAX_PALLET_CAPACITY
 from simulator.gui.event_bus import EventBus
 
 class Factory:
@@ -62,7 +62,7 @@ class Factory:
         self._load_factory(layout_json_name)
 
         # Init simulation
-        self.init_simulation(1)
+        self.init_simulation()
 
 
     # ----------------
@@ -98,16 +98,14 @@ class Factory:
             return None
         return self.components[component_id]
 
-    def init_simulation(self, pallet_qty: int):
+    def init_simulation(self):
         """
         Initialize simulation.
         Stores requested amount of pallets in warehouse,
         fills ItemWarehouse with initial stock,
         places initial orders.
         """
-        self._init_pallets(pallet_qty)
-
-        self.inventory_manager.place_refill_order(1001,10)
+        self._init_pallets(WAREHOUSE_MAX_PALLET_CAPACITY)
 
     def inject_eventbus(self, bus: EventBus):
         """Pass event bus to every object that interacts with gui"""
@@ -117,4 +115,4 @@ class Factory:
         for pallet in self.pallets.values():
             pallet.event_bus = bus
 
-        self.warehouse.event_bus = bus
+        self.warehouse.inject_eventbus(bus)

@@ -3,6 +3,7 @@ import heapq
 from abc import ABC, abstractmethod
 from simulator.core.orders.order import Order
 from simulator.gui.event_bus import EventBus
+import itertools
 
 class Stock(ABC):
     """
@@ -14,9 +15,11 @@ class Stock(ABC):
         Simulation environment.
     process : simpy.Process
         SimPy process instance for this component.
-    order_queue : min-heap[int, Order]
+    order_queue : min-heap
         Internal priority queue for handling orders based on priority.
     """
+    _counter = itertools.count()  # shared counter across all instances
+
     def __init__(self, env: simpy.Environment):
         self.env = env
         self.process = env.process(self._run())  # Register run loop
@@ -30,7 +33,7 @@ class Stock(ABC):
     def _next_order(self):
         """Pop the next order (highest priority)."""
         if self._order_queue:
-            return heapq.heappop(self._order_queue)[1]
+            return heapq.heappop(self._order_queue)[2]
         return None
 
     def _has_orders(self) -> bool:
@@ -40,13 +43,16 @@ class Stock(ABC):
     #   Logic
     # ----------
 
+    @abstractmethod
     def place_order(self, order: Order, priority: int):
-        """Insert an order with given priority (lower = higher priority)."""
-        heapq.heappush(self._order_queue, (priority, order))
+        pass
 
     @abstractmethod
     def process_order(self, order: Order):
-        """Order processing depends on the stock type."""
+        pass
+
+    @abstractmethod
+    def inject_eventbus(self, event_bus: EventBus):
         pass
 
     @abstractmethod

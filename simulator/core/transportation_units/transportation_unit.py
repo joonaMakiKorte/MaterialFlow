@@ -1,6 +1,5 @@
 from abc import ABC
 from dataclasses import dataclass
-from simulator.gui.event_bus import EventBus
 
 @dataclass
 class Destination:
@@ -28,7 +27,6 @@ class TransportationUnit(ABC):
     def __init__(self, unit_id: int, actual_location: Location):
         self._unit_id = unit_id
         self.actual_location = actual_location
-        self.event_bus: None | EventBus = None
 
     @property
     def id(self) -> int:

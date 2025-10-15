@@ -18,11 +18,9 @@ def main():
     # Create scene and simulation controller
     scene = FactoryScene(factory)
     controller = SimulationController(env, scene)
-    controller.start()
 
     # Create and show main window
-    window = MainWindow(scene)
-    window.resize(1600, 800)
+    window = MainWindow(factory, scene, controller)
     window.show()
 
     # Start event loop

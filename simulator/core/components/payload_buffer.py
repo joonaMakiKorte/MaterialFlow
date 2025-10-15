@@ -67,6 +67,10 @@ class PayloadBuffer(Component):
     def handoff(self):
         """Unload payload to downstream."""
         if self._output and self._payload is not None:
+            # Wait until output becomes available for loading
+            while not self._output.can_load():
+                yield self.env.timeout(0.5)
+
             yield self.env.timeout(self._process_time)  # process delay
             print(f"[{self.env.now}] {self}: Unloaded {self._payload}")
             self._output.load(self._payload)

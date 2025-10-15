@@ -1,12 +1,6 @@
 from typing import Optional
 from simulator.core.orders.order import Order
 from simulator.core.transportation_units.transportation_unit import TransportationUnit, Destination, Location
-from simulator.gui.component_items import PalletState
-
-PALLET_ORDER_STATES = {
-    "RefillOrder" : PalletState.REFILL_ORDER,
-    "OpmOrder" : PalletState.OPM_ORDER
-}
 
 class SystemPallet(TransportationUnit):
     """
@@ -42,13 +36,7 @@ class SystemPallet(TransportationUnit):
         self._order = new_order
         self.requested_dest = Destination(destination_type)
 
-        if self.event_bus is not None:
-            self.event_bus.emit("update_pallet_state", {"id" : self._unit_id, "state" : PALLET_ORDER_STATES[new_order.type]})
-
     def clear_order(self):
         """Clear current order."""
         self._order = None
         self.requested_dest = None # Also clears destination requests
-
-        if self.event_bus is not None:
-            self.event_bus.emit("update_pallet_state", {"id" : self._unit_id, "state" : PalletState.EMPTY})

@@ -22,15 +22,15 @@ The simulator manages:
 ## Architecture
 
 The project follows a **modular architecture**:
-- **`docs/`** # Full system documentation
-- **`data/`** # Item definitions and layout for the factory
+- **`docs/`**: Full system documentation
+- **`data/`**: Item definitions and layout for the factory
 - **`simulator/`**
-  - **`core/`** # Simulation logic (SimPy processes, orders, stock, conveyors)
-  - **`gui/`** # PyQt6 GUI components, scene rendering, event handling
+  - **`core/`**: Simulation logic (SimPy processes, orders, stock, conveyors)
+  - **`gui/`**: PyQt6 GUI components, scene rendering, event handling
   - **`database/`**
-  - **`config/`** # Global parameters and constants
-- **`app.py`** # Entry point for running the simulator
-- **`tests.py`** # Essential test files using pytest
+  - **`config/`**: Global parameters and constants
+- **`app.py`**: Entry point for running the simulator
+- **`tests.py`**: Pytest test scipts 
 
 ## Technologies Used
 
@@ -41,3 +41,4 @@ The project follows a **modular architecture**:
 | Language | Python 3.10+ |
 | Database | SQLite (via `DatabaseManager`) |
 | Event System | Custom Event Bus for GUI sync |
+| Testing | [pytest](https://docs.pytest.org/en/stable/) |

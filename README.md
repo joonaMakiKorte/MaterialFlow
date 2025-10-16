@@ -24,14 +24,37 @@ The simulator manages:
 The project follows a **modular architecture**:
 - **`docs/`**: Full system documentation
 - **`data/`**: Item definitions and layout for the factory
+- **`tests.py`**: Pytest test scipts
 - **`simulator/`**
   - **`core/`**: Simulation logic (SimPy processes, orders, stock, conveyors)
   - **`gui/`**: PyQt6 GUI components, scene rendering, event handling
   - **`database/`**
   - **`config/`**: Global parameters and constants
 - **`app.py`**: Entry point for running the simulator
-- **`tests.py`**: Pytest test scipts 
 
+## Roadmap
+
+### v0.4 — Simulation Core DEMO (DONE)
+- Core simulation & SCADA-style GUI
+- Event bus communication layer
+- Order-flow demo
+  - Ordering from Warehouse to Material Flow system
+
+### v0.5 - Full Simulation Core (IN PROGRESS)
+- Material Flow routing and automatic orders.
+- Database integration.
+- Order log visualization.
+
+### v0.6 — Advanced Visualization
+- Add live speed controls.
+- Add detailed payload tracking overlay.
+- Real-time analytics dashboard.
+
+### v1.0 — Full Material Flow Simulator (GOAL)
+- Support multiple factory layouts.
+- Enable data export and analysis.
+- Error logging and handling. 
+  
 ## Technologies Used
 
 | Category | Technology |

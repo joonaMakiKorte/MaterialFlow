@@ -1,6 +1,7 @@
 import simpy
 from simulator.core.components.component import Component
 from simulator.core.stock.warehouse import Warehouse
+from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.routing.factory_graph import FactoryGraph
@@ -48,11 +49,10 @@ class Factory:
         self.id_generator = IDGenerator()
         self.factory_graph = FactoryGraph()
         self.components: dict[str,Component] = {}
-        self.warehouse = Warehouse(self.env)
-        #self.itemwarehouse: Optional[ItemWarehouse] = None
+        self.warehouse = Warehouse(env)
+        self.item_warehouse = ItemWarehouse(env)
         self.catalogue = Catalogue(items_json_name)
-        self.inventory_manager = InventoryManager(env=self.env,
-                                                  id_gen=self.id_generator,
+        self.inventory_manager = InventoryManager(id_gen=self.id_generator,
                                                   catalogue=self.catalogue,
                                                   warehouse=self.warehouse)
         self.pallets: dict[int,SystemPallet] = {}

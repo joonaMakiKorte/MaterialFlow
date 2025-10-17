@@ -6,7 +6,6 @@ from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
 from simulator.core.factory.id_gen import IDGenerator
 from simulator.gui.component_items import BatchState
-
 from simulator.gui.event_bus import EventBus
 
 
@@ -20,8 +19,8 @@ class BatchBuilder(Component):
     ---------------------
     id_gen : IDGenerator
         For accessing central ID-generator.
-    process : simpy.Process
-        SimPy process instance for this component.
+    process_main : simpy.Process
+        SimPy process instance for main batch building loop.
     coordinate : Tuple[int,int]
         Physical location of the batch builder.
     buffer : PayloadBuffer
@@ -34,7 +33,7 @@ class BatchBuilder(Component):
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
         super().__init__(env, component_id=builder_id, static_process_time=batch_process_time)
         self._id_gen = id_gen
-        self.process = env.process(self._run()) # Register run loop
+        self.process_main = env.process(self._build_loop()) # Register run loop
         self._coordinate = coordinate
         self._batch_process_time = batch_process_time
 
@@ -118,7 +117,7 @@ class BatchBuilder(Component):
 
         self._current_batch = None # Clear current batch
 
-    def _run(self):
+    def _build_loop(self):
         """
         Wait for batch to be ready to hand it downstream.
         Can also handoff batch if given wait time has been exceeded.

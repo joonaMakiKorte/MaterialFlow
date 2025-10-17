@@ -13,8 +13,8 @@ class PayloadConveyor(Component):
 
     Additional Attributes
     ----------
-    process : simpy.Process
-        SimPy process instance for this component.
+    process_conveying : simpy.Process
+        SimPy process instance of main conveying loop.
     start : Tuple[int,int]
         Entry point of the conveyor for payloads.
     end : Tuple[int,int]
@@ -43,7 +43,7 @@ class PayloadConveyor(Component):
         self._num_slots = max(abs(start[0]-end[0]),abs(start[1]-end[1])) + 1
 
         super().__init__(env,component_id=conveyor_id, static_process_time=self._num_slots * cycle_time)
-        self.process = env.process(self._run())
+        self.process_conveying = env.process(self._conveying_loop())
         self._cycle_time = cycle_time
 
         # Internal slots
@@ -151,7 +151,7 @@ class PayloadConveyor(Component):
         print(f"[{self.env.now}] {self}: Unloaded {payload}")
         downstream.load(payload)
 
-    def _run(self):
+    def _conveying_loop(self):
         """Main conveyor loop."""
         while True:
             while all(slot is None for slot in self._slots):

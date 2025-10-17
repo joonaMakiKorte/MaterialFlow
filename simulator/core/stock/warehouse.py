@@ -14,11 +14,14 @@ from simulator.gui.event_bus import EventBus
 class Warehouse(Stock):
     """
     Manages item refills to ItemWarehouse (RefillOrder).
-    Contains an I/O component (PayloadBuffer) where orders get merged on pallets.
+    Contains I/O components (PayloadBuffer) for pallet input and output.
+    Orders get merged on pallets on output buffer.
     Also stores system pallets.
 
     Additional Attributes
     ----------
+    process_listener : simpy.Process
+        SimPy process instance for listening pallet input.
     input_buffer : PayloadBuffer
         Infeed for empty pallets
     output_buffer : PayloadBuffer
@@ -39,6 +42,7 @@ class Warehouse(Stock):
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  pallet_capacity: int = WAREHOUSE_MAX_PALLET_CAPACITY):
         super().__init__(env=env)
+        self.process_listener = env.process(self._listen_for_pallets()) # Attach pallet listening process
         self._input_buffer: PayloadBuffer | None = None
         self._output_buffer : PayloadBuffer | None = None
         self._order_process_time = order_process_time
@@ -85,7 +89,6 @@ class Warehouse(Stock):
         if not isinstance(buffer, PayloadBuffer):
             raise ValueError("buffer must be PayloadBuffer object")
         self._input_buffer = buffer
-        self.env.process(self._listen_for_pallets())
 
     @output_buffer.setter
     def output_buffer(self, buffer):
@@ -139,7 +142,7 @@ class Warehouse(Stock):
 
             if pallet is None:
                 # Wait until a pallet exists
-                yield self.env.timeout(0)
+                yield self.env.timeout(0.5)
                 continue
 
             yield self.env.timeout(self._pallet_process_time) # Pallet processing delay
@@ -149,22 +152,21 @@ class Warehouse(Stock):
 
             if self.event_bus is not None:
                 self.event_bus.emit("store_pallet", {"id":pallet.id})
-                pallets_available = math.ceil(
-                    self._pallet_count / WAREHOUSE_MAX_PALLET_CAPACITY * 100)
+                fill_percentage = math.ceil(self._pallet_count / self._pallet_capacity) * 100
                 self.event_bus.emit("warehouse_pallet_count",
-                                    {"count": self._pallet_count, "available": pallets_available})
+                                    {"count": self._pallet_count, "available": fill_percentage})
 
             print(f"[{self.env.now}] Warehouse: Stored empty pallet {pallet}")
 
     def inject_eventbus(self, event_bus: EventBus):
         self.event_bus = event_bus
         # Emit order and pallet count
-        pallets_available = math.ceil(self._pallet_count/WAREHOUSE_MAX_PALLET_CAPACITY * 100) # Pallets available in percentages
+        fill_percentage = math.ceil(self._pallet_count/self._pallet_capacity) * 100
         self.event_bus.emit("warehouse_pallet_count",
-                            {"count":self._pallet_count, "available":pallets_available})
+                            {"count":self._pallet_count, "available":fill_percentage})
         self.event_bus.emit("warehouse_order_count",{"count":len(self._order_queue)})
 
-    def _run(self):
+    def _order_loop(self):
         """Continuously monitor and process orders."""
         while True:
             # Wait until there's at least one order in the queue

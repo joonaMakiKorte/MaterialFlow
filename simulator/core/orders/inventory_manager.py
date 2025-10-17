@@ -1,4 +1,3 @@
-import math
 from simulator.core.orders.order import RefillOrder, OpmOrder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.items.catalogue import Catalogue
@@ -9,27 +8,19 @@ import simpy
 class InventoryManager:
     """
     Interface for placing orders in the material flow system.
-    Handles manual order placing from Warehouse->ItemWarehouse (RefillOrder) and ItemWarehouse->OPM (OpmOrder).
-    Also supports automatic demand driven RefillOrder generating/dispatching if being subscribed to.
+    Handles manual order placing from Warehouse->ItemWarehouse (RefillOrder)
+    and ItemWarehouse->OPM (OpmOrder).
 
     Attributes
     ----------
-    env : simpy.Environment
-        Simulation environment.
-    process : simpy.Process
-        SimPy process instance for this component.
     catalogue : Catalogue
         Helper methods for order-related calculations
     warehouse : Warehouse
         Stores instance of warehouse for order placing.
     itemwarehouse : ItemWarehouse
 
-    auto_refill_event : simpy.events.Event
-        Event to trigger automatic RefillOrders
     """
-    def __init__(self, env: simpy.Environment, id_gen: IDGenerator, catalogue: Catalogue, warehouse: Warehouse):
-        self.env = env
-        # self.process = env.process(self.run())
+    def __init__(self, id_gen: IDGenerator, catalogue: Catalogue, warehouse: Warehouse):
         self._id_gen = id_gen
         self._catalogue = catalogue
         self._warehouse = warehouse

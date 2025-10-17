@@ -13,8 +13,6 @@ FACTORY_JSON = "factory_init.json"
 # Simulation time unit = 1 second in simulation world
 # ---------------------------------------------------
 
-TIME_SCALE = 3.0
-
 # CONVEYOR
 CONVEYOR_CYCLE_TIME = 3.0
 
@@ -37,8 +35,13 @@ BATCH_MAX_WAIT_TIME = 10.0
 
 MAX_ITEM_BATCH = 10
 
-WAREHOUSE_MAX_PALLET_CAPACITY = 25
 
+# -----------------
+# Stock constraints
+# -----------------
+
+WAREHOUSE_MAX_PALLET_CAPACITY = 25
+ITEM_WAREHOUSE_MAX_ITEM_CAPACITY = 500
 
 # -----------------
 # Pallet properties

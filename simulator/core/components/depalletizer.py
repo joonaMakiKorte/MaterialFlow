@@ -12,14 +12,14 @@ from simulator.gui.component_items import PALLET_ORDER_STATES
 class Depalletizer(Component):
     """
     Unloads items from pallets and transitions items to other processes.
-    Always connected to two outputs: empty pallet conveyor and item conveyor.
-    Can unload one item at a time onto an item conveyor infeed.
+    Always connected to two outputs: empty pallet conveyor and batch builder.
+    Can unload one item at a time onto batch builder
     After depalletizing process has been finished the depalletizer unloads the empty pallet forward.
 
     Additional Attributes
     ----------
-    process : simpy.Process
-        SimPy process instance for this component.
+    process_depal : simpy.Process
+        SimPy process instance main depalletizing loop.
     coordinate : Tuple[int,int]
         Physical location of the depalletizer.
     pallet_process_time : float
@@ -41,7 +41,7 @@ class Depalletizer(Component):
                  item_process_time: float = ITEM_PROCESS_TIME,
                  start_delay: float = DEPALLETIZING_DELAY):
         super().__init__(env, component_id=depalletizer_id, static_process_time=pallet_process_time)
-        self.process = env.process(self._run())
+        self.process_depal = env.process(self._depal_loop())
         self._coordinate = coordinate
         self._pallet_process_time = pallet_process_time
         self._item_process_time = item_process_time
@@ -136,7 +136,7 @@ class Depalletizer(Component):
             return self._output.load(item_id) # Indicate loading success
         return False
 
-    def _run(self):
+    def _depal_loop(self):
         """Main depalletizing loop."""
         while True:
             self._buffer.on_load_event = self.env.event()

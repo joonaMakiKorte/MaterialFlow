@@ -4,13 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Orders in GUI">
-      <change afterPath="$PROJECT_DIR$/docs/architecture.md" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Start documentation">
+      <change afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/factory/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/factory.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_components.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_order.py" afterDir="false" />
     </list>
@@ -27,6 +33,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -59,7 +70,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;sim__core&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
@@ -231,7 +242,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760536819873</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Start documentation">
+      <option name="closed" value="true" />
+      <created>1760538642441</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1760538642441</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -262,6 +281,7 @@
     <MESSAGE value="Factory layout demo" />
     <MESSAGE value="GUI working" />
     <MESSAGE value="Orders in GUI" />
-    <option name="LAST_COMMIT_MESSAGE" value="Orders in GUI" />
+    <MESSAGE value="Start documentation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start documentation" />
   </component>
 </project>

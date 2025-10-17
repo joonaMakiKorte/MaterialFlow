@@ -4,11 +4,11 @@ def test_conveyor_one_pallet(env, conveyor_factory, pallet_factory):
     pallet = pallet_factory(10000000)
 
     # load pallet at t=0
-    def loader(env, conveyor):
+    def loader():
         conveyor.load(pallet)
-        yield env.timeout(1)
+        yield env.timeout(0)
 
-    env.process(loader(env, conveyor))
+    env.process(loader())
     env.run(until=5)
 
     # At the end, pallet should be in last slot
@@ -23,13 +23,13 @@ def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
     pallet2 = pallet_factory(10000002)
 
     # load pallet at t=0
-    def loader(env, conveyor):
+    def loader():
         conveyor.load(pallet1)
         yield env.timeout(2)
         # load second pallet after 2 seconds
         conveyor.load(pallet2)
 
-    env.process(loader(env, conveyor))
+    env.process(loader())
     env.run(until=5)
 
     # At the end, first pallet should be in last slot and second pallet in the middle
@@ -46,11 +46,11 @@ def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     pallet = pallet_factory(10000001)
 
     # load pallet at t=0
-    def loader(env, conveyor):
-        conveyor.load(pallet)
+    def loader():
+        conveyor1.load(pallet)
         yield env.timeout(1)
 
-    env.process(loader(env, conveyor1))
+    env.process(loader())
     env.run(until=10)
 
     # Make sure pallet reached the end of second conveyor
@@ -72,12 +72,12 @@ def test_conveyor_with_buffers(env, conveyor_factory, buffer_factory, pallet_fac
     pallet = pallet_factory(1, (0,0))
 
     # load pallet at t=0
-    def loader(env, buffer):
-        buffer.load(pallet)
+    def loader():
+        input_buffer.load(pallet)
         yield env.timeout(0)
-        yield env.process(buffer.handoff())  # explicitly push to conveyor
+        yield env.process(input_buffer.handoff())  # explicitly push to conveyor
 
-    env.process(loader(env, input_buffer))
+    env.process(loader())
     env.run(until=8)
 
     # Assert pallet is on output buffer and other elements are free
@@ -108,11 +108,11 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     pallet.requested_dest.specify(element_id=1)
 
     # load pallet at t=0
-    def loader(env, conveyor):
-        conveyor.load(pallet)
+    def loader():
+        input_conv.load(pallet)
         yield env.timeout(0)
 
-    env.process(loader(env, input_conv))
+    env.process(loader())
     env.run(until=5)
 
     # Assert pallet is being processed in depal

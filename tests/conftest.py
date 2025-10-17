@@ -5,11 +5,13 @@ from simulator.core.factory.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location
+from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.components.depalletizer import Depalletizer
 from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.stock.warehouse import Warehouse
+from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.routing.factory_graph import FactoryGraph
 
 @pytest.fixture
@@ -163,8 +165,21 @@ def pallet_factory():
     """Create pallet with default destination (0,0)."""
     def _factory(pallet_id, dest=(0,0)):
         return SystemPallet(
-            pallet_id=pallet_id
-            , actual_location=Location("",dest))
+            pallet_id=pallet_id,
+            actual_location=Location("",dest))
+    return _factory
+
+@pytest.fixture
+def batch_factory():
+    """Create batch with default destination (0,0) and load 10 counts of requested item id."""
+    def _factory(batch_id, item_id, dest=(0,0)):
+        batch = ItemBatch(
+            batch_id=batch_id,
+            actual_location=Location("",dest)
+        )
+        batch._items = {item_id : 10}
+        batch._item_count = 10
+        return batch
     return _factory
 
 @pytest.fixture
@@ -176,10 +191,17 @@ def warehouse(env):
      )
 
 @pytest.fixture
+def item_warehouse(env):
+    return ItemWarehouse(
+        env=env,
+        item_process_time=1,
+        batch_process_time=1
+    )
+
+@pytest.fixture
 def inventory_manager(env, id_gen, catalogue, warehouse):
     """Initialize order service with warehouse"""
     return InventoryManager(
-        env=env,
         id_gen=id_gen,
         catalogue=catalogue,
         warehouse=warehouse

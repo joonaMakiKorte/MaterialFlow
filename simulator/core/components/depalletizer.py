@@ -40,7 +40,7 @@ class Depalletizer(Component):
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  item_process_time: float = ITEM_PROCESS_TIME,
                  start_delay: float = DEPALLETIZING_DELAY):
-        super().__init__(env, component_id=depalletizer_id, static_process_time=pallet_process_time)
+        super().__init__(env, component_id=depalletizer_id)
         self.process_depal = env.process(self._depal_loop())
         self._coordinate = coordinate
         self._pallet_process_time = pallet_process_time
@@ -144,11 +144,17 @@ class Depalletizer(Component):
 
             if pallet is None:
                 # Wait until a pallet exists
-                yield self.env.timeout(0)
+                yield self.env.timeout(0.5)
                 continue
 
             # Init order info
             order = pallet.order
+
+            # If empty pallet, hand to downstream immediately
+            if order is None:
+                yield self.env.process(self._handoff_pallet())
+                continue
+
             if isinstance(order, RefillOrder):
                 self._current_item_id = order.item_id
                 self._remaining_qty = order.qty

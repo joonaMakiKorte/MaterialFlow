@@ -135,7 +135,9 @@ class PayloadConveyorItem(BaseComponentItem):
     A long rectangle divided into slots.
     A single conveyor slot is 80x80, but for visualizing purposes the slots in the middle merge together
     """
-    def __init__(self, component_id: str, start: tuple[int,int], end: tuple[int,int], event_bus: EventBus):
+    def __init__(self, component_id: str,
+                 start: tuple[int,int], end: tuple[int,int],
+                 event_bus: EventBus):
         self.start = start
         self.end = end
         self.num_slots = max(abs(start[0]-end[0]), abs(start[1]-end[1])) + 1
@@ -328,13 +330,83 @@ class BatchBuilderItem(BaseComponentItem):
 # Stock items
 # ------------
 
-class WarehouseItem(BaseComponentItem):
+class BaseStockItem(BaseComponentItem):
+    """
+    Base model for a stock item
+    """
+    def __init__(self, stock_id: str, x: float, y: float, event_bus: EventBus, rect: QRectF, color, z=0):
+        super().__init__(stock_id, x, y, event_bus, rect, color, z)
+
+        # Track item and order count for visualization
+        self.stock_count = 0
+        self.fill_percentage = 0  # percentages (empty)
+        self.order_count = 0
+
+        # Text layout and font calculations
+        padding = 10
+        # Define dedicated areas for text inside the main rectangle
+        content_rect = self.rect.adjusted(padding, padding, -padding, -padding)
+        title_height = content_rect.height() * 0.3  # Reduced from 0.4 to leave more room
+        info_height = (content_rect.height() - title_height) / 2
+
+        self.title_rect = QRectF(content_rect.x(), content_rect.y(), content_rect.width(), title_height)
+        self.stock_rect = QRectF(content_rect.x(), self.title_rect.bottom(), content_rect.width(), info_height)
+        self.order_rect = QRectF(content_rect.x(), self.stock_rect.bottom(), content_rect.width(), info_height)
+
+    def _get_optimal_font(self, text: str, rect: QRectF, bold: bool = False, font_family: str = "Segoe UI") -> QFont:
+        """Calculates the largest QFont that fits the text within the given rectangle."""
+        font = QFont(font_family)
+        if bold:
+            font.setWeight(QFont.Weight.Bold)
+
+        # Binary search for best font size
+        min_size, max_size = 4, 150
+        optimal_size = min_size
+
+        while min_size <= max_size:
+            current_size = (min_size + max_size) // 2
+            if current_size == 0:
+                break
+
+            font.setPixelSize(current_size)
+            metrics = QFontMetrics(font)
+
+            # Check if text fits both horizontally and vertically
+            # Add some padding margin (90% of available space)
+            text_rect = metrics.boundingRect(text)
+            if text_rect.width() < rect.width() * 0.95 and text_rect.height() < rect.height() * 0.9:
+                optimal_size = current_size
+                min_size = current_size + 1  # It fits, so try a larger size
+            else:
+                max_size = current_size - 1  # It's too big, try a smaller size
+
+        font.setPixelSize(optimal_size)
+        return font
+
+    def update_order_count(self, payload):
+        """Updates the order count and schedules a repaint."""
+        order_count = payload["count"]
+        if type(order_count) == int:  # Validate payload
+            self.order_count = order_count
+            self.update()
+
+    def update_stock_count(self, payload):
+        """Updates the pallet count and schedules a repaint."""
+        stock_count = payload["count"]
+        fill_percentage = payload["fill"]
+        if type(stock_count) == int and type(fill_percentage) == int:  # Validate payload
+            self.stock_count = stock_count
+            self.fill_percentage = fill_percentage
+            self.update()
+
+class WarehouseItem(BaseStockItem):
     """
     Visual representation of a warehouse between input and output buffers.
     Text is dynamically scaled to perfectly fit the item's dimensions.
     """
-
-    def __init__(self, input_buffer_pos: tuple[int, int], output_buffer_pos: tuple[int, int], event_bus: EventBus):
+    def __init__(self, input_buffer_pos: tuple[int, int],
+                 output_buffer_pos: tuple[int, int],
+                 event_bus: EventBus):
         dx = output_buffer_pos[0] - input_buffer_pos[0]
         dy = output_buffer_pos[1] - input_buffer_pos[1]
         self.is_horizontal = abs(dx) > abs(dy)
@@ -361,73 +433,14 @@ class WarehouseItem(BaseComponentItem):
         rect = QRectF(-width / 2, -height / 2, width, height)
         super().__init__("warehouse", x, y, event_bus, rect, color="#d0e4f7")
 
-        self.pallet_count = 0
-        self.pallets_available = 100 # percentages
-        self.order_count = 0
-
-        # Text layout and font calculations
-        padding = 10
-        # Define dedicated areas for text inside the main rectangle
-        content_rect = self.rect.adjusted(padding, padding, -padding, -padding)
-        title_height = content_rect.height() * 0.4  # Give title more space
-        info_height = (content_rect.height() - title_height) / 2
-
-        self.title_rect = QRectF(content_rect.x(), content_rect.y(), content_rect.width(), title_height)
-        self.pallet_rect = QRectF(content_rect.x(), self.title_rect.bottom(), content_rect.width(), info_height)
-        self.order_rect = QRectF(content_rect.x(), self.pallet_rect.bottom(), content_rect.width(), info_height)
-
         # Calculate the optimal font sizes once during initialization for performance
         # Use a placeholder for dynamic text to estimate the maximum required width
         self.title_font = self._get_optimal_font("Warehouse", self.title_rect, bold=True)
-        self.info_font = self._get_optimal_font("Pallets: 99999", self.pallet_rect)
+        self.info_font = self._get_optimal_font("Orders in queue: 99999", self.stock_rect)
 
         # Subscribe to events
-        self.event_bus.subscribe("warehouse_pallet_count", self.update_pallet_count)
+        self.event_bus.subscribe("warehouse_pallet_count", self.update_stock_count)
         self.event_bus.subscribe("warehouse_order_count", self.update_order_count)
-
-    def _get_optimal_font(self, text: str, rect: QRectF, bold: bool = False, font_family: str = "Segoe UI") -> QFont:
-        """Calculates the largest QFont that fits the text within the given rectangle."""
-        font = QFont(font_family)
-        if bold:
-            font.setWeight(QFont.Weight.Bold)
-
-        # Binary search for best font size
-        min_size, max_size = 4, 150
-        optimal_size = min_size
-
-        while min_size <= max_size:
-            current_size = (min_size + max_size) // 2
-            if current_size == 0: break
-
-            font.setPixelSize(current_size)
-            metrics = QFontMetrics(font)
-
-            # Check if text fits both horizontally and vertically
-            text_rect = metrics.boundingRect(text)
-            if text_rect.width() < rect.width() and text_rect.height() < rect.height():
-                optimal_size = current_size
-                min_size = current_size + 1  # It fits, so try a larger size
-            else:
-                max_size = current_size - 1  # It's too big, try a smaller size
-
-        font.setPixelSize(optimal_size)
-        return font
-
-    def update_pallet_count(self, payload):
-        """Updates the pallet count and schedules a repaint."""
-        pallet_count = payload["count"]
-        available = payload["available"]
-        if type(pallet_count) == int and type(available) == int:  # Validate payload
-            self.pallet_count = pallet_count
-            self.pallets_available = available
-            self.update()
-
-    def update_order_count(self, payload):
-        """Updates the order count and schedules a repaint."""
-        order_count = payload["count"]
-        if type(order_count) == int: # Validate payload
-            self.order_count = order_count
-            self.update()
 
     def paint(self, painter, option, widget=None):
         """Draws the component background and its autofitting text."""
@@ -444,5 +457,89 @@ class WarehouseItem(BaseComponentItem):
         # info text
         painter.setPen(QColor("#222222"))
         painter.setFont(self.info_font)
-        painter.drawText(self.pallet_rect, Qt.AlignmentFlag.AlignCenter, f"Pallets: {self.pallet_count} ({self.pallets_available}%)")
-        painter.drawText(self.order_rect, Qt.AlignmentFlag.AlignCenter, f"Orders in queue: {self.order_count}")
+        painter.drawText(self.stock_rect, Qt.AlignmentFlag.AlignCenter, f"Pallets: {self.stock_count} ({self.fill_percentage}%)")
+        painter.drawText(self.order_rect, Qt.AlignmentFlag.AlignCenter, f"Orders: {self.order_count}")
+
+
+class ItemWarehouseItem(BaseStockItem):
+    """
+    Visual representation of an item warehouse.
+    Buffers are either on top+bottom (horizontal) or left+right (vertical).
+    Text is dynamically scaled to perfectly fit the item's dimensions.
+    """
+
+    def __init__(self, top_left_corner_pos: tuple[int, int],
+                 bottom_right_corner_pos: tuple[int, int],
+                 event_bus: EventBus,
+                 buffers_horizontal: bool = True):
+        """
+        Args:
+            top_left_corner_pos: Top-left corner buffer position
+            bottom_right_corner_pos: Bottom-right corner buffer position
+            event_bus: Event bus for updates
+            buffers_horizontal: True if buffers are on top+bottom, False if on left+right
+        """
+        BUFFER_HALF = 40
+        VISUAL_GAP = 10
+
+        min_x = top_left_corner_pos[0]
+        max_x = bottom_right_corner_pos[0]
+        min_y = top_left_corner_pos[1]
+        max_y = bottom_right_corner_pos[1]
+
+        if buffers_horizontal:
+            # Buffers on top and bottom
+            # Warehouse fits between them vertically, extends horizontally
+            left = min_x * 100 - BUFFER_HALF - VISUAL_GAP
+            right = max_x * 100 + BUFFER_HALF + VISUAL_GAP
+            top = min_y * 100 + BUFFER_HALF + VISUAL_GAP
+            bottom = max_y * 100 - BUFFER_HALF - VISUAL_GAP
+        else:
+            # Buffers on left and right
+            # Warehouse fits between them horizontally, extends vertically
+            left = min_x * 100 + BUFFER_HALF + VISUAL_GAP
+            right = max_x * 100 - BUFFER_HALF - VISUAL_GAP
+            top = min_y * 100 - BUFFER_HALF - VISUAL_GAP
+            bottom = max_y * 100 + BUFFER_HALF + VISUAL_GAP
+
+        # Calculate center position and dimensions
+        x = (left + right) / 200
+        y = (top + bottom) / 200
+        width = abs(right - left)
+        height = abs(bottom - top)
+
+        # Ensure minimum reasonable size
+        width = max(width, 200)
+        height = max(height, 160)
+
+        rect = QRectF(-width / 2, -height / 2, width, height)
+        super().__init__("item_warehouse", x, y, event_bus, rect, color="#d0e4f7")
+
+        # Calculate the optimal font sizes once during initialization for performance
+        # Use a placeholder for dynamic text to estimate the maximum required width
+        self.title_font = self._get_optimal_font("Item Warehouse", self.title_rect, bold=True)
+        self.info_font = self._get_optimal_font("Orders in queue: 99999", self.stock_rect)
+
+        # Subscribe to events
+        self.event_bus.subscribe("item_warehouse_item_count", self.update_stock_count)
+        self.event_bus.subscribe("item_warehouse_order_count", self.update_order_count)
+
+    def paint(self, painter, option, widget=None):
+        """Draws the component background and its autofitting text."""
+        # main body
+        painter.setBrush(QBrush(QColor(self.color)))
+        painter.setPen(QPen(QColor("#2a6ea9"), 2))
+        painter.drawRect(self.rect)
+
+        # title text
+        painter.setPen(QColor("#0b3954"))
+        painter.setFont(self.title_font)
+        painter.drawText(self.title_rect, Qt.AlignmentFlag.AlignCenter, "Item Warehouse")
+
+        # info text
+        painter.setPen(QColor("#222222"))
+        painter.setFont(self.info_font)
+        painter.drawText(self.stock_rect, Qt.AlignmentFlag.AlignCenter,
+                         f"Items: {self.stock_count} ({self.fill_percentage}%)")
+        painter.drawText(self.order_rect, Qt.AlignmentFlag.AlignCenter, f"Orders: {self.order_count}")
+

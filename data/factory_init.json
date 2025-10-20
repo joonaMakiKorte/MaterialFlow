@@ -6,15 +6,27 @@
 		"coordinate" : [1,7]
       },
       {
-		"id": "pallet_conv1",
+		"id": "pallet_conv_dep",
 		"type": "PayloadConveyor",
 		"start" : [1,6],
 		"end" : [1,3]
       },
+      {
+        "id": "junc_dep1",
+        "type": "Junction",
+        "ratio": "1:1",
+        "coordinate" : [1,2]
+      },
+      {
+        "id" : "pallet_conv_dep_junc",
+        "type" : "PayloadConveyor",
+        "start" : [1,1],
+        "end" : [1,0]
+      },
 	  {
-		"id" : "pallet_conv2",
+		"id" : "pallet_conv_dep1_in",
 		"type" : "PayloadConveyor",
-		"start" : [1,2],
+		"start" : [2,2],
 		"end" : [6,2]
 	  },
       {
@@ -25,39 +37,98 @@
 	  {
         "id" : "bb1",
 		"type" : "BatchBuilder",
-		"coordinate" : [7,1]
+		"coordinate" : [8,2]
 	  },
 	  {
 		"id" : "item_conv1",
 		"type" : "PayloadConveyor",
-		"start" : [8,1],
-		"end" : [15,1]
+		"start" : [9,2],
+		"end" : [15,2]
       },
       {
-        "id" : "pallet_conv3",
+        "id" : "iwh_buff_in1",
+        "type" : "PayloadBuffer",
+        "coordinate" : [16,2]
+      },
+      {
+        "id": "junc_dep2",
+        "type": "Junction",
+        "ratio": "1",
+        "coordinate": [1,-1]
+      },
+      {
+        "id" : "pallet_conv_dep2_in",
+        "type" : "PayloadConveyor",
+        "start" : [2,-1],
+        "end" : [6,-1]
+      },
+      {
+        "id" : "depal2",
+        "type" : "Depalletizer",
+        "coordinate" : [7,-1]
+      },
+      {
+        "id" : "bb2",
+        "type" : "BatchBuilder",
+        "coordinate" : [8,-1]
+      },
+      {
+        "id" : "item_conv2",
+        "type" : "PayloadConveyor",
+        "start" : [9,-1],
+        "end" : [15,-1]
+      },
+      {
+        "id" : "iwh_buff_in2",
+        "type" : "PayloadBuffer",
+        "coordinate" : [16,-1]
+      },
+      {
+        "id" : "pallet_conv_dep1_out",
 		"type" : "PayloadConveyor",
 		"start" : [7,3],
 		"end" : [7,6]
       },
       {
+        "id" : "pallet_conv_dep2_out",
+        "type" : "PayloadConveyor",
+        "start" : [7,0],
+        "end" : [7,1]
+      },
+      {
         "id" : "wh_buff_in",
         "type" : "PayloadBuffer",
         "coordinate" : [7,7]
+      },
+      {
+        "id" : "iwh_buff_out1",
+        "type" : "BatchBuilder",
+        "coordinate" : [22,2]
+      },
+      {
+        "id" : "iwh_buff_out2",
+        "type" : "BatchBuilder",
+        "coordinate" : [22,-1]
       }
     ],
 	"connections" : [
 	  {
 		"from" : "wh_buff_out",
-		"to" : "pallet_conv1",
+		"to" : "pallet_conv_dep",
 		"port" : "out"
 	  },
 	  {
-		"from" : "pallet_conv1",
-		"to" : "pallet_conv2",
+		"from" : "pallet_conv_dep",
+		"to" : "junc_dep1",
 		"port" : "out"
 	  },
+      {
+        "from" : "junc_dep1",
+        "to" : "pallet_conv_dep1_in",
+        "port" : "dep1"
+      },
 	  {
-		"from" : "pallet_conv2",
+		"from" : "pallet_conv_dep1_in",
 		"to" : "depal1",
 		"port" : "out"
 	  },
@@ -72,12 +143,62 @@
 		"port" : "out"
 	  },
       {
+        "from" : "item_conv1",
+        "to" : "iwh_buff_in1",
+        "port" : "out"
+      },
+      {
         "from" : "depal1",
-        "to" : "pallet_conv3",
+        "to" : "pallet_conv_dep1_out",
         "port" : "pallet_out"
       },
       {
-        "from" : "pallet_conv3",
+        "from" : "junc_dep1",
+        "to" : "pallet_conv_dep_junc",
+        "port" : "dep_junc"
+      },
+      {
+        "from" : "pallet_conv_dep_junc",
+        "to" : "junc_dep2",
+        "port" : "out"
+      },
+      {
+        "from" : "junc_dep2",
+        "to" : "pallet_conv_dep2_in",
+        "port" : "dep2"
+      },
+      {
+        "from" : "pallet_conv_dep2_in",
+        "to" : "depal2",
+        "port" : "out"
+      },
+      {
+        "from" : "depal2",
+        "to" : "bb2",
+        "port" : "item_out"
+      },
+      {
+        "from" : "bb2",
+        "to" : "item_conv2",
+        "port" : "out"
+      },
+      {
+        "from" : "item_conv2",
+        "to" : "iwh_buff_in2",
+        "port" : "out"
+      },
+      {
+        "from" : "depal2",
+        "to" : "pallet_conv_dep2_out",
+        "port" : "pallet_out"
+      },
+      {
+        "from" : "pallet_conv_dep2_out",
+        "to" : "depal1",
+        "port" : "out"
+      },
+      {
+        "from" : "pallet_conv_dep1_out",
         "to" : "wh_buff_in",
         "port" : "out"
       }
@@ -88,8 +209,14 @@
         "output_buffer" : "wh_buff_out"
       },
       "item_warehouse" : {
-        "input_buffers" : [],
-        "output_buffers" : []
+        "input_buffers" : [
+          "iwh_buff_in1",
+          "iwh_buff_in2"
+        ],
+        "output_buffers" : [
+          "iwh_buff_out1",
+          "iwh_buff_out2"
+        ]
       }
     }
 }

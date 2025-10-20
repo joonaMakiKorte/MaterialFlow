@@ -55,7 +55,13 @@ class ItemWarehouse(Stock):
     # Properties
     # ----------
 
+    @property
+    def input_buffers(self) -> list[PayloadBuffer]:
+        return self._input_buffers
 
+    @property
+    def output_buffers(self) -> list[BatchBuilder]:
+        return self._output_buffers
 
     # ----------------
     # Buffer injection
@@ -92,9 +98,9 @@ class ItemWarehouse(Stock):
         self.event_bus = event_bus
         # Emit item and order count
         fill_percentage = math.ceil(self._item_count / self._item_capacity) * 100
-        self.event_bus.emit("warehouse_item_count",
+        self.event_bus.emit("itemwarehouse_item_count",
                             {"count": self._item_count, "available":fill_percentage})
-        self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
+        self.event_bus.emit("itemwarehouse_order_count", {"count": len(self._order_queue)})
 
     def _load_batch(self, batch: ItemBatch):
         """Load items from batch into storage."""
@@ -130,8 +136,12 @@ class ItemWarehouse(Stock):
 
             yield self.env.process(self._load_batch(batch))
             buffer.clear() # Clear pallet from buffer
+            
+            if self.event_bus is not None:
+                self.event_bus.emit("store_payload", {"id":batch.id})
+
             print(f"[{self.env.now}] ItemWarehouse: Stored batch {batch}")
 
     def _order_loop(self):
         while True:
-            yield self.env.timeout(100)
+            yield self.env.timeout(0.5)

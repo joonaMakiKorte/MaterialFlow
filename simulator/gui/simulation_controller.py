@@ -15,7 +15,7 @@ class SimulationController(QObject):
 
         # Subscribe to events
         self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
-        self.event_bus.subscribe("store_pallet", self.on_store_pallet)
+        self.event_bus.subscribe("store_payload", self.on_store_payload)
         self.event_bus.subscribe("move_payload", self.on_move_payload)
         self.event_bus.subscribe("update_payload_state", self.on_update_payload_state)
         self.event_bus.subscribe("create_batch", self.on_create_batch)
@@ -27,7 +27,7 @@ class SimulationController(QObject):
 
     def start(self):
         self.running = True
-        self.timer.start(20)  # 20 ticks per second (real time)
+        self.timer.start(10)  # 20 ticks per second (real time)
 
     def stop(self):
         self.running = False
@@ -63,7 +63,7 @@ class SimulationController(QObject):
         pallet_id = data["id"]
         self.scene.create_payload(pallet_id, payload_type="SystemPallet")
 
-    def on_store_pallet(self, data):
+    def on_store_payload(self, data):
         pallet_id = data["id"]
         self.scene.delete_payload(pallet_id)
 

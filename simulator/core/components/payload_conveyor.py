@@ -42,12 +42,12 @@ class PayloadConveyor(Component):
         # Calculate number of slots (determined by length)
         self._num_slots = max(abs(start[0]-end[0]),abs(start[1]-end[1])) + 1
 
-        super().__init__(env,component_id=conveyor_id, static_process_time=self._num_slots * cycle_time)
+        super().__init__(env,component_id=conveyor_id)
         self.process_conveying = env.process(self._conveying_loop())
         self._cycle_time = cycle_time
 
         # Internal slots
-        self._slots: List[TransportationUnit | None] = [None] * self._num_slots
+        self._slots: list[TransportationUnit | None] = [None] * self._num_slots
         self._slot_coords = self._calculate_slots(start, end, self._num_slots)
 
         self.previously_loaded = False
@@ -69,10 +69,9 @@ class PayloadConveyor(Component):
         return self._num_slots
 
     @property
-    def slots(self) -> List[TransportationUnit | None]:
+    def slots(self) -> list[TransportationUnit | None]:
         """Read-only view of slot contents"""
         return self._slots
-
 
     # ---------------
     # Private Helpers
@@ -103,12 +102,12 @@ class PayloadConveyor(Component):
 
     def can_load(self) -> bool:
         """Check if first slot is free for loading"""
-        return self.slots[0] is None
+        return self._slots[0] is None
 
     def load(self, payload: TransportationUnit):
         """Place payload at start if free"""
         if self.can_load():
-            self.slots[0] = payload
+            self._slots[0] = payload
             payload.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
             print(f"[{self.env.now}] {self}: Loaded {payload}")
 
@@ -121,23 +120,23 @@ class PayloadConveyor(Component):
     def shift(self):
         """Shift transportation units one slot forward if possible."""
         # Try to unload the last slot into downstream
-        if self._output and self.slots[-1] is not None:
-            payload = self.slots[-1]
+        if self._output and self._slots[-1] is not None:
+            payload = self._slots[-1]
             if self._output.can_load():
                 self.env.process(self._handoff(payload, self._output))
-                self.slots[-1] = None
+                self._slots[-1] = None
 
         # Traverse backwards to not overwrite slots
         for i in reversed(range(1, self.num_slots)):
-            if self.slots[i] is None and self.slots[i - 1] is not None:
+            if self._slots[i] is None and self._slots[i - 1] is not None:
                 if i == 0 and self.previously_loaded:
                     # Skip shifting if pallet was just loaded
                     break
 
-                payload = self.slots[i - 1]
+                payload = self._slots[i - 1]
                 payload.actual_location.update(coordinates=self._slot_coords[i])
-                self.slots[i] = self.slots[i - 1]
-                self.slots[i - 1] = None
+                self._slots[i] = self._slots[i - 1]
+                self._slots[i - 1] = None
 
                 # Notify gui of event
                 if self.event_bus is not None:

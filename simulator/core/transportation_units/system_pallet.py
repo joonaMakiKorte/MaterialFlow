@@ -1,4 +1,3 @@
-from typing import Optional
 from simulator.core.orders.order import Order
 from simulator.core.transportation_units.transportation_unit import TransportationUnit, Destination, Location
 
@@ -16,8 +15,8 @@ class SystemPallet(TransportationUnit):
     """
     def __init__(self, pallet_id: int, actual_location: Location):
         super().__init__(pallet_id, actual_location)
-        self._order: Optional["Order"] = None
-        self.requested_dest: Optional[Destination] = None
+        self._order: Order | None = None
+        self.requested_dest: Destination | None = None
 
     # ----------
     # Properties

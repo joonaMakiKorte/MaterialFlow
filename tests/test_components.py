@@ -138,3 +138,70 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     assert builder1.payload is None
     slots = [p.id if p else None for p in item_conv.slots]
     assert all(slot is not None for slot in slots)
+
+
+def test_junction_ratio21(env, pallet_factory, conveyor_factory, junction_factory):
+    """Load 3 pallets to junction and make sure they follow the ratio 2:1."""
+    pallet1 = pallet_factory(1001)
+    pallet2 = pallet_factory(1002)
+    pallet3 = pallet_factory(1003)
+
+    conv_in = conveyor_factory("conv_in", (0,0),(2,0))
+    junction = junction_factory("junc", "2:1", (3,0))
+    conv_out1 = conveyor_factory("conv_out1", (3,1), (3,2))
+    conv_out2 = conveyor_factory("conv_out2", (3,-1), (3,-2))
+
+    conv_in.connect(junction)
+    junction.connect(conv_out1, "out1")
+    junction.connect(conv_out2, "out2")
+
+    def loader():
+        # Load pallets
+        conv_in.load(pallet1)
+        yield env.timeout(2)
+        conv_in.load(pallet2)
+        yield env.timeout(2)
+        conv_in.load(pallet3)
+
+    # Run until pallets should have been sorted
+    env.process(loader())
+    env.run(15)
+
+    # Two pallets should be on conv_out1, one on conv_out2
+    slots1 = [p.id if p else None for p in conv_out1.slots]
+    slots2 = [p.id if p else None for p in conv_out2.slots]
+    assert slots1 == [pallet2.id, pallet1.id]
+    assert slots2 == [None, pallet3.id]
+
+def test_junction_ratio11(env, pallet_factory, conveyor_factory, junction_factory):
+    """Load 3 pallets to junction and make sure they follow the ratio 1:1."""
+    pallet1 = pallet_factory(1001)
+    pallet2 = pallet_factory(1002)
+    pallet3 = pallet_factory(1003)
+
+    conv_in = conveyor_factory("conv_in", (0,0),(2,0))
+    junction = junction_factory("junc", "1:1", (3,0))
+    conv_out1 = conveyor_factory("conv_out1", (3,1), (3,2))
+    conv_out2 = conveyor_factory("conv_out2", (3,-1), (3,-2))
+
+    conv_in.connect(junction)
+    junction.connect(conv_out1, "out1")
+    junction.connect(conv_out2, "out2")
+
+    def loader():
+        # Load pallets
+        conv_in.load(pallet1)
+        yield env.timeout(2)
+        conv_in.load(pallet2)
+        yield env.timeout(2)
+        conv_in.load(pallet3)
+
+    # Run until pallets should have been sorted
+    env.process(loader())
+    env.run(15)
+
+    # Two pallets should be on conv_out1, one on conv_out2
+    slots1 = [p.id if p else None for p in conv_out1.slots]
+    slots2 = [p.id if p else None for p in conv_out2.slots]
+    assert slots1 == [pallet3.id, pallet1.id]
+    assert slots2 == [None, pallet2.id]

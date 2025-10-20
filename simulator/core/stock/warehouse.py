@@ -151,10 +151,10 @@ class Warehouse(Stock):
             self._input_buffer.clear() # Clear pallet from buffer
 
             if self.event_bus is not None:
-                self.event_bus.emit("store_pallet", {"id":pallet.id})
+                self.event_bus.emit("store_payload", {"id":pallet.id})
                 fill_percentage = math.ceil(self._pallet_count / self._pallet_capacity) * 100
                 self.event_bus.emit("warehouse_pallet_count",
-                                    {"count": self._pallet_count, "available": fill_percentage})
+                                    {"count": self._pallet_count, "fill": fill_percentage})
 
             print(f"[{self.env.now}] Warehouse: Stored empty pallet {pallet}")
 
@@ -163,7 +163,7 @@ class Warehouse(Stock):
         # Emit order and pallet count
         fill_percentage = math.ceil(self._pallet_count/self._pallet_capacity) * 100
         self.event_bus.emit("warehouse_pallet_count",
-                            {"count":self._pallet_count, "available":fill_percentage})
+                            {"count":self._pallet_count, "fill":fill_percentage})
         self.event_bus.emit("warehouse_order_count",{"count":len(self._order_queue)})
 
     def _order_loop(self):
@@ -200,7 +200,7 @@ class Warehouse(Stock):
                 pallets_available = math.ceil(
                     self._pallet_count / WAREHOUSE_MAX_PALLET_CAPACITY * 100)
                 self.event_bus.emit("warehouse_pallet_count",
-                                    {"count": self._pallet_count, "available": pallets_available})
+                                    {"count": self._pallet_count, "fill": pallets_available})
                 self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
 
             self._output_buffer.load(pallet)

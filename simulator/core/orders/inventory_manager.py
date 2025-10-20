@@ -17,7 +17,7 @@ class InventoryManager:
         Helper methods for order-related calculations
     warehouse : Warehouse
         Stores instance of warehouse for order placing.
-    itemwarehouse : ItemWarehouse
+    item_warehouse : ItemWarehouse
 
     """
     def __init__(self, id_gen: IDGenerator, catalogue: Catalogue, warehouse: Warehouse):

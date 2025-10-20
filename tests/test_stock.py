@@ -62,7 +62,7 @@ def test_itemwarehouse_input(env, item_warehouse, buffer_factory, batch_factory)
     assert item_warehouse._item_stock.get(1000) == 10
 
 def test_itemwarehouse_two_inputs(env, item_warehouse, buffer_factory, batch_factory):
-    """Test loading two batches on two itemwarehouse input buffers"""
+    """Test loading two batches on two item_warehouse input buffers"""
     input_buffer1 = buffer_factory('buff1', (0,0))
     input_buffer2 = buffer_factory('buff2', (1,0))
     item_warehouse.inject_input_buffer(input_buffer1)

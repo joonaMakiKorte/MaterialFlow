@@ -12,7 +12,7 @@ from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
-from simulator.core.routing.factory_graph import FactoryGraph
+from simulator.core.components.junction import Junction
 
 @pytest.fixture
 def env():
@@ -82,6 +82,10 @@ def mock_factory_json(tmp_path):
             "warehouse" : {
                 "input_buffer": "wh_buff_in",
                 "output_buffer": "wh_buff_out"
+            },
+            "item_warehouse" : {
+                "input_buffers" : [],
+                "output_buffers" : []
             }
         }
 
@@ -100,10 +104,6 @@ def catalogue(mock_items_json):
 @pytest.fixture
 def id_gen():
     return IDGenerator()
-
-@pytest.fixture
-def factory_graph():
-    return FactoryGraph()
 
 @pytest.fixture
 def conveyor_factory(env):
@@ -158,6 +158,19 @@ def builder_factory(env, id_gen):
             batch_process_time=batch_process_time
         )
         return batch_builder
+    return _factory
+
+@pytest.fixture
+def junction_factory(env):
+    def _factory(junction_id, ratio, coordinate, pallet_process_time = 1):
+        junction = Junction(
+            env=env,
+            junction_id=junction_id,
+            ratio=ratio,
+            coordinate=coordinate,
+            payload_process_time=pallet_process_time
+        )
+        return junction
     return _factory
 
 @pytest.fixture

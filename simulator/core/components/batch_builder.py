@@ -31,7 +31,7 @@ class BatchBuilder(Component):
     def __init__(self, env: simpy.Environment, id_gen: IDGenerator, builder_id: str,
                  coordinate : tuple[int,int],
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
-        super().__init__(env, component_id=builder_id, static_process_time=batch_process_time)
+        super().__init__(env, component_id=builder_id)
         self._id_gen = id_gen
         self.process_main = env.process(self._build_loop()) # Register run loop
         self._coordinate = coordinate

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Destination:
     """Logical destination request."""
-    type: str  # e.g., "depalletizer", "storage", "dock"
+    type: str  # e.g., "Depalletizer, Storage, None"
     id: int | None = None  # optional: specific resource ID
 
     def specify(self, element_id: int):

@@ -4,7 +4,6 @@ from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.transportation_units.system_pallet import SystemPallet
-from simulator.core.routing.factory_graph import FactoryGraph
 from simulator.core.factory.loader import load_factory_from_json
 from simulator.core.factory.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
@@ -27,7 +26,7 @@ class Factory:
         All physical components of the factory keyed by id
     warehouse : Warehouse
         To access main warehouse
-    itemwarehouse : ItemWarehouse
+    item_warehouse : ItemWarehouse
         To access item warehouse
     catalogue : Catalogue
         Store warehouse item catalogue.
@@ -39,15 +38,12 @@ class Factory:
 
     db : DatabaseManager
         Access the database
-    factory_graph : FactoryGraph
-        Access the factory layout
     """
     def __init__(self, env: simpy.Environment,
                  items_json_name: str = ITEM_JSON,
                  layout_json_name: str = FACTORY_JSON):
         self.env = env
         self.id_generator = IDGenerator()
-        self.factory_graph = FactoryGraph()
         self.components: dict[str,Component] = {}
         self.warehouse = Warehouse(env)
         self.item_warehouse = ItemWarehouse(env)
@@ -76,8 +72,8 @@ class Factory:
                                       env=self.env,
                                       id_gen=self.id_generator,
                                       components=self.components,
-                                      factory_graph=self.factory_graph,
-                                      warehouse=self.warehouse)
+                                      warehouse=self.warehouse,
+                                      item_warehouse=self.item_warehouse)
 
     def _init_pallets(self, pallet_qty: int):
         """Initialize given amount of pallets and store to warehouse."""
@@ -116,3 +112,4 @@ class Factory:
             pallet.event_bus = bus
 
         self.warehouse.inject_eventbus(bus)
+        self.item_warehouse.inject_eventbus(bus)

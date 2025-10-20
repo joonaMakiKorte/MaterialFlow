@@ -21,7 +21,7 @@ class PayloadBuffer(Component):
     """
     def __init__(self, env: simpy.Environment, buffer_id: str,
                  coordinate: tuple[int,int], process_time: float = PALLET_BUFFER_PROCESS_TIME):
-        super().__init__(env, component_id=buffer_id, static_process_time=process_time)
+        super().__init__(env, component_id=buffer_id)
         self._coordinate = coordinate
         self._process_time = process_time
         self._payload: TransportationUnit | None = None
@@ -64,16 +64,22 @@ class PayloadBuffer(Component):
                 self.on_load_event.succeed(payload)
                 self.on_load_event = None
 
-    def handoff(self):
+    def handoff(self, port: str = "out"):
         """Unload payload to downstream."""
-        if self._output and self._payload is not None:
+        # Choose output element
+        if port == "out":
+            output = self._output
+        else:
+            output = self._outputs.get(port)
+
+        if output and self._payload is not None:
             # Wait until output becomes available for loading
-            while not self._output.can_load():
+            while not output.can_load():
                 yield self.env.timeout(0.5)
 
             yield self.env.timeout(self._process_time)  # process delay
             print(f"[{self.env.now}] {self}: Unloaded {self._payload}")
-            self._output.load(self._payload)
+            output.load(self._payload)
             self._payload = None
 
     def clear(self):

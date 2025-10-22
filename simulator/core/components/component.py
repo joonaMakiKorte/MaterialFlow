@@ -1,10 +1,15 @@
+from collections import deque
+from typing import Deque
 import simpy
 from abc import ABC, abstractmethod
 from simulator.gui.event_bus import EventBus
+from simulator.core.factory.log_manager import get_logger
+from simulator.config import MAX_COMPONENT_LOG_COUNT
 
 class Component(ABC):
     """
     Abstract base class for all factory systems physical flow elements.
+    Includes built-in, instance specific logging.
 
     Attributes
     ----------
@@ -20,6 +25,10 @@ class Component(ABC):
         Allow named outputs for components with multiple.
     event_bus : EventBus
         Bridge to communicate with gui.
+    logger : logging.Logger
+        Logging manager for the component
+    recent_logs : list[str]
+        Store a constricted amount of recent logs.
     """
     def __init__(self, env: simpy.Environment, component_id: str):
         self.env = env
@@ -28,6 +37,10 @@ class Component(ABC):
         self._output: None | Component = None
         self._outputs: dict[str, "Component"] = {}
         self.event_bus: None | EventBus = None
+
+        # Configure logger
+        self._recent_logs: Deque[str] = deque(maxlen=MAX_COMPONENT_LOG_COUNT)
+        self._logger = get_logger(component_id, self._recent_logs)
 
     # ----------
     # Properties
@@ -45,9 +58,13 @@ class Component(ABC):
     def output(self) -> "Component":
         return self._output
 
-    # ---------
-    #   Logic
-    # ---------
+    # -------
+    #  Logic
+    # -------
+
+    def get_recent_logs(self) -> list[str]:
+        """Returns this component's recent log history."""
+        return list(self._recent_logs)
 
     def connect(self, component: "Component", port: str = "out"):
         """Link component's output to another components. Overridable"""

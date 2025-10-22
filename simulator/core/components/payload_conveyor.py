@@ -3,6 +3,8 @@ from simulator.core.components.component import Component
 from simulator.core.transportation_units.transportation_unit import TransportationUnit
 from typing import List
 from simulator.config import CONVEYOR_CYCLE_TIME
+from simulator.core.factory.log_manager import log_context
+
 
 class PayloadConveyor(Component):
     """
@@ -109,12 +111,12 @@ class PayloadConveyor(Component):
         if self.can_load():
             self._slots[0] = payload
             payload.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
-            print(f"[{self.env.now}] {self}: Loaded {payload}")
+
+            self._logger.info(f"Loaded {payload}", extra=log_context(self.env))
 
             # Notify gui of event
             if self.event_bus is not None:
                 self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[0]})
-
             self.previously_loaded = True
 
     def shift(self):
@@ -147,7 +149,7 @@ class PayloadConveyor(Component):
     def _handoff(self, payload: TransportationUnit, downstream):
         """Schedule payload unloading for the downstream elements next event turn"""
         yield self.env.timeout(0)  # schedule for "next event turn"
-        print(f"[{self.env.now}] {self}: Unloaded {payload}")
+        self._logger.info(f"Unloaded {payload} to {downstream}", extra=log_context(self.env))
         downstream.load(payload)
 
     def _conveying_loop(self):

@@ -7,6 +7,7 @@ from simulator.config import PALLET_BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME, DEPA
 import simpy
 from simulator.gui.event_bus import EventBus
 from simulator.gui.component_items import PALLET_ORDER_STATES
+from simulator.core.factory.log_manager import log_context
 
 
 class Depalletizer(Component):
@@ -160,7 +161,7 @@ class Depalletizer(Component):
                 self._remaining_qty = order.qty
 
             yield self.env.timeout(DEPALLETIZING_DELAY)  # Add a little delay before depalletizing is started
-            print(f"[{self.env.now}] {self}: Started depalletizing {pallet.order}")
+            self._logger.info(f"Depalletizing {pallet} with {order}", extra=log_context(self.env))
 
             # Process items
             if self.event_bus is not None:
@@ -176,7 +177,7 @@ class Depalletizer(Component):
 
             # Mark order done, clear pallet
             order.status = OrderStatus.COMPLETED
-            print(f"[{self.env.now}] {self}: Depalletized {order}")
+            self._logger.info(f"Depalletized {pallet} with {order}", extra=log_context(self.env))
             pallet.clear_order()
 
             if self.event_bus is not None:

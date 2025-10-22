@@ -3,7 +3,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMainWindow, QGraphicsView, QApplication, QToolBar
 from simulator.gui.factory_scene import FactoryScene
 from simulator.gui.simulation_controller import SimulationController
-from simulator.gui.order_dialog import OrderDialog
+from simulator.gui.dialogs import OrderDialog, LogDialog
 from simulator.core.factory.factory import Factory
 import math
 
@@ -40,6 +40,9 @@ class MainWindow(QMainWindow):
         self.order_dialog = OrderDialog(factory, self)
         self.order_dialog.hide()
 
+        self.factory_log_dialog = LogDialog(self)
+        self.factory_log_dialog.hide()
+
         # Toolbar setup
         self._create_toolbar()
 
@@ -60,7 +63,20 @@ class MainWindow(QMainWindow):
         pause_action.triggered.connect(self.controller.stop)
         toolbar.addAction(pause_action)
 
+        toolbar.addSeparator()
+
         # Place Order button
         order_action = QAction(QIcon.fromTheme("document-new"), "Place Order", self)
         order_action.triggered.connect(self.order_dialog.show_order_dialog)
         toolbar.addAction(order_action)
+
+        # View Log button
+        log_action = QAction(QIcon.fromTheme("document-open"), "View Log", self)
+        log_action.triggered.connect(self._show_main_log)
+        toolbar.addAction(log_action)
+
+    def _show_main_log(self):
+        self.factory_log_dialog.show_logs(
+            self.factory.log_manager.get_recent_logs(),
+            title="Factory Log"
+        )

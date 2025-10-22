@@ -8,6 +8,7 @@ from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import ITEM_PROCESS_TIME, ITEM_WAREHOUSE_MAX_ITEM_CAPACITY, BATCH_BUFFER_PROCESS_TIME
 from simulator.gui.event_bus import EventBus
+from simulator.core.factory.log_manager import log_context
 
 
 class ItemWarehouse(Stock):
@@ -41,7 +42,7 @@ class ItemWarehouse(Stock):
                  item_process_time: float = ITEM_PROCESS_TIME,
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME,
                  item_capacity: int = ITEM_WAREHOUSE_MAX_ITEM_CAPACITY):
-        super().__init__(env=env)
+        super().__init__(env=env, name=self.__class__.__name__)
         self.process_listeners = []
         self._input_buffers: list[PayloadBuffer] = []
         self._output_buffers: list[BatchBuilder] = []
@@ -140,7 +141,7 @@ class ItemWarehouse(Stock):
             if self.event_bus is not None:
                 self.event_bus.emit("store_payload", {"id":batch.id})
 
-            print(f"[{self.env.now}] ItemWarehouse: Stored batch {batch}")
+            self._logger.info(f"Stored batch {batch}", extra=log_context(self.env))
 
     def _order_loop(self):
         while True:

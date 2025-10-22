@@ -4,32 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Process instance tuning, core for item warehouse">
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Item warehouse + junctions">
+      <change afterPath="$PROJECT_DIR$/simulator/core/factory/log_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/factory_init.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/factory_init.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/junction.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/junction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/factory/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/routing/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/routing/factory_graph.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/routing/router.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/transportation_unit.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/transportation_unit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/component_items.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/component_items.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/order_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dialogs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_components.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_stock.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -269,7 +259,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760742145711</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Item warehouse + junctions">
+      <option name="closed" value="true" />
+      <created>1760986585468</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1760986585468</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -302,6 +300,7 @@
     <MESSAGE value="Orders in GUI" />
     <MESSAGE value="Start documentation" />
     <MESSAGE value="Process instance tuning, core for item warehouse" />
-    <option name="LAST_COMMIT_MESSAGE" value="Process instance tuning, core for item warehouse" />
+    <MESSAGE value="Item warehouse + junctions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Item warehouse + junctions" />
   </component>
 </project>

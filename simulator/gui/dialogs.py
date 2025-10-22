@@ -1,6 +1,7 @@
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QSpinBox, QPushButton, QFrame, QGridLayout
+    QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit
 )
 from PyQt6.QtCore import Qt
 from simulator.core.factory.factory import Factory
@@ -170,6 +171,81 @@ class OrderDialog(QDialog):
             print(f"Failed to place order: {e}")
 
     def show_order_dialog(self):
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+
+class LogDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Log Viewer") # A generic default title
+        self.setModal(False)  # Allow interaction with the main window
+        self.setMinimumSize(800, 600)
+
+        # Apply a stylesheet similar to OrderDialog for a consistent look
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+                color: #f0f0f0;
+            }
+            QTextEdit {
+                background-color: #1e1e1e;
+                color: #dcdcdc;
+                border: 1px solid #555;
+                border-radius: 6px;
+                padding: 5px;
+            }
+            QPushButton {
+                padding: 6px 14px;
+                border-radius: 6px;
+                font-weight: 500;
+                border: none;
+                color: #f0f0f0;
+                background-color: #555;
+            }
+            QPushButton:hover {
+                background-color: #666;
+            }
+        """)
+
+        layout = QVBoxLayout(self)
+
+        # The main text area for displaying logs
+        self.log_display = QTextEdit()
+        self.log_display.setReadOnly(True)
+        self.log_display.setFont(QFont("Monospace", 10)) # Monospaced font for clean log alignment
+        self.log_display.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap) # Prevent wrapping for long lines
+        layout.addWidget(self.log_display)
+
+        # Close button
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.hide)
+        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignRight)
+
+    def show_logs(self, recent_logs: list[str], title: str):
+        """
+        Populates the dialog with logs from a given provider and shows it.
+
+        Args:
+            log_provider: Any object with a get_recent_logs() method that returns a list of strings.
+            title: The title to set for the dialog window.
+        """
+        self.setWindowTitle(title)
+
+        try:
+            # Get the logs
+            log_text = "\n".join(recent_logs)
+            self.log_display.setText(log_text)
+
+            # Automatically scroll to the bottom to show the most recent logs
+            scrollbar = self.log_display.verticalScrollBar()
+            scrollbar.setValue(scrollbar.maximum())
+
+        except Exception as e:
+            self.log_display.setText(f"Error: Could not retrieve logs.\n\n{e}")
+
+        # Show the dialog
         self.show()
         self.raise_()
         self.activateWindow()

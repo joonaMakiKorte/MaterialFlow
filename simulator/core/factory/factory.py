@@ -10,6 +10,7 @@ from simulator.core.items.catalogue import Catalogue
 from pathlib import Path
 from simulator.config import ITEM_JSON, FACTORY_JSON, WAREHOUSE_MAX_PALLET_CAPACITY
 from simulator.gui.event_bus import EventBus
+from simulator.core.factory.log_manager import LogManager
 
 class Factory:
     """
@@ -38,6 +39,8 @@ class Factory:
 
     db : DatabaseManager
         Access the database
+    log_manager : LogManager
+        Access factory logging
     """
     def __init__(self, env: simpy.Environment,
                  items_json_name: str = ITEM_JSON,
@@ -52,7 +55,8 @@ class Factory:
                                                   catalogue=self.catalogue,
                                                   warehouse=self.warehouse)
         self.pallets: dict[int,SystemPallet] = {}
-        #self.database: Optional[DatabaseManager] = None
+        #self.database: DatabaseManager | None = None
+        self.log_manager = LogManager()
 
         # Load layout from json
         self._load_factory(layout_json_name)

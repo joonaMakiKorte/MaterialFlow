@@ -9,6 +9,7 @@ from simulator.core.transportation_units.transportation_unit import Location
 from simulator.config import ORDER_MERGE_TIME, WAREHOUSE_MAX_PALLET_CAPACITY, PALLET_BUFFER_PROCESS_TIME
 from simulator.gui.component_items import PALLET_ORDER_STATES
 from simulator.gui.event_bus import EventBus
+from simulator.core.factory.log_manager import log_context
 
 
 class Warehouse(Stock):
@@ -41,7 +42,7 @@ class Warehouse(Stock):
                  order_process_time: float = ORDER_MERGE_TIME,
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  pallet_capacity: int = WAREHOUSE_MAX_PALLET_CAPACITY):
-        super().__init__(env=env)
+        super().__init__(env=env, name=self.__class__.__name__)
         self.process_listener = env.process(self._listen_for_pallets()) # Attach pallet listening process
         self._input_buffer: PayloadBuffer | None = None
         self._output_buffer : PayloadBuffer | None = None
@@ -122,9 +123,10 @@ class Warehouse(Stock):
         # After processing pallet is routed to depalletizers
         pallet = self._output_buffer.payload
         if isinstance(pallet, SystemPallet):
-            print(f"[{self.env.now}] {self}: Processing order {order}")
+            self._logger.info(f"Processing order {order}", extra=log_context(self.env))
             yield self.env.timeout(self._order_process_time)
             pallet.merge_order(new_order=order, destination_type="depalletizer")
+            self._logger.info(f"Merged order {order} on pallet {pallet}", extra=log_context(self.env))
             order.status = OrderStatus.IN_PROGRESS # Update order status to pending
 
             if self.event_bus is not None:
@@ -132,7 +134,7 @@ class Warehouse(Stock):
                                     {"id": pallet.id, "state": PALLET_ORDER_STATES[order.type]})
                 self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
 
-            print(f"[{self.env.now}] Warehouse: Processed order {order}")
+            self._logger.info(f"Processed order {order}", extra=log_context(self.env))
 
     def _listen_for_pallets(self):
         """Continuously listen for pallets arriving in the input buffer."""
@@ -156,7 +158,7 @@ class Warehouse(Stock):
                 self.event_bus.emit("warehouse_pallet_count",
                                     {"count": self._pallet_count, "fill": fill_percentage})
 
-            print(f"[{self.env.now}] Warehouse: Stored empty pallet {pallet}")
+            self._logger.info(f"Stored empty pallet {pallet}", extra=log_context(self.env))
 
     def inject_eventbus(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -186,7 +188,7 @@ class Warehouse(Stock):
 
             # Take a pallet from the store
             pallet: SystemPallet = yield self._pallet_store.get()
-            print(f"[{self.env.now}] {self}: Took pallet {pallet} from pallet store")
+            self._logger.info(f"Took pallet {pallet} from storage", extra=log_context(self.env))
 
             # Simulate loading pallet into buffer
             yield self.env.timeout(PALLET_BUFFER_PROCESS_TIME)
@@ -204,7 +206,6 @@ class Warehouse(Stock):
                 self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
 
             self._output_buffer.load(pallet)
-            print(f"[{self.env.now}] {self}: Loaded {pallet} into buffer")
 
             # Run order process
             yield self.env.process(self.process_order(order))

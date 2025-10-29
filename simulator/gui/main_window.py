@@ -3,7 +3,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMainWindow, QGraphicsView, QApplication, QToolBar
 from simulator.gui.factory_scene import FactoryScene
 from simulator.gui.simulation_controller import SimulationController
-from simulator.gui.dialogs import OrderDialog, LogDialog
+from simulator.gui.dialogs import SingleItemOrderDialog, MultiItemOrderDialog, LogDialog
 from simulator.core.factory.factory import Factory
 import math
 
@@ -37,8 +37,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.view)
 
         # Initialize dialogs once
-        self.order_dialog = OrderDialog(factory, self)
-        self.order_dialog.hide()
+        self.refill_order_dialog = SingleItemOrderDialog(factory, self)
+        self.refill_order_dialog.hide()
+
+        self.opm_order_dialog = MultiItemOrderDialog(factory, self)
+        self.opm_order_dialog.hide()
 
         self.factory_log_dialog = LogDialog(self)
         self.factory_log_dialog.hide()
@@ -65,13 +68,19 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
-        # Place Order button
-        order_action = QAction(QIcon.fromTheme("document-new"), "Place Order", self)
-        order_action.triggered.connect(self.order_dialog.show_order_dialog)
-        toolbar.addAction(order_action)
+        # Place RefillOrder button
+        refill_order_action = QAction("Refill Order", self)
+        refill_order_action.triggered.connect(self.refill_order_dialog.show_dialog)
+        toolbar.addAction(refill_order_action)
+
+        # Place OpmOrder button
+        # Place OpmOrder button
+        opm_order_action = QAction("OPM Order", self)
+        opm_order_action.triggered.connect(self.opm_order_dialog.show_dialog)
+        toolbar.addAction(opm_order_action)
 
         # View Log button
-        log_action = QAction(QIcon.fromTheme("document-open"), "View Log", self)
+        log_action = QAction("View Log", self)
         log_action.triggered.connect(self._show_main_log)
         toolbar.addAction(log_action)
 

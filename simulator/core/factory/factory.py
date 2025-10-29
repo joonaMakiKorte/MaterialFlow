@@ -51,9 +51,11 @@ class Factory:
         self.warehouse = Warehouse(env)
         self.item_warehouse = ItemWarehouse(env)
         self.catalogue = Catalogue(items_json_name)
-        self.inventory_manager = InventoryManager(id_gen=self.id_generator,
+        self.inventory_manager = InventoryManager(env=env,
+                                                  id_gen=self.id_generator,
                                                   catalogue=self.catalogue,
-                                                  warehouse=self.warehouse)
+                                                  warehouse=self.warehouse,
+                                                  item_warehouse=self.item_warehouse)
         self.pallets: dict[int,SystemPallet] = {}
         #self.database: DatabaseManager | None = None
         self.log_manager = LogManager()

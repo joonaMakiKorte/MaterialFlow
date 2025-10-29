@@ -212,10 +212,12 @@ def item_warehouse(env):
     )
 
 @pytest.fixture
-def inventory_manager(env, id_gen, catalogue, warehouse):
+def inventory_manager(env, id_gen, catalogue, warehouse, item_warehouse):
     """Initialize order service with warehouse"""
     return InventoryManager(
+        env=env,
         id_gen=id_gen,
         catalogue=catalogue,
-        warehouse=warehouse
+        warehouse=warehouse,
+        item_warehouse=item_warehouse
     )

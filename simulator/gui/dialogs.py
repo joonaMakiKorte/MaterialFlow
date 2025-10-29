@@ -1,16 +1,16 @@
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit
+    QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit, QTableWidget, QHeaderView, QTableWidgetItem
 )
 from PyQt6.QtCore import Qt
 from simulator.core.factory.factory import Factory
 
-class OrderDialog(QDialog):
+class SingleItemOrderDialog(QDialog):
     def __init__(self, factory: Factory, parent=None):
         super().__init__(parent)
         self.factory = factory
-        self.setWindowTitle("Place Order")
+        self.setWindowTitle("Place Refill Order")
         self.setModal(False)  # allow interaction with main window
         self.setFixedSize(420, 340)
 
@@ -170,7 +170,175 @@ class OrderDialog(QDialog):
         except Exception as e:
             print(f"Failed to place order: {e}")
 
-    def show_order_dialog(self):
+    def show_dialog(self):
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+
+class MultiItemOrderDialog(QDialog):
+    def __init__(self, factory: Factory, parent=None):
+        super().__init__(parent)
+        self.factory = factory
+        self.setWindowTitle("Place OPM-order")
+        self.setModal(False)
+        self.setMinimumSize(500, 450)
+
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #2b2b2b;
+                border-radius: 8px;
+                color: #f0f0f0;
+            }
+            QLabel {
+                font-size: 13px;
+                color: #e0e0e0;
+            }
+            QComboBox, QSpinBox {
+                padding: 6px;
+                border-radius: 6px;
+                border: 1px solid #555;
+                background-color: #3c3c3c;
+                color: #f0f0f0;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #3c3c3c;
+                border: 1px solid #555;
+                selection-background-color: #0078d7;
+            }
+            QTableWidget {
+                background-color: #3c3c3c;
+                border-radius: 6px;
+                border: 1px solid #555;
+                gridline-color: #555;
+            }
+            QHeaderView::section {
+                background-color: #444;
+                color: #f0f0f0;
+                padding: 4px;
+                border: 1px solid #555;
+            }
+            QPushButton {
+                padding: 6px 14px;
+                border-radius: 6px;
+                font-weight: 500;
+                border: none;
+                color: #f0f0f0;
+            }
+            QPushButton#addBtn {
+                background-color: #28a745;
+            }
+            QPushButton#addBtn:hover {
+                background-color: #218838;
+            }
+            QPushButton#placeBtn {
+                background-color: #0078d7;
+            }
+            QPushButton#placeBtn:hover {
+                background-color: #005fa3;
+            }
+            QPushButton#closeBtn {
+                background-color: #555;
+            }
+            QPushButton#closeBtn:hover {
+                background-color: #666;
+            }
+        """)
+
+        layout = QVBoxLayout(self)
+
+        # --- Item Selection ---
+        selection_layout = QHBoxLayout()
+        self.item_combo = QComboBox()
+        self.quantity_spin = QSpinBox()
+        self.quantity_spin.setRange(1, 1000)
+        add_btn = QPushButton("Add Item")
+        add_btn.setObjectName("addBtn")
+
+        selection_layout.addWidget(QLabel("Item:"))
+        selection_layout.addWidget(self.item_combo, 1)
+        selection_layout.addWidget(QLabel("Quantity:"))
+        selection_layout.addWidget(self.quantity_spin)
+        selection_layout.addWidget(add_btn)
+        layout.addLayout(selection_layout)
+
+        # --- Order Table ---
+        self.order_table = QTableWidget()
+        self.order_table.setColumnCount(3)
+        self.order_table.setHorizontalHeaderLabels(["Item ID", "Name", "Quantity"])
+        self.order_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.order_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        layout.addWidget(self.order_table)
+
+        # --- Buttons ---
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        self.place_btn = QPushButton("Place Order")
+        self.place_btn.setObjectName("placeBtn")
+        close_btn = QPushButton("Close")
+        close_btn.setObjectName("closeBtn")
+        button_layout.addWidget(self.place_btn)
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
+
+        add_btn.clicked.connect(self._on_add_item)
+        self.place_btn.clicked.connect(self._on_place_order)
+        close_btn.clicked.connect(self.hide)
+
+        # Initialize item list
+        self.refresh_items()
+
+    def refresh_items(self):
+        """Refreshes the items in the combo box."""
+        self.item_combo.clear()
+        for item_id, item in self.factory.catalogue.items:
+            # Show name but store ID as userData
+            display_name = f"{item.name} ({item.category})"
+            self.item_combo.addItem(display_name, userData=item_id)
+
+    def _on_add_item(self):
+        """Adds the selected item and quantity to the order table."""
+        item_id = self.item_combo.currentData()
+        if item_id is None:
+            return
+
+        item_name = self.item_combo.currentText().split(" (ID:")[0]
+        quantity = self.quantity_spin.value()
+
+        # Check if item is already in the table
+        for row in range(self.order_table.rowCount()):
+            if self.order_table.item(row, 0).text() == str(item_id):
+                # Update quantity
+                current_quantity = int(self.order_table.item(row, 2).text())
+                self.order_table.setItem(row, 2, QTableWidgetItem(str(current_quantity + quantity)))
+                return
+
+        # Add new row
+        row_position = self.order_table.rowCount()
+        self.order_table.insertRow(row_position)
+        self.order_table.setItem(row_position, 0, QTableWidgetItem(str(item_id)))
+        self.order_table.setItem(row_position, 1, QTableWidgetItem(item_name))
+        self.order_table.setItem(row_position, 2, QTableWidgetItem(str(quantity)))
+
+    def _on_place_order(self):
+        """Gathers items and quantities and places the order."""
+        if self.order_table.rowCount() == 0:
+            print("No items in the order.")
+            return
+
+        items_to_order = {}
+        for row in range(self.order_table.rowCount()):
+            item_id = int(self.order_table.item(row, 0).text())
+            quantity = int(self.order_table.item(row, 2).text())
+            items_to_order[item_id] = quantity
+
+        self.factory.inventory_manager.place_opm_order(items_to_order)
+
+        # Clear the table and close the dialog after placing the order
+        self.order_table.setRowCount(0)
+        self.accept()
+
+    def show_dialog(self):
         self.show()
         self.raise_()
         self.activateWindow()

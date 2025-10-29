@@ -17,8 +17,8 @@ class Stock(ABC):
     ----------
     env : simpy.Environment
         Simulation environment.
-    process_orders : simpy.Process
-        SimPy process instance for main order processing loop.
+    process_order_main : simpy.Environment
+        SimPy process instance for monitoring and processing orders
     order_queue : min-heap
         Internal priority queue for handling orders based on priority.
     logger : logging.Logger
@@ -30,7 +30,7 @@ class Stock(ABC):
 
     def __init__(self, env: simpy.Environment, name: str):
         self.env = env
-        self.process_orders = env.process(self._order_loop())  # Register run loop
+        self.process_order_main = self.env.process(self._order_loop())
         self._order_queue = []
         self.event_bus: None | EventBus = None
 
@@ -58,10 +58,6 @@ class Stock(ABC):
 
     @abstractmethod
     def place_order(self, order: Order, priority: int):
-        pass
-
-    @abstractmethod
-    def process_order(self, order: Order):
         pass
 
     @abstractmethod

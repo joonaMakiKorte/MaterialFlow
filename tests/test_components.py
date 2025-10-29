@@ -103,7 +103,7 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     builder1.connect(item_conv)
 
     # Create
-    test_order = RefillOrder(order_id=1, item_id=1, qty=50)
+    test_order = RefillOrder(order_id=1, order_time=0, item_id=1, qty=50)
     pallet.merge_order(test_order, "depalletizer")
     pallet.requested_dest.specify(element_id=1)
 

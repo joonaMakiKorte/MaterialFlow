@@ -48,7 +48,7 @@ class Warehouse(Stock):
         self._output_buffer : PayloadBuffer | None = None
         self._order_process_time = order_process_time
         self._pallet_process_time = pallet_process_time
-        self._pallet_store = simpy.Store(self.env, pallet_capacity)
+        self._pallet_store = simpy.Store(env, pallet_capacity)
         self._pallet_capacity = pallet_capacity
         self._pallet_count = 0
 
@@ -111,7 +111,7 @@ class Warehouse(Stock):
         self._pallet_count += 1
         return new_pallet
 
-    def place_order(self, order: RefillOrder, priority: int):
+    def place_order(self, order: RefillOrder, priority: float):
         """Insert an order with given priority (lower = higher priority)."""
         count = next(self._counter)  # Prevents comparasion errors when priorities match
         heapq.heappush(self._order_queue, (priority, count, order))
@@ -141,11 +141,6 @@ class Warehouse(Stock):
         while True:
             self._input_buffer.on_load_event = self.env.event()
             pallet = yield self._input_buffer.on_load_event  # wait for pallet
-
-            if pallet is None:
-                # Wait until a pallet exists
-                yield self.env.timeout(0.5)
-                continue
 
             yield self.env.timeout(self._pallet_process_time) # Pallet processing delay
             yield self._pallet_store.put(pallet)
@@ -178,13 +173,12 @@ class Warehouse(Stock):
 
             # Wait until output buffer is ready to accept new pallet
             while not self._output_buffer.can_load():
-                yield self.env.timeout(0.1)
+                yield self.env.timeout(0.5)
 
             # Wait until a pallet becomes available in warehouse
-            if len(self._pallet_store.items) == 0:
+            while len(self._pallet_store.items) == 0:
                 # No pallets currently available — keep checking
                 yield self.env.timeout(0.5)
-                continue
 
             # Take a pallet from the store
             pallet: SystemPallet = yield self._pallet_store.get()

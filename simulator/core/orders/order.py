@@ -1,7 +1,5 @@
 from abc import ABC
-from datetime import datetime
 from enum import Enum, auto
-from typing import Dict
 
 class OrderStatus(Enum):
     """Enumeration of possible order states."""
@@ -20,16 +18,16 @@ class Order(ABC):
         Unique identifier for the order.
     type : str
         Type of order. (refill/OPM)
-    order_time : datetime
-        Timestamp of the order creation.
+    order_time : float
+        Timestamp of the order creation as sim time.
     status : OrderStatus
         Current processing state.
     """
 
-    def __init__(self, order_id: int):
+    def __init__(self, order_id: int, order_time: float):
         self._order_id = order_id
         self._type = self.__class__.__name__
-        self._order_time = datetime.now()
+        self._order_time = order_time
         self._status = OrderStatus.PENDING
 
     # ----------
@@ -37,7 +35,7 @@ class Order(ABC):
     # ----------
 
     @property
-    def order_id(self) -> int:
+    def id(self) -> int:
         return self._order_id
 
     @property
@@ -45,7 +43,7 @@ class Order(ABC):
         return self._type
 
     @property
-    def order_time(self) -> datetime:
+    def order_time(self) -> float:
         return self._order_time
 
     @property
@@ -60,7 +58,7 @@ class Order(ABC):
         self._status = new_status
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(id={self.order_id}, status={self.status.name})"
+        return f"{self.__class__.__name__}(id={self.id}, status={self.status.name})"
 
 
 class RefillOrder(Order):
@@ -74,8 +72,8 @@ class RefillOrder(Order):
     qty : int
         Amount of items in the pallet / quantity requested
     """
-    def __init__(self, order_id: int, item_id: int, qty: int):
-        super().__init__(order_id)
+    def __init__(self, order_id: int, order_time: float, item_id: int, qty: int):
+        super().__init__(order_id, order_time)
         self._item_id = item_id
         self._qty = qty
 
@@ -98,9 +96,9 @@ class OpmOrder(Order):
 
     Additional attributes
     ----------
-    requested_items: Dict[int, int]
+    items: dict[int, int]
         Contents of the order with quantities
     """
-    def __init__(self, order_id: int, requested_items: Dict[int, int]):
-        super().__init__(order_id)
-        self.requested_items = requested_items
+    def __init__(self, order_id: int, order_time: float, requested_items: dict[int, int]):
+        super().__init__(order_id, order_time)
+        self.items = requested_items

@@ -26,7 +26,7 @@ def test_warehouse_output(env, warehouse, buffer_factory, pallet_factory):
     pallet = pallet_factory('1001')
 
     # Place order in queue
-    order = RefillOrder(order_id=1, item_id=1, qty=1)
+    order = RefillOrder(order_id=1, order_time=0, item_id=1, qty=1)
     warehouse.place_order(order, priority=10)
 
     # Place pallet in warehouse input buffer
@@ -38,7 +38,7 @@ def test_warehouse_output(env, warehouse, buffer_factory, pallet_factory):
     env.run(until=10)
 
     # Make sure order is merged on pallet at output buffer and order queue is empty
-    assert pallet.order.order_id == order.order_id
+    assert pallet.order.id == order.id
     assert len(warehouse._order_queue) == 0
     assert pallet.actual_location.coordinates == output_buffer.coordinate
 

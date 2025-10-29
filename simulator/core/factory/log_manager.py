@@ -14,7 +14,7 @@ class ListHandler(logging.Handler):
 
 def log_context(env: simpy.Environment):
     """Get sim time as log context."""
-    return {'sim_time': env.now}
+    return {'sim_time': round(env.now,1)}
 
 class SimTimeFormatter(logging.Formatter):
     """

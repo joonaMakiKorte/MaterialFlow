@@ -472,13 +472,6 @@ class ItemWarehouseItem(BaseStockItem):
                  bottom_right_corner_pos: tuple[int, int],
                  event_bus: EventBus,
                  buffers_horizontal: bool = True):
-        """
-        Args:
-            top_left_corner_pos: Top-left corner buffer position
-            bottom_right_corner_pos: Bottom-right corner buffer position
-            event_bus: Event bus for updates
-            buffers_horizontal: True if buffers are on top+bottom, False if on left+right
-        """
         BUFFER_HALF = 40
         VISUAL_GAP = 10
 

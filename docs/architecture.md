@@ -9,6 +9,7 @@ flowchart LR
             Catalogue[Catalogue]
             Component[Components]
             Payloads[Transportation Units]
+            LogManager[Logger]
         end
     end
 
@@ -27,3 +28,4 @@ flowchart LR
     GUI -->|User Interactions| SimulationCore
     SimulationCore -->|Database Manager| DB
     DB --> SimulationCore
+

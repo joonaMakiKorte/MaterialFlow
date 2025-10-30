@@ -135,7 +135,10 @@ class SingleItemOrderDialog(QDialog):
     def refresh_items(self):
         """Refresh dropdown items."""
         self.item_combo.clear()
-        for item_id, item in self.factory.catalogue.items:
+        all_items = self.factory.catalogue.items
+        sorted_item_list = sorted(all_items, key=lambda item_tuple: item_tuple[1].name)
+
+        for item_id, item in sorted_item_list:
             # Show name but store ID as userData
             display_name = f"{item.name} ({item.category})"
             self.item_combo.addItem(display_name, userData=item_id)
@@ -182,7 +185,7 @@ class MultiItemOrderDialog(QDialog):
         self.factory = factory
         self.setWindowTitle("Place OPM-order")
         self.setModal(False)
-        self.setMinimumSize(500, 450)
+        self.setMinimumSize(550, 450)
 
         self.setStyleSheet("""
             QDialog {
@@ -231,6 +234,12 @@ class MultiItemOrderDialog(QDialog):
             QPushButton#addBtn:hover {
                 background-color: #218838;
             }
+            QPushButton#deleteBtn {
+                background-color: #dc3545;
+            }
+            QPushButton#deleteBtn:hover {
+                background-color: #c82333;
+            }
             QPushButton#placeBtn {
                 background-color: #0078d7;
             }
@@ -264,9 +273,10 @@ class MultiItemOrderDialog(QDialog):
 
         # --- Order Table ---
         self.order_table = QTableWidget()
-        self.order_table.setColumnCount(3)
-        self.order_table.setHorizontalHeaderLabels(["Item ID", "Name", "Quantity"])
+        self.order_table.setColumnCount(4)
+        self.order_table.setHorizontalHeaderLabels(["Item ID", "Name", "Quantity", "Action"])
         self.order_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.order_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         self.order_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.order_table)
 
@@ -291,7 +301,10 @@ class MultiItemOrderDialog(QDialog):
     def refresh_items(self):
         """Refreshes the items in the combo box."""
         self.item_combo.clear()
-        for item_id, item in self.factory.catalogue.items:
+        all_items = self.factory.catalogue.items
+        sorted_item_list = sorted(all_items, key=lambda item_tuple: item_tuple[1].name)
+
+        for item_id, item in sorted_item_list:
             # Show name but store ID as userData
             display_name = f"{item.name} ({item.category})"
             self.item_combo.addItem(display_name, userData=item_id)
@@ -319,6 +332,21 @@ class MultiItemOrderDialog(QDialog):
         self.order_table.setItem(row_position, 0, QTableWidgetItem(str(item_id)))
         self.order_table.setItem(row_position, 1, QTableWidgetItem(item_name))
         self.order_table.setItem(row_position, 2, QTableWidgetItem(str(quantity)))
+
+        delete_btn = QPushButton("Remove")
+        delete_btn.setObjectName("deleteBtn")
+        delete_btn.clicked.connect(self._on_delete_item)
+        self.order_table.setCellWidget(row_position, 3, delete_btn)
+
+    def _on_delete_item(self):
+        """Removes the row corresponding to the clicked 'Remove' button."""
+        clicked_button = self.sender()
+        if clicked_button:
+            # Find the row of the button that was clicked
+            for row in range(self.order_table.rowCount()):
+                if self.order_table.cellWidget(row, 3) == clicked_button:
+                    self.order_table.removeRow(row)
+                    break  # Stop searching once the row is found and removed
 
     def _on_place_order(self):
         """Gathers items and quantities and places the order."""

@@ -129,7 +129,7 @@ class ItemWarehouse(Stock):
                 missing_qty = requested_qty - stock_qty
                 request = {'item_id': item_id, 'qty': missing_qty}
                 self.requested_items_queue.put(request)
-                self._logger.info(f"Item {item_id} out of stock. Requested {missing_qty} more.")
+                self._logger.info(f"Item {item_id} out of stock: requested {missing_qty} more", extra=log_context(self.env))
 
     def _reserve_stock(self, items: dict[int, int]):
         """Reserve items for an order by removing them from available items dict"""
@@ -149,7 +149,7 @@ class ItemWarehouse(Stock):
 
     def process_order(self, order: OpmOrder, buffer: BatchBuilder):
         """Process an order by taking items from stock and simulating the picking time."""
-        self._logger.info(f"Processing order {order.id} for buffer {buffer.id}")
+        self._logger.info(f"Processing order {order.id} for buffer {buffer.id}", extra=log_context(self.env))
 
         # Decrement stock for each item in the order
         for item_id, qty in order.items.items():
@@ -160,7 +160,7 @@ class ItemWarehouse(Stock):
         processing_time = len(order.items) * self._item_process_time
         yield self.env.timeout(processing_time)
 
-        self._logger.info(f"Finished processing order {order.id}")
+        self._logger.info(f"Finished processing order {order.id}", extra=log_context(self.env))
 
         if self.event_bus is not None:
             fill_percentage = math.ceil(self._item_count / self._item_capacity) * 100
@@ -184,11 +184,6 @@ class ItemWarehouse(Stock):
             yield self.env.timeout(0.5)
         self._item_count += batch_item_count
 
-        if self.event_bus is not None:
-            fill_percentage = math.ceil(self._item_count / self._item_capacity) * 100
-            self.event_bus.emit("item_warehouse_item_count",
-                                {"count": self._item_count, "fill":fill_percentage})
-
         # Load items
         items = batch.items
         for item, qty in items.items():
@@ -197,6 +192,11 @@ class ItemWarehouse(Stock):
             self._item_stock[item] += qty
             self._available_item_stock[item] += qty
         yield self.env.timeout(self._batch_process_time)
+
+        if self.event_bus is not None:
+            fill_percentage = math.ceil(self._item_count / self._item_capacity) * 100
+            self.event_bus.emit("item_warehouse_item_count",
+                                {"count": self._item_count, "fill":fill_percentage})
 
     def _listen_for_batch(self, buffer: PayloadBuffer):
         """Continuously listen for batches arriving in input buffer."""

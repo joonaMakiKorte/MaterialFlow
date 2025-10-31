@@ -84,3 +84,24 @@ def test_itemwarehouse_two_inputs(env, item_warehouse, buffer_factory, batch_fac
     assert item_warehouse._item_count == 20 # 10 is default item count for batches
     assert item_warehouse._item_stock.get(1000) == 10 and item_warehouse._item_stock.get(1010) == 10
 
+def test_itemwarehouse_full_stock(env, item_warehouse, buffer_factory, batch_factory):
+    """Try to load item batch into a full itemwarehouse"""
+    input_buffer = buffer_factory('buff1', (0, 0))
+    item_warehouse.inject_input_buffer(input_buffer)
+    batch = batch_factory('1001', item_id=1000)
+
+    # Manually set max stock
+    max_capacity = item_warehouse._item_capacity
+    item_warehouse._item_count = max_capacity
+
+    # load batch at 0
+    def loader():
+        input_buffer.load(batch)
+        yield env.timeout(0)
+
+    env.process(loader())
+    env.run(until=5)
+
+    # Assert the buffer still has the batch and item warehouse hasn't stored the items in the batch
+    assert input_buffer._payload == batch
+    assert item_warehouse._item_stock.get(1000) is None

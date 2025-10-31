@@ -219,5 +219,6 @@ def inventory_manager(env, id_gen, catalogue, warehouse, item_warehouse):
         id_gen=id_gen,
         catalogue=catalogue,
         warehouse=warehouse,
-        item_warehouse=item_warehouse
+        item_warehouse=item_warehouse,
+        refill_scan_interval=1
     )

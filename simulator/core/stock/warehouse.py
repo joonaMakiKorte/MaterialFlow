@@ -43,7 +43,7 @@ class Warehouse(Stock):
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  pallet_capacity: int = WAREHOUSE_MAX_PALLET_CAPACITY):
         super().__init__(env=env, name=self.__class__.__name__)
-        self.process_listener = env.process(self._listen_for_pallets()) # Attach pallet listening process
+        self.process_listener = self.env.process(self._listen_for_pallets()) # Attach process listener
         self._input_buffer: PayloadBuffer | None = None
         self._output_buffer : PayloadBuffer | None = None
         self._order_process_time = order_process_time

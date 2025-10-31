@@ -24,18 +24,22 @@ class InventoryManager:
         Stores instance of item warehouse for order placing.
     process_auto_refill : simpy.Process
         SimPy process instance for auto refill loop
+    refill_scan_interval : float
+        Time in simulation units for auto refill order scan interval
     """
     def __init__(self, env: simpy.Environment,
                  id_gen: IDGenerator,
                  catalogue: Catalogue,
                  warehouse: Warehouse,
-                 item_warehouse: ItemWarehouse):
+                 item_warehouse: ItemWarehouse,
+                 refill_scan_interval = REQUESTED_ITEM_SCAN_INTERVAL):
         self.env = env
         self._id_gen = id_gen
         self._catalogue = catalogue
         self._warehouse = warehouse
         self._item_warehouse = item_warehouse
         self.process_auto_refill = self.env.process(self._listen_for_requested_items())
+        self._refill_scan_interval = refill_scan_interval
 
     # ---------------
     # Private helpers
@@ -84,7 +88,7 @@ class InventoryManager:
     def _listen_for_requested_items(self):
         """Listen for requested items in item warehouse."""
         while True:
-            yield self.env.timeout(REQUESTED_ITEM_SCAN_INTERVAL) # Simulate a scanning interval
+            yield self.env.timeout(self._refill_scan_interval) # Simulate a scanning interval
 
             if len(self._item_warehouse.requested_items_queue.items) == 0:
                 continue

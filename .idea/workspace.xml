@@ -6,8 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Item warehouse auto-refill">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/dialogs.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dialogs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_stock.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +63,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;sim__core&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }

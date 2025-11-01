@@ -4,10 +4,10 @@ from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.transportation_units.transportation_unit import Location
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
-from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.utils.id_gen import IDGenerator
 from simulator.gui.component_items import BatchState
 from simulator.gui.event_bus import EventBus
-from simulator.core.factory.log_manager import log_context
+from simulator.core.utils.logging_config import log_manager
 
 
 class BatchBuilder(Component):
@@ -98,7 +98,7 @@ class BatchBuilder(Component):
             if self.event_bus is not None:
                 self.event_bus.emit("create_batch", {"id": batch_id})
 
-                self._logger.info(f"Created {new_batch}", extra=log_context(self.env))
+                log_manager.log(f"Created {new_batch}", f"{self}", sim_time=self.env.now)
 
             self._buffer.load(new_batch)
             self._current_batch = new_batch # Save instance internally

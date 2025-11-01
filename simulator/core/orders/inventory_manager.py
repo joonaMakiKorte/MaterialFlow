@@ -2,7 +2,7 @@ from simulator.core.orders.order import RefillOrder, OpmOrder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.items.catalogue import Catalogue
-from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.utils.id_gen import IDGenerator
 from simulator.config import EURO_PALLET_MAX_WEIGHT, EURO_PALLET_MAX_VOLUME, REQUESTED_ITEM_SCAN_INTERVAL
 import simpy
 

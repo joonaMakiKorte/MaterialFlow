@@ -2,7 +2,7 @@ import simpy
 from simulator.core.components.component import Component
 from simulator.core.transportation_units.system_pallet import TransportationUnit
 from simulator.config import PALLET_BUFFER_PROCESS_TIME
-from simulator.core.factory.log_manager import log_context
+from simulator.core.utils.logging_config import log_manager
 
 
 class PayloadBuffer(Component):
@@ -56,7 +56,7 @@ class PayloadBuffer(Component):
             self._payload = payload
             payload.actual_location.update(coordinates=self._coordinate, element_name=f"{self}")
 
-            self._logger.info(f"Loaded {payload}", extra=log_context(self.env))
+            log_manager.log(f"Loaded {payload}", f"{self}", sim_time=self.env.now)
 
             # Notify gui of event
             if self.event_bus is not None:
@@ -81,7 +81,7 @@ class PayloadBuffer(Component):
                 yield self.env.timeout(0.5)
 
             yield self.env.timeout(self._process_time)  # process delay
-            self._logger.info(f"Unloaded {self._payload} to {output}", extra=log_context(self.env))
+            log_manager.log(f"Unloaded {self._payload} to {output}", f"{self}", sim_time=self.env.now)
             output.load(self._payload)
             self._payload = None
 

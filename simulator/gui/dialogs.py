@@ -1,10 +1,11 @@
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit, QTableWidget, QHeaderView, QTableWidgetItem
+    QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit, QTableWidget, QHeaderView, QTableWidgetItem, QSizePolicy
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from simulator.core.factory.factory import Factory
+from simulator.core.utils.log_manager import LogManager
 
 class SingleItemOrderDialog(QDialog):
     def __init__(self, factory: Factory, parent=None):
@@ -373,75 +374,138 @@ class MultiItemOrderDialog(QDialog):
 
 
 class LogDialog(QDialog):
-    def __init__(self, parent=None):
+    # Set the refresh rate for the log viewer in milliseconds
+    REFRESH_INTERVAL_MS = 1000
+
+    def __init__(self, log_manager: 'LogManager', parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Log Viewer") # A generic default title
-        self.setModal(False)  # Allow interaction with the main window
+        self.log_manager = log_manager
+
+        self.setWindowTitle("Live Log Viewer")
+        self.setModal(False)
         self.setMinimumSize(800, 600)
 
-        # Apply a stylesheet similar to OrderDialog for a consistent look
+        # Apply a consistent stylesheet
         self.setStyleSheet("""
             QDialog {
                 background-color: #2b2b2b;
-                color: #f0f0f0;
+                 color: #f0f0f0; 
             }
             QTextEdit {
                 background-color: #1e1e1e;
                 color: #dcdcdc;
                 border: 1px solid #555;
-                border-radius: 6px;
-                padding: 5px;
+                border-radius: 4px; 
             }
-            QPushButton {
+            QPushButton { 
                 padding: 6px 14px;
-                border-radius: 6px;
-                font-weight: 500;
-                border: none;
-                color: #f0f0f0;
+                border-radius: 4px; 
+                border: none; 
+                color: #f0f0f0; 
                 background-color: #555;
             }
-            QPushButton:hover {
+            QPushButton:hover { 
                 background-color: #666;
+            }
+            QComboBox { 
+                padding: 4px; 
+                border-radius: 4px; 
+                border: 1px solid #555; 
+                background-color: #3c3f41;
+            }
+            QLabel { 
+                font-weight: bold; 
             }
         """)
 
+        # --- Layouts and Widgets ---
         layout = QVBoxLayout(self)
 
-        # The main text area for displaying logs
+        # Filter controls
+        filter_layout = QHBoxLayout()
+        filter_layout.addWidget(QLabel("Filter by Component:"))
+        self.component_filter = QComboBox()
+        self.component_filter.setMinimumWidth(300)
+        self.component_filter.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.component_filter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.component_filter.currentTextChanged.connect(self._update_logs)  # Update when selection changes
+        filter_layout.addWidget(self.component_filter)
+        filter_layout.addStretch()  # Pushes the filter to the left
+        layout.addLayout(filter_layout)
+
+        # Main log display area
         self.log_display = QTextEdit()
         self.log_display.setReadOnly(True)
-        self.log_display.setFont(QFont("Monospace", 10)) # Monospaced font for clean log alignment
-        self.log_display.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap) # Prevent wrapping for long lines
+        self.log_display.setFont(QFont("Monospace", 10))
+        self.log_display.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         layout.addWidget(self.log_display)
 
         # Close button
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.hide)
-        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
 
-    def show_logs(self, recent_logs: list[str], title: str):
-        """
-        Populates the dialog with logs from a given provider and shows it.
+        # --- Timer for live polling ---
+        self.timer = QTimer(self)
+        self.timer.setInterval(self.REFRESH_INTERVAL_MS)
+        self.timer.timeout.connect(self._update_logs)
 
-        Args:
-            log_provider: Any object with a get_recent_logs() method that returns a list of strings.
-            title: The title to set for the dialog window.
-        """
-        self.setWindowTitle(title)
+    def _update_component_filter(self):
+        """Updates the dropdown with the latest list of component IDs."""
+        current_selection = self.component_filter.currentText()
+        all_ids = self.log_manager.get_unique_component_ids()
 
-        try:
-            # Get the logs
-            log_text = "\n".join(recent_logs)
-            self.log_display.setText(log_text)
+        # Block signals to prevent this update from triggering a log refresh
+        self.component_filter.blockSignals(True)
 
-            # Automatically scroll to the bottom to show the most recent logs
-            scrollbar = self.log_display.verticalScrollBar()
+        # Rebuild the list
+        self.component_filter.clear()
+        self.component_filter.addItem("All Logs")
+        self.component_filter.addItems(all_ids)
+
+        # Restore previous selection if it still exists
+        index = self.component_filter.findText(current_selection)
+        if index != -1:
+            self.component_filter.setCurrentIndex(index)
+
+        self.component_filter.blockSignals(False)
+
+    def _update_logs(self):
+        """Fetches and displays logs based on the current filter."""
+        # First, ensure the component list is up-to-date
+        self._update_component_filter()
+
+        selected_component = self.component_filter.currentText()
+
+        # Check if the user is scrolled to the bottom before we update
+        scrollbar = self.log_display.verticalScrollBar()
+        is_at_bottom = scrollbar.value() >= scrollbar.maximum() - 5
+
+        # Fetch logs based on filter
+        if selected_component == "All Logs":
+            logs = self.log_manager.get_all_logs()
+        else:
+            logs = self.log_manager.get_component_logs(selected_component)
+
+        log_text = "\n".join(logs)
+        self.log_display.setText(log_text)
+
+        # Auto-scroll only if the user was already at the bottom
+        if is_at_bottom:
             scrollbar.setValue(scrollbar.maximum())
 
-        except Exception as e:
-            self.log_display.setText(f"Error: Could not retrieve logs.\n\n{e}")
+    def showEvent(self, event):
+        """Called when the dialog is shown."""
+        super().showEvent(event)
+        # Populate immediately and start the timer
+        self._update_logs()
+        self.timer.start()
 
-        # Show the dialog
-        self.show()
-        self.raise_()
-        self.activateWindow()
+    def hideEvent(self, event):
+        """Called when the dialog is hidden or closed."""
+        super().hideEvent(event)
+        # Stop the timer to save resources
+        self.timer.stop()

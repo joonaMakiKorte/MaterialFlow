@@ -43,8 +43,7 @@ class MainWindow(QMainWindow):
         self.opm_order_dialog = MultiItemOrderDialog(factory, self)
         self.opm_order_dialog.hide()
 
-        self.factory_log_dialog = LogDialog(self)
-        self.factory_log_dialog.hide()
+        self.log_dialog = LogDialog(factory.log_manager, self)
 
         # Toolbar setup
         self._create_toolbar()
@@ -74,18 +73,11 @@ class MainWindow(QMainWindow):
         toolbar.addAction(refill_order_action)
 
         # Place OpmOrder button
-        # Place OpmOrder button
         opm_order_action = QAction("OPM Order", self)
         opm_order_action.triggered.connect(self.opm_order_dialog.show_dialog)
         toolbar.addAction(opm_order_action)
 
         # View Log button
         log_action = QAction("View Log", self)
-        log_action.triggered.connect(self._show_main_log)
+        log_action.triggered.connect(self.log_dialog.show)
         toolbar.addAction(log_action)
-
-    def _show_main_log(self):
-        self.factory_log_dialog.show_logs(
-            self.factory.log_manager.get_recent_logs(),
-            title="Factory Log"
-        )

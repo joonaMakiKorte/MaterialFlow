@@ -4,21 +4,27 @@
 ### Payload Movement
 
 Each component registers a Simpy process. When a process is completed, component emits an event through Event Bus for GUI updating.
-Sequence example for moving a pallet through conveyors:
+Sequence example for moving a payload through conveyors:
 
 ```mermaid
 sequenceDiagram
     participant PayloadConveyor1
     participant PayloadConveyor2
+    participant LogManager
     participant EventBus
     participant GUI
 
     PayloadConveyor1->>PayloadConveyor2: Check if can load
     PayloadConveyor2-->>PayloadConveyor1: Ready to load
+
+    PayloadConveyor1->>LogManager: log("Unloading payload {payload_id}", "PayloadConveyor1")
     PayloadConveyor1->>PayloadConveyor2: Start loading process
+    
     Note over PayloadConveyor1,PayloadConveyor2: Wait for CONVEYOR_CYCLE_TIME
-    PayloadConveyor2->>EventBus: Emit 'move_pallet' event
-    EventBus->>GUI: Update pallet position on screen
+
+    PayloadConveyor2->>LogManager: log("Loaded payload {payload_id}", "PayloadConveyor2")
+    PayloadConveyor2->>EventBus: Emit 'move_payload' event
+    EventBus->>GUI: Update payload position on screen
 ```
 
 ### Placing orders in GUI

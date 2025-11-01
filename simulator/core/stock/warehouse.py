@@ -1,7 +1,7 @@
 import simpy
 import heapq
 import math
-from simulator.core.orders.order import RefillOrder, OrderStatus, Order
+from simulator.core.orders.order import RefillOrder, OrderStatus
 from simulator.core.stock.stock import Stock
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.transportation_units.system_pallet import SystemPallet
@@ -9,7 +9,7 @@ from simulator.core.transportation_units.transportation_unit import Location
 from simulator.config import ORDER_MERGE_TIME, WAREHOUSE_MAX_PALLET_CAPACITY, PALLET_BUFFER_PROCESS_TIME
 from simulator.gui.component_items import PALLET_ORDER_STATES
 from simulator.gui.event_bus import EventBus
-from simulator.core.factory.log_manager import log_context
+from simulator.core.utils.logging_config import log_manager
 
 
 class Warehouse(Stock):
@@ -42,7 +42,7 @@ class Warehouse(Stock):
                  order_process_time: float = ORDER_MERGE_TIME,
                  pallet_process_time: float = PALLET_BUFFER_PROCESS_TIME,
                  pallet_capacity: int = WAREHOUSE_MAX_PALLET_CAPACITY):
-        super().__init__(env=env, name=self.__class__.__name__)
+        super().__init__(env=env)
         self.process_listener = self.env.process(self._listen_for_pallets()) # Attach process listener
         self._input_buffer: PayloadBuffer | None = None
         self._output_buffer : PayloadBuffer | None = None
@@ -123,10 +123,14 @@ class Warehouse(Stock):
         # After processing pallet is routed to depalletizers
         pallet = self._output_buffer.payload
         if isinstance(pallet, SystemPallet):
-            self._logger.info(f"Processing order {order}", extra=log_context(self.env))
+            log_manager.log(f"Processing order {order}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
             yield self.env.timeout(self._order_process_time)
             pallet.merge_order(new_order=order, destination_type="depalletizer")
-            self._logger.info(f"Merged order {order} on pallet {pallet}", extra=log_context(self.env))
+            log_manager.log(f"Merged order {order} on pallet {pallet}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
             order.status = OrderStatus.IN_PROGRESS # Update order status to pending
 
             if self.event_bus is not None:
@@ -134,7 +138,9 @@ class Warehouse(Stock):
                                     {"id": pallet.id, "state": PALLET_ORDER_STATES[order.type]})
                 self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
 
-            self._logger.info(f"Processed order {order}", extra=log_context(self.env))
+            log_manager.log(f"Processed order {order}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
     def _listen_for_pallets(self):
         """Continuously listen for pallets arriving in the input buffer."""
@@ -153,7 +159,9 @@ class Warehouse(Stock):
                 self.event_bus.emit("warehouse_pallet_count",
                                     {"count": self._pallet_count, "fill": fill_percentage})
 
-            self._logger.info(f"Stored empty pallet {pallet}", extra=log_context(self.env))
+            log_manager.log(f"Stored empty pallet {pallet}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
     def inject_eventbus(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -182,7 +190,9 @@ class Warehouse(Stock):
 
             # Take a pallet from the store
             pallet: SystemPallet = yield self._pallet_store.get()
-            self._logger.info(f"Took pallet {pallet} from storage", extra=log_context(self.env))
+            log_manager.log(f"Took pallet {pallet} from storage",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
             # Simulate loading pallet into buffer
             yield self.env.timeout(PALLET_BUFFER_PROCESS_TIME)

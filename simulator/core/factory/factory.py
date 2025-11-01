@@ -5,12 +5,12 @@ from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.factory.loader import load_factory_from_json
-from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from pathlib import Path
 from simulator.config import ITEM_JSON, FACTORY_JSON, WAREHOUSE_MAX_PALLET_CAPACITY
 from simulator.gui.event_bus import EventBus
-from simulator.core.factory.log_manager import LogManager
+from simulator.core.utils.logging_config import log_manager
 
 class Factory:
     """
@@ -58,7 +58,7 @@ class Factory:
                                                   item_warehouse=self.item_warehouse)
         self.pallets: dict[int,SystemPallet] = {}
         #self.database: DatabaseManager | None = None
-        self.log_manager = LogManager()
+        self.log_manager = log_manager
 
         # Load layout from json
         self._load_factory(layout_json_name)

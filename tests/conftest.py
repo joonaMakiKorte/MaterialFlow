@@ -1,7 +1,7 @@
 import pytest
 import simpy
 import json
-from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location

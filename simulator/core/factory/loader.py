@@ -7,7 +7,7 @@ from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.components.junction import Junction
-from simulator.core.factory.id_gen import IDGenerator
+from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 

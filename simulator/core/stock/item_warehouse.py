@@ -8,7 +8,7 @@ from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import ITEM_PROCESS_TIME, ITEM_WAREHOUSE_MAX_ITEM_CAPACITY, BATCH_BUFFER_PROCESS_TIME
 from simulator.gui.event_bus import EventBus
-from simulator.core.factory.log_manager import log_context
+from simulator.core.utils.logging_config import log_manager
 
 
 class ItemWarehouse(Stock):
@@ -57,7 +57,7 @@ class ItemWarehouse(Stock):
                  item_process_time: float = ITEM_PROCESS_TIME,
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME,
                  item_capacity: int = ITEM_WAREHOUSE_MAX_ITEM_CAPACITY):
-        super().__init__(env=env, name=self.__class__.__name__)
+        super().__init__(env=env)
         self.process_input_listeners = []
         self.process_output_listeners = []
         self.order_events = {}
@@ -129,7 +129,9 @@ class ItemWarehouse(Stock):
                 missing_qty = requested_qty - stock_qty
                 request = {'item_id': item_id, 'qty': missing_qty}
                 self.requested_items_queue.put(request)
-                self._logger.info(f"Item {item_id} out of stock: requested {missing_qty} more", extra=log_context(self.env))
+                log_manager.log(f"Item {item_id} out of stock: requested {missing_qty} more",
+                                component_id=self.__class__.__name__,
+                                sim_time=self.env.now)
 
     def _reserve_stock(self, items: dict[int, int]):
         """Reserve items for an order by removing them from available items dict"""
@@ -149,7 +151,9 @@ class ItemWarehouse(Stock):
 
     def process_order(self, order: OpmOrder, buffer: BatchBuilder):
         """Process an order by taking items from stock and simulating the picking time."""
-        self._logger.info(f"Processing order {order.id} for buffer {buffer.id}", extra=log_context(self.env))
+        log_manager.log(f"Processing order {order.id} for buffer {buffer.id}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
         # Decrement stock for each item in the order
         for item_id, qty in order.items.items():
@@ -160,7 +164,9 @@ class ItemWarehouse(Stock):
         processing_time = len(order.items) * self._item_process_time
         yield self.env.timeout(processing_time)
 
-        self._logger.info(f"Finished processing order {order.id}", extra=log_context(self.env))
+        log_manager.log(f"Finished processing order {order.id}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
         if self.event_bus is not None:
             fill_percentage = math.ceil(self._item_count / self._item_capacity) * 100
@@ -208,7 +214,9 @@ class ItemWarehouse(Stock):
             
             if self.event_bus is not None:
                 self.event_bus.emit("store_payload", {"id":batch.id})
-            self._logger.info(f"Stored batch {batch}", extra=log_context(self.env))
+            log_manager.log(f"Stored batch {batch}",
+                        component_id=self.__class__.__name__,
+                        sim_time=self.env.now)
 
     def _listen_for_order(self, buffer: BatchBuilder):
         """Listens for orders assigned for the specific buffer."""

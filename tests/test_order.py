@@ -46,4 +46,22 @@ def test_auto_refill_order_gen(env, catalogue, item_warehouse, warehouse, invent
     assert isinstance(order, RefillOrder)
     assert order.qty == 100
 
+def test_order_priority_queue(env, warehouse):
+    """Test placing orders to queue with different priorities"""
+    # Create 3 mock orders
+    order1 = RefillOrder(order_id=1, order_time=1, item_id=1, qty=10)
+    order2 = RefillOrder(order_id=2, order_time=1, item_id=10, qty=12)
+    order3 = RefillOrder(order_id=5, order_time=1, item_id=100, qty=100)
+
+    # Place orders with different priorities
+    warehouse.place_order(order1, priority=10)
+    warehouse.place_order(order2, priority=0)
+    warehouse.place_order(order3, priority=100)
+
+    # Asset the orders are in order 2, 1, 3
+    assert warehouse.order_count == 3
+    assert warehouse._order_queue[0][2] == order2
+    assert warehouse._order_queue[1][2] == order1
+    assert warehouse._order_queue[2][2] == order3
+
 

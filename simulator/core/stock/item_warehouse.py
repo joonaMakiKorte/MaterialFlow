@@ -7,7 +7,7 @@ from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import ITEM_PROCESS_TIME, ITEM_WAREHOUSE_MAX_ITEM_CAPACITY, BATCH_BUFFER_PROCESS_TIME
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.core.utils.logging_config import log_manager
 
 

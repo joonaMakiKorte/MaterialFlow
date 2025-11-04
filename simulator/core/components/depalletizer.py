@@ -5,7 +5,7 @@ from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.orders.order import OrderStatus, RefillOrder
 from simulator.config import PALLET_BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME, DEPALLETIZING_DELAY
 import simpy
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.gui.component_items import PALLET_ORDER_STATES
 from simulator.core.utils.logging_config import log_manager
 

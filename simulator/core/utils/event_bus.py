@@ -1,6 +1,9 @@
 from collections import defaultdict
 
 class EventBus:
+    """
+    Stateless service for signaling system state changes to other components.
+    """
     def __init__(self):
         self._subscribers = defaultdict(list)
 

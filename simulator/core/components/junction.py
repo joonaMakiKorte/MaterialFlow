@@ -1,6 +1,6 @@
 from simulator.core.components.component import Component
 from simulator.core.components.payload_buffer import PayloadBuffer
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.core.transportation_units.transportation_unit import TransportationUnit
 from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.config import PALLET_BUFFER_PROCESS_TIME

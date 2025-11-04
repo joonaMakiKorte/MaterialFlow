@@ -1,7 +1,6 @@
 import pytest
 import simpy
 import json
-from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location
@@ -102,10 +101,6 @@ def catalogue(mock_items_json):
     return Catalogue(str(mock_items_json))
 
 @pytest.fixture
-def id_gen():
-    return IDGenerator()
-
-@pytest.fixture
 def conveyor_factory(env):
     """Create conveyor with 3 slots and cycle time of 1."""
     def _factory(conveyor_id, start, end, cycle_time=1):
@@ -148,11 +143,10 @@ def depalletizer_factory(env):
     return _factory
 
 @pytest.fixture
-def builder_factory(env, id_gen):
+def builder_factory(env):
     def _factory(builder_id, coordinate, batch_process_time = 1):
         batch_builder = BatchBuilder(
             env=env,
-            id_gen=id_gen,
             builder_id=builder_id,
             coordinate=coordinate,
             batch_process_time=batch_process_time
@@ -212,11 +206,10 @@ def item_warehouse(env):
     )
 
 @pytest.fixture
-def inventory_manager(env, id_gen, catalogue, warehouse, item_warehouse):
+def inventory_manager(env, catalogue, warehouse, item_warehouse):
     """Initialize order service with warehouse"""
     return InventoryManager(
         env=env,
-        id_gen=id_gen,
         catalogue=catalogue,
         warehouse=warehouse,
         item_warehouse=item_warehouse,

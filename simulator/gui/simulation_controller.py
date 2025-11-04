@@ -1,11 +1,12 @@
 from PyQt6.QtCore import QTimer, QObject, pyqtSlot
 import simpy
 from simulator.gui.factory_scene import FactoryScene
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 
 class SimulationController(QObject):
     """
-
+    Controls simulation running.
+    Listens for simulation events and persists them to the factory scene.
     """
     def __init__(self, env: simpy.Environment, scene: FactoryScene):
         super().__init__()

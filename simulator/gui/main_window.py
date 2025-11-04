@@ -15,7 +15,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Material Flow")
         self.controller = controller
-        self.factory = factory
 
         # Window sizing and centering
         screen = QApplication.primaryScreen()
@@ -37,13 +36,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.view)
 
         # Initialize dialogs once
-        self.refill_order_dialog = SingleItemOrderDialog(factory, self)
+        self.refill_order_dialog = SingleItemOrderDialog(factory.inventory_manager, self)
         self.refill_order_dialog.hide()
 
-        self.opm_order_dialog = MultiItemOrderDialog(factory, self)
+        self.opm_order_dialog = MultiItemOrderDialog(factory.inventory_manager, self)
         self.opm_order_dialog.hide()
 
-        self.log_dialog = LogDialog(factory.log_manager, self)
+        self.log_dialog = LogDialog(self)
 
         # Toolbar setup
         self._create_toolbar()

@@ -4,27 +4,34 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Test scripts for auto orders and item warehosue">
-      <change afterPath="$PROJECT_DIR$/simulator/core/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/utils/logging_config.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Centralized logger + improved log view in GUI">
+      <change afterPath="$PROJECT_DIR$/simulator/core/utils/id_gen_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/database/database_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/junction.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/junction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/factory/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/id_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/id_gen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/factory/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/log_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/component_items.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/component_items.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/gui/dialogs.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dialogs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/event_bus.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/event_bus.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/factory_scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/factory_scene.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_factory.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,22 +73,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.app.executor": "Run",
-    "Python.component_items.executor": "Run",
-    "Python.factory_scene.executor": "Run",
-    "Python.inventory_manager.executor": "Run",
-    "Python.main_window.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "log__update",
-    "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.component_items.executor&quot;: &quot;Run&quot;,
+    &quot;Python.factory_scene.executor&quot;: &quot;Run&quot;,
+    &quot;Python.inventory_manager.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_window.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;database&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\joona\PycharmProjects\MaterialFlow\simulator\core\utils" />

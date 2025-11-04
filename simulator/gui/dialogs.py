@@ -4,13 +4,13 @@ from PyQt6.QtWidgets import (
     QSpinBox, QPushButton, QFrame, QGridLayout, QTextEdit, QTableWidget, QHeaderView, QTableWidgetItem, QSizePolicy
 )
 from PyQt6.QtCore import Qt, QTimer
-from simulator.core.factory.factory import Factory
-from simulator.core.utils.log_manager import LogManager
+from simulator.core.orders.inventory_manager import InventoryManager
+from simulator.core.utils.logging_config import log_manager
 
 class SingleItemOrderDialog(QDialog):
-    def __init__(self, factory: Factory, parent=None):
+    def __init__(self, inventory_manager: InventoryManager, parent=None):
         super().__init__(parent)
-        self.factory = factory
+        self.inventory_manager = inventory_manager
         self.setWindowTitle("Place Refill Order")
         self.setModal(False)  # allow interaction with main window
         self.setFixedSize(420, 340)
@@ -136,7 +136,7 @@ class SingleItemOrderDialog(QDialog):
     def refresh_items(self):
         """Refresh dropdown items."""
         self.item_combo.clear()
-        all_items = self.factory.catalogue.items
+        all_items = self.inventory_manager.catalogue.items
         sorted_item_list = sorted(all_items, key=lambda item_tuple: item_tuple[1].name)
 
         for item_id, item in sorted_item_list:
@@ -157,7 +157,7 @@ class SingleItemOrderDialog(QDialog):
         # Set as selected
         self.selected_item = item_id
 
-        item = self.factory.catalogue[item_id]
+        item = self.inventory_manager.catalogue[item_id]
         self.info_labels["id"].setText(str(item.item_id))
         self.info_labels["name"].setText(item.name)
         self.info_labels["category"].setText(item.category)
@@ -169,7 +169,7 @@ class SingleItemOrderDialog(QDialog):
         item = self.selected_item
         quantity = self.quantity_spin.value()
         try:
-            self.factory.inventory_manager.place_refill_order(item, quantity)
+            self.inventory_manager.place_refill_order(item, quantity)
             self.hide()
         except Exception as e:
             print(f"Failed to place order: {e}")
@@ -181,9 +181,9 @@ class SingleItemOrderDialog(QDialog):
 
 
 class MultiItemOrderDialog(QDialog):
-    def __init__(self, factory: Factory, parent=None):
+    def __init__(self, inventory_manager : InventoryManager, parent=None):
         super().__init__(parent)
-        self.factory = factory
+        self.inventory_manager = inventory_manager
         self.setWindowTitle("Place OPM-order")
         self.setModal(False)
         self.setMinimumSize(550, 450)
@@ -302,7 +302,7 @@ class MultiItemOrderDialog(QDialog):
     def refresh_items(self):
         """Refreshes the items in the combo box."""
         self.item_combo.clear()
-        all_items = self.factory.catalogue.items
+        all_items = self.inventory_manager.catalogue.items
         sorted_item_list = sorted(all_items, key=lambda item_tuple: item_tuple[1].name)
 
         for item_id, item in sorted_item_list:
@@ -361,7 +361,7 @@ class MultiItemOrderDialog(QDialog):
             quantity = int(self.order_table.item(row, 2).text())
             items_to_order[item_id] = quantity
 
-        self.factory.inventory_manager.place_opm_order(items_to_order)
+        self.inventory_manager.place_opm_order(items_to_order)
 
         # Clear the table and close the dialog after placing the order
         self.order_table.setRowCount(0)
@@ -377,10 +377,8 @@ class LogDialog(QDialog):
     # Set the refresh rate for the log viewer in milliseconds
     REFRESH_INTERVAL_MS = 1000
 
-    def __init__(self, log_manager: 'LogManager', parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.log_manager = log_manager
-
         self.setWindowTitle("Live Log Viewer")
         self.setModal(False)
         self.setMinimumSize(800, 600)
@@ -456,7 +454,7 @@ class LogDialog(QDialog):
     def _update_component_filter(self):
         """Updates the dropdown with the latest list of component IDs."""
         current_selection = self.component_filter.currentText()
-        all_ids = self.log_manager.get_unique_component_ids()
+        all_ids = log_manager.get_unique_component_ids()
 
         # Block signals to prevent this update from triggering a log refresh
         self.component_filter.blockSignals(True)
@@ -486,9 +484,9 @@ class LogDialog(QDialog):
 
         # Fetch logs based on filter
         if selected_component == "All Logs":
-            logs = self.log_manager.get_all_logs()
+            logs = log_manager.get_all_logs()
         else:
-            logs = self.log_manager.get_component_logs(selected_component)
+            logs = log_manager.get_component_logs(selected_component)
 
         log_text = "\n".join(logs)
         self.log_display.setText(log_text)

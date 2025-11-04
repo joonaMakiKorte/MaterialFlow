@@ -8,7 +8,7 @@ from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.transportation_units.transportation_unit import Location
 from simulator.config import ORDER_MERGE_TIME, WAREHOUSE_MAX_PALLET_CAPACITY, PALLET_BUFFER_PROCESS_TIME
 from simulator.gui.component_items import PALLET_ORDER_STATES
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.core.utils.logging_config import log_manager
 
 

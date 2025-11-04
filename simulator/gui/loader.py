@@ -15,7 +15,7 @@ COMPONENT_ITEM_TYPES = {
 }
 
 def load_items(component_items: dict[str, "BaseComponentItem"],
-                         factory: Factory, event_bus):
+               factory: Factory):
     """
     Create gui component items from simulator components and pallets.
     """
@@ -32,9 +32,9 @@ def load_items(component_items: dict[str, "BaseComponentItem"],
 
         # Create component item based on attributes
         if hasattr(component, "start") and hasattr(component, "end"):
-            component_item = cls(component.id, start=component.start, end=component.end, event_bus=event_bus)
+            component_item = cls(component.id, start=component.start, end=component.end, event_bus=factory.event_bus)
         elif hasattr(component, "coordinate"):
-            component_item = cls(component.id, coordinate=component.coordinate, event_bus=event_bus)
+            component_item = cls(component.id, coordinate=component.coordinate, event_bus=factory.event_bus)
         else:
             raise ValueError(f"Cannot model component: {component.id}")
 
@@ -45,7 +45,7 @@ def load_items(component_items: dict[str, "BaseComponentItem"],
     warehouse = factory.warehouse
     warehouse_item = WarehouseItem(input_buffer_pos=warehouse.input_buffer.coordinate,
                                    output_buffer_pos=warehouse.output_buffer.coordinate,
-                                   event_bus=event_bus)
+                                   event_bus=factory.event_bus)
     # Create dict entry with 'warehouse'-key
     component_items["warehouse"] = warehouse_item
 
@@ -77,7 +77,7 @@ def load_items(component_items: dict[str, "BaseComponentItem"],
     item_warehouse_item = ItemWarehouseItem(
         top_left_corner_pos=(min_x, min_y),
         bottom_right_corner_pos=(max_x, max_y),
-        event_bus=event_bus,
+        event_bus=factory.event_bus,
         buffers_horizontal=buffers_horizontal
     )
     # Create dict entry with 'item_warehouse'-key

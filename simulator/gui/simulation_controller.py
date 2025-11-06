@@ -18,7 +18,7 @@ class SimulationController(QObject):
         self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
         self.event_bus.subscribe("store_payload", self.on_store_payload)
         self.event_bus.subscribe("move_payload", self.on_move_payload)
-        self.event_bus.subscribe("update_payload_state", self.on_update_payload_state)
+        self.event_bus.subscribe("update_payload", self.on_update_payload_state)
         self.event_bus.subscribe("create_batch", self.on_create_batch)
 
         # Timer for stepping the simulation

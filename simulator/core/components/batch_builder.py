@@ -90,12 +90,12 @@ class BatchBuilder(Component):
         """
         if self._buffer.can_load():
             batch_id = id_generator.generate_id(type_digit=2, length=8)
-            new_batch = ItemBatch(batch_id=batch_id, actual_location=Location(self._component_id, self._coordinate))
+            new_batch = ItemBatch(batch_id=batch_id, current_location=Location(self._component_id, self._coordinate))
 
             if self.event_bus is not None:
                 self.event_bus.emit("create_batch", {"id": batch_id})
 
-                log_manager.log(f"Created {new_batch}", f"{self}", sim_time=self.env.now)
+            log_manager.log(f"Created {new_batch}", f"{self}", sim_time=self.env.now)
 
             self._buffer.load(new_batch)
             self._current_batch = new_batch # Save instance internally
@@ -113,7 +113,9 @@ class BatchBuilder(Component):
         yield from self._buffer.handoff()
 
         if self.event_bus is not None:
-            self.event_bus.emit("update_payload_state", {"id": self._current_batch.id, "state": BatchState.READY})
+            self.event_bus.emit("update_payload", {
+                "id": self._current_batch.id,
+                "state": BatchState.READY})
 
         self._current_batch = None # Clear current batch
 

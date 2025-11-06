@@ -14,8 +14,8 @@ class ItemBatch(TransportationUnit):
     ready_event : simpy.events.Event
         Event triggered when the batch is full, or when the last item of order gets loaded.
     """
-    def __init__(self, batch_id: int, actual_location: Location):
-        super().__init__(batch_id, actual_location)
+    def __init__(self, batch_id: int, current_location: Location):
+        super().__init__(batch_id, current_location)
         self._items: dict[int,int] = {}
         self._item_count = 0
         self.ready_event = None

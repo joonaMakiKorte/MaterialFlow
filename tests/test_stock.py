@@ -40,7 +40,7 @@ def test_warehouse_output(env, warehouse, buffer_factory, pallet_factory):
     # Make sure order is merged on pallet at output buffer and order queue is empty
     assert pallet.order.id == order.id
     assert len(warehouse._order_queue) == 0
-    assert pallet.actual_location.coordinates == output_buffer.coordinate
+    assert pallet.location.coordinates == output_buffer.coordinate
 
 def test_itemwarehouse_input(env, item_warehouse, buffer_factory, batch_factory):
     """Test batch storage in item warehouse"""

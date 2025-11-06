@@ -4,34 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Centralized logger + improved log view in GUI">
-      <change afterPath="$PROJECT_DIR$/simulator/core/utils/id_gen_config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/database/database_config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Skeleton for database connection">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/junction.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/junction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/factory/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/component_items.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/component_items.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/dialogs.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dialogs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/event_bus.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/event_bus.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/factory_scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/factory_scene.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/item_batch.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/item_batch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/system_pallet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/transportation_units/transportation_unit.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/transportation_units/transportation_unit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_listener.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/simulation_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_factory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_components.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_stock.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -305,7 +296,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761914083400</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Skeleton for database connection">
+      <option name="closed" value="true" />
+      <created>1762262271956</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1762262271956</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -342,6 +341,7 @@
     <MESSAGE value="Process logging implemented" />
     <MESSAGE value="Item warehouse auto-refill" />
     <MESSAGE value="Test scripts for auto orders and item warehosue" />
-    <option name="LAST_COMMIT_MESSAGE" value="Test scripts for auto orders and item warehosue" />
+    <MESSAGE value="Skeleton for database connection" />
+    <option name="LAST_COMMIT_MESSAGE" value="Skeleton for database connection" />
   </component>
 </project>

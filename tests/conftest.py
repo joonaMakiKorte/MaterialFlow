@@ -173,7 +173,7 @@ def pallet_factory():
     def _factory(pallet_id, dest=(0,0)):
         return SystemPallet(
             pallet_id=pallet_id,
-            actual_location=Location("",dest))
+            current_location=Location("", dest))
     return _factory
 
 @pytest.fixture
@@ -182,7 +182,7 @@ def batch_factory():
     def _factory(batch_id, item_id, dest=(0,0)):
         batch = ItemBatch(
             batch_id=batch_id,
-            actual_location=Location("",dest)
+            current_location=Location("", dest)
         )
         batch._items = {item_id : 10}
         batch._item_count = 10

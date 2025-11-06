@@ -110,13 +110,19 @@ class PayloadConveyor(Component):
         """Place payload at start if free"""
         if self.can_load():
             self._slots[0] = payload
-            payload.actual_location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
+            payload.location.update(coordinates=self._slot_coords[0], element_name=f"{self}")
 
             log_manager.log(f"Loaded {payload}", f"{self}", sim_time=self.env.now)
 
             # Notify gui of event
             if self.event_bus is not None:
-                self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[0]})
+                self.event_bus.emit("move_payload", {
+                    "id":payload.id,
+                    "sim_time": self.env.now,
+                    "type": payload.__class__.__name__,
+                    "location": f"{payload.location}",
+                    "coords":self._slot_coords[0]})
+
             self.previously_loaded = True
 
     def shift(self):
@@ -136,13 +142,18 @@ class PayloadConveyor(Component):
                     break
 
                 payload = self._slots[i - 1]
-                payload.actual_location.update(coordinates=self._slot_coords[i])
+                payload.location.update(coordinates=self._slot_coords[i])
                 self._slots[i] = self._slots[i - 1]
                 self._slots[i - 1] = None
 
                 # Notify gui of event
                 if self.event_bus is not None:
-                    self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._slot_coords[i]})
+                    self.event_bus.emit("move_payload", {
+                        "id": payload.id,
+                        "sim_time": self.env.now,
+                        "type": payload.__class__.__name__,
+                        "location": f"{payload.location}",
+                        "coords": self._slot_coords[i]})
 
         self.previously_loaded = False
 

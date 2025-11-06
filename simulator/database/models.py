@@ -12,8 +12,9 @@ class Pallet(Base):
     __tablename__ = 'pallets'
 
     # Columns in the 'pallets' table
-    id: Mapped[str] = mapped_column(primary_key=True)
-    contents: Mapped[str] = mapped_column(sqlalchemy.String, default="Empty")
-    current_location: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    location: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
+    destination: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
+    order_id: Mapped[int] = mapped_column(sqlalchemy.Integer, nullable=True)
     last_updated_sim_time: Mapped[float] = mapped_column(sqlalchemy.Float)
 

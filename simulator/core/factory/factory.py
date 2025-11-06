@@ -11,6 +11,7 @@ from simulator.config import ITEM_JSON, FACTORY_JSON, WAREHOUSE_MAX_PALLET_CAPAC
 from simulator.core.utils.event_bus import EventBus
 from simulator.core.utils.logging_config import log_manager
 from simulator.core.utils.id_gen_config import id_generator
+from simulator.database.database_config import db_manager
 
 class Factory:
     """
@@ -36,7 +37,7 @@ class Factory:
     active_batches :
 
     db : DatabaseManager
-        Access the database
+        Stateful service for accessing database
     log_manager : LogManager
         Stateful service for accessing component logs
     event_bus : EventBus
@@ -56,13 +57,12 @@ class Factory:
                                                   warehouse=self.warehouse,
                                                   item_warehouse=self.item_warehouse)
         self.pallets: dict[int,SystemPallet] = {}
-        #self.database: DatabaseManager | None = None
+        self.db = db_manager
         self.log_manager = log_manager
         self.event_bus = event_bus
 
         # Load layout from json
         self._load_factory(layout_json_name)
-
 
 
     # ----------------
@@ -114,7 +114,6 @@ class Factory:
         Stores requested amount of pallets in warehouse,
         fills ItemWarehouse with initial stock,
         places initial orders.
-
         """
-        self._init_pallets(WAREHOUSE_MAX_PALLET_CAPACITY)
         self._inject_eventbus(self.event_bus)
+        self._init_pallets(WAREHOUSE_MAX_PALLET_CAPACITY)

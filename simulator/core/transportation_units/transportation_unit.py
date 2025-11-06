@@ -11,6 +11,9 @@ class Destination:
         """Update specific element id for destination."""
         self.id = element_id
 
+    def __repr__(self):
+        return f"{self.type}[{self.id}]"
+
 @dataclass
 class Location:
     """Concrete location of the transportation unit"""
@@ -23,10 +26,13 @@ class Location:
         if element_name is not None:
             self.element_name = element_name
 
+    def __repr__(self):
+        return f"{self.element_name}({self.coordinates})"
+
 class TransportationUnit(ABC):
-    def __init__(self, unit_id: int, actual_location: Location):
+    def __init__(self, unit_id: int, current_location: Location):
         self._unit_id = unit_id
-        self.actual_location = actual_location
+        self.location = current_location
 
     @property
     def id(self) -> int:

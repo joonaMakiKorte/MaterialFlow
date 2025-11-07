@@ -14,17 +14,18 @@ class SimulationController(QObject):
         self.scene = scene
         self.event_bus: EventBus = scene.event_bus
 
-        # Subscribe to events
+        # Timer for stepping the simulation
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.tick)
+        self.running = False
+
+    def setup_subscriptions(self):
+        """Subscribe to relevant events from the simulation."""
         self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
         self.event_bus.subscribe("store_payload", self.on_store_payload)
         self.event_bus.subscribe("move_payload", self.on_move_payload)
         self.event_bus.subscribe("update_payload", self.on_update_payload_state)
         self.event_bus.subscribe("create_batch", self.on_create_batch)
-
-        # Timer for stepping the simulation
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.tick)
-        self.running = False
 
     def start(self):
         self.running = True

@@ -1,10 +1,11 @@
-from simulator.database.database_config import db_manager
+from simulator.database.database_manager import DatabaseManager
 from simulator.core.utils.event_bus import EventBus
 
 class DatabaseListener:
     """Listens for simulation events and persists them to the database"""
-    def __init__(self, event_bus: EventBus):
+    def __init__(self, event_bus: EventBus, db_manager: DatabaseManager):
         self.event_bus = event_bus
+        self.db_manager = db_manager
 
     def setup_subscriptions(self):
         """Subscribe to relevant events from the simulation."""
@@ -14,7 +15,7 @@ class DatabaseListener:
         self.event_bus.subscribe("move_payload", self.on_pallet_moved)
 
     def on_pallet_created(self, data: dict):
-        db_manager.insert_pallet(
+        self.db_manager.insert_pallet(
             pallet_id=data['pallet_id'],
             location=data['location'],
             sim_time=data['sim_time']
@@ -26,7 +27,7 @@ class DatabaseListener:
             # Assert we only update data if type is SystemPallet
             return
 
-        db_manager.update_pallet(
+        self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
             order_id=data['order_id'],
@@ -38,7 +39,7 @@ class DatabaseListener:
         if data.get("type") != "SystemPallet":
             return
 
-        db_manager.update_pallet(
+        self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
             location=data['location']

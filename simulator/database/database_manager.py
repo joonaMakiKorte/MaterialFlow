@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 
-from simulator.database.models import Base, Pallet
+from simulator.database.models import Base, Pallet, RefillOrder, OpmOrder
 import os
 
 # Create the SQLAlchemy URL to point in 'data' directory
@@ -39,14 +39,14 @@ class DatabaseManager:
             if session.get(Pallet, pallet_id):
                 return
 
-            new_db_pallet = Pallet(
+            new_pallet = Pallet(
                 id=pallet_id,
                 location=location,
                 destination=None,
                 order_id=None,
                 last_updated_sim_time=sim_time
             )
-            session.add(new_db_pallet)
+            session.add(new_pallet)
             session.commit()
 
 
@@ -67,7 +67,25 @@ class DatabaseManager:
                 else:
                     print(f"DATABASE-WARN: Ignoring unknown attribute '{key}' for Pallet update.")
 
-            # Always update the simulation time
+            # Update sim time
             pallet.last_updated_sim_time = sim_time
+            session.commit()
 
+    # ----------------
+    # Order operations
+    # ----------------
+
+    def insert_refill_order(self, order_id: int, order_time: float, item_id: int, qty: int):
+        """Insert a refill order record into the database upon its creation."""
+        with self.Session() as session:
+            if session.get(RefillOrder, order_id):
+                return
+
+            refill_order = RefillOrder(
+                order_id=order_id,
+                order_time=order_time,
+                item_id=item_id,
+                qty=qty
+            )
+            session.add(refill_order)
             session.commit()

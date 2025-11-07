@@ -32,17 +32,12 @@ class Factory:
         For managing the factory inventory (stock and orders)
     pallets : dict[int,SystemPallet]
         All SystemPallets available keyed by id
-    active_batches :
-
-    db : DatabaseManager
-        Stateful service for accessing database
-    log_manager : LogManager
-        Stateful service for accessing component logs
     event_bus : EventBus
-        Stateless service for passing events to gui and database
+        Stateless service for passing events to gui and database.
+        Allows communication with GUI and database
     """
     def __init__(self, env: simpy.Environment,
-                 event_bus: EventBus,
+                 event_bus: EventBus | None = None,
                  items_json_name: str = ITEM_JSON,
                  layout_json_name: str = FACTORY_JSON):
         self.env = env
@@ -95,6 +90,18 @@ class Factory:
         self.warehouse.inject_eventbus(bus)
         self.item_warehouse.inject_eventbus(bus)
 
+    def _emit_catalogue_items(self):
+        """Emit all items in catalogue through event bus for database setup."""
+        for item_id, item in self.catalogue.items:
+            self.event_bus.emit("create_item", {
+                "item_id": item_id,
+                "name": item.name,
+                "weight": item.weight,
+                "category": item.category,
+                "volume": item.volume,
+                "stackable": item.stackable
+            })
+
     # --------------
     # Public methods
     # --------------
@@ -113,3 +120,4 @@ class Factory:
         """
         self._inject_eventbus(self.event_bus)
         self._init_pallets(WAREHOUSE_MAX_PALLET_CAPACITY)
+        self._emit_catalogue_items()

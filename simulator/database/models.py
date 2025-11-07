@@ -110,7 +110,7 @@ class Pallet(Base):
     __tablename__ = 'pallets'
 
     # Columns in the 'pallets' table
-    id: Mapped[int] = mapped_column(primary_key=True)
+    pallet_id: Mapped[int] = mapped_column(primary_key=True)
     location: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
     destination: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
     order_id: Mapped[int] = mapped_column(sqlalchemy.Integer, nullable=True)

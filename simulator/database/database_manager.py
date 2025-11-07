@@ -1,7 +1,6 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-
-from simulator.database.models import Base, Pallet, RefillOrder, OpmOrder
+from simulator.database.models import Base, Pallet, RefillOrder, OpmOrder, Item
 import os
 
 # Create the SQLAlchemy URL to point in 'data' directory
@@ -29,6 +28,27 @@ class DatabaseManager:
         Base.metadata.create_all(self.engine)
         print("INFO: Database tables created successfully.")
 
+    # ---------------
+    # Item operations
+    # ---------------
+
+    def insert_item(self, item_id: int, name: str, weight: float, category: str, volume: float, stackable: bool):
+        """Insert a new item record"""
+        with self.Session() as session:
+            if session.get(Item, item_id):
+                return
+
+            new_item = Item(
+                item_id=item_id,
+                name=name,
+                weight=weight,
+                category=category,
+                volume=volume,
+                stackable=stackable
+            )
+            session.add(new_item)
+            session.commit()
+
     # -----------------
     # Pallet operations
     # -----------------
@@ -40,7 +60,7 @@ class DatabaseManager:
                 return
 
             new_pallet = Pallet(
-                id=pallet_id,
+                pallet_id=pallet_id,
                 location=location,
                 destination=None,
                 order_id=None,
@@ -88,4 +108,21 @@ class DatabaseManager:
                 qty=qty
             )
             session.add(refill_order)
+            session.commit()
+
+    def insert_opm_order(self, order_id: int, order_time: float, items: dict[int,int]):
+        """
+        Insert an opm order record.
+        The 'items' proxy on OpmOrder knows how to handle the dict as it is.
+        """
+        with self.Session() as session:
+            if session.get(OpmOrder, order_id):
+                return
+
+            opm_order = OpmOrder(
+                order_id=order_id,
+                order_time=order_time,
+                items=items
+            )
+            session.add(opm_order)
             session.commit()

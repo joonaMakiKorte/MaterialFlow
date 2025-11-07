@@ -91,7 +91,7 @@ class FactoryScene(QGraphicsScene):
         self._add_components()
 
     # --------------
-    # Event handlers
+    # Scene updating
     # --------------
 
     def create_payload(self, payload_id: int, payload_type: str):

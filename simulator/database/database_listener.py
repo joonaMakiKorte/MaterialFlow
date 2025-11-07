@@ -14,6 +14,20 @@ class DatabaseListener:
         self.event_bus.subscribe("store_payload", self.on_pallet_moved)
         self.event_bus.subscribe("move_payload", self.on_pallet_moved)
 
+    # --------------
+    # Event handlers
+    # --------------
+
+    def on_item_created(self, data: dict):
+        self.db_manager.insert_item(
+            item_id=data['item_id'],
+            name=data['name'],
+            weight=data['weight'],
+            category=data['category'],
+            volume=data['volume'],
+            stackable=data['stackable']
+        )
+
     def on_pallet_created(self, data: dict):
         self.db_manager.insert_pallet(
             pallet_id=data['pallet_id'],

@@ -57,9 +57,9 @@ class SimulationController(QObject):
             print("Simulation completed (empty schedule).")
             self.stop()
 
-    # --------------------------
-    # Connect events to handlers
-    # --------------------------
+    # --------------
+    # Event handlers
+    # --------------
 
     def on_dispatch_pallet(self, data):
         pallet_id = data["id"]

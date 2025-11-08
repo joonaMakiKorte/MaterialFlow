@@ -9,10 +9,14 @@ class DatabaseListener:
 
     def setup_subscriptions(self):
         """Subscribe to relevant events from the simulation."""
-        self.event_bus.subscribe("pallet_created", self.on_pallet_created)
+        self.event_bus.subscribe("create_pallet", self.on_pallet_created)
         self.event_bus.subscribe("update_payload", self.on_pallet_updated)
         self.event_bus.subscribe("store_payload", self.on_pallet_moved)
         self.event_bus.subscribe("move_payload", self.on_pallet_moved)
+        self.event_bus.subscribe("create_item", self.on_item_created)
+        self.event_bus.subscribe("create_order", self.on_order_created)
+        self.event_bus.subscribe("update_order", self.on_order_updated)
+
 
     # --------------
     # Event handlers
@@ -31,12 +35,13 @@ class DatabaseListener:
     def on_pallet_created(self, data: dict):
         self.db_manager.insert_pallet(
             pallet_id=data['pallet_id'],
-            location=data['location'],
+            location=data.get('location'),
+            destination=data.get('destination'),
+            order_id=data.get('order_id'),
             sim_time=data['sim_time']
         )
 
     def on_pallet_updated(self, data: dict):
-        """Updates assigned order and destination on pallet"""
         if data.get("type") != "SystemPallet":
             # Assert we only update data if type is SystemPallet
             return
@@ -44,17 +49,44 @@ class DatabaseListener:
         self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
-            order_id=data['order_id'],
-            destination=data['destination']
+            order_id=data.get('order_id'),
+            destination=data.get('destination')
         )
 
     def on_pallet_moved(self, data: dict):
-        """""""Update pallet location and destination"""
         if data.get("type") != "SystemPallet":
             return
 
         self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
-            location=data['location']
+            location=data.get('location')
+        )
+
+    def on_order_created(self, data: dict):
+        type = data.get("type")
+        if type != "RefillOrder" and type != "OpmOrder":
+            return
+
+        order_id=data['id'],
+        order_time = data['order_time']
+
+        if type == "RefillOrder":
+            self.db_manager.insert_refill_order(
+                order_id=order_id,
+                order_time=order_time,
+                item_id=data['item_id'],
+                qty=data['qty']
+            )
+        elif type == "OpmOrder":
+            self.db_manager.insert_opm_order(
+                order_id=order_id,
+                order_time=order_time,
+                items=data['items']
+            )
+
+    def on_order_updated(self, data: dict):
+        self.db_manager.update_order(
+            order_id=data['order_id'],
+            status=data['status']
         )

@@ -1,7 +1,9 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from simulator.database.models import Base, Pallet, RefillOrder, OpmOrder, Item
+from simulator.database.models import Base, Pallet, Order, RefillOrder, OpmOrder, Item
+from simulator.core.utils.logging_config import log_manager
 import os
+
 
 # Create the SQLAlchemy URL to point in 'data' directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +55,8 @@ class DatabaseManager:
     # Pallet operations
     # -----------------
 
-    def insert_pallet(self, pallet_id: int, location: str, sim_time: float):
+    def insert_pallet(self, pallet_id: int, location: str, destination: str | None,
+                      order_id: int | None, sim_time: float):
         """Insert a new pallet record into the database upon its creation"""
         with self.Session() as session:
             if session.get(Pallet, pallet_id):
@@ -62,8 +65,8 @@ class DatabaseManager:
             new_pallet = Pallet(
                 pallet_id=pallet_id,
                 location=location,
-                destination=None,
-                order_id=None,
+                destination=destination,
+                order_id=order_id,
                 last_updated_sim_time=sim_time
             )
             session.add(new_pallet)
@@ -125,4 +128,14 @@ class DatabaseManager:
                 items=items
             )
             session.add(opm_order)
+            session.commit()
+
+    def update_order(self, order_id: int, status):
+        """Update order status."""
+        with self.Session() as session:
+            order = session.get(Order, order_id)
+            if not order:
+                return
+
+            order.status = status
             session.commit()

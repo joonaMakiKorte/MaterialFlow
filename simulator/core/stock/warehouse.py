@@ -108,7 +108,7 @@ class Warehouse(Stock):
                                   current_location=Location(element_name=self.__class__.__name__,
                                                             coordinates=self._output_buffer.coordinate))
         if self.event_bus is not None:
-            self.event_bus.emit("pallet_created", {
+            self.event_bus.emit("create_pallet", {
                 "pallet_id": pallet_id,
                 "location": self.__class__.__name__,
                 "sim_time": self.env.now
@@ -124,6 +124,13 @@ class Warehouse(Stock):
         heapq.heappush(self._order_queue, (priority, count, order))
         if self.event_bus is not None:
             self.event_bus.emit("warehouse_order_count", {"count":len(self._order_queue)})
+            self.event_bus.emit("create_order", {
+                "order_id": order.id,
+                "order_time": order.order_time,
+                "type": order.type,
+                "item_id": order.item_id,
+                "qty": order.qty
+            })
 
     def process_order(self, order: RefillOrder):
         """Process order by merging it on the pallet on buffer."""
@@ -150,7 +157,12 @@ class Warehouse(Stock):
                     "destination": f"{pallet.destination}",
                     "state": PALLET_ORDER_STATES[order.type],
                     "sim_time": self.env.now})
-                self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
+                self.event_bus.emit("update_order", {
+                    "order_id": order.id,
+                    "status": order.status
+                })
+                self.event_bus.emit("warehouse_order_count", {
+                    "count": len(self._order_queue)})
 
             log_manager.log(f"Processed order {order}",
                         component_id=self.__class__.__name__,

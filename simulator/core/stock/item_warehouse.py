@@ -147,7 +147,14 @@ class ItemWarehouse(Stock):
         count = next(self._counter)  # Prevents comparasion errors when priorities match
         heapq.heappush(self._order_queue, (priority, count, order))
         if self.event_bus is not None:
-            self.event_bus.emit("item_warehouse_order_count", {"count": len(self._order_queue)})
+            self.event_bus.emit("item_warehouse_order_count", {
+                "count": len(self._order_queue)})
+            self.event_bus.emit("create_order", {
+                "order_id": order.id,
+                "order_time": order.order_time,
+                "type": order.type,
+                "items": order.items
+            })
 
     def process_order(self, order: OpmOrder, buffer: BatchBuilder):
         """Process an order by taking items from stock and simulating the picking time."""

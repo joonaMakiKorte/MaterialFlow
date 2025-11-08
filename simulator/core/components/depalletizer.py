@@ -184,10 +184,13 @@ class Depalletizer(Component):
                 self.event_bus.emit("update_payload", {
                     "id": pallet.id,
                     "type": pallet.__class__.__name,
-                    "order_id": None,
                     "destination": f"{pallet.destination}",
                     "state": PALLET_ORDER_STATES["Empty"],
                     "sim_time": self.env.now})
+                self.event_bus.emit("update_order", {
+                    "order_id": order.id,
+                    "status": order.status
+                })
                 self.event_bus.emit("depalletizer_idle", {"id":self._component_id})
 
             # Send empty pallet downstream

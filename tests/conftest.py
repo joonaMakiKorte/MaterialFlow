@@ -1,7 +1,6 @@
 import pytest
 import simpy
 import json
-from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.items.catalogue import Catalogue
 from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.transportation_units.system_pallet import SystemPallet, Location
@@ -13,6 +12,7 @@ from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.components.junction import Junction
+from simulator.database.database_manager import DatabaseManager
 
 @pytest.fixture
 def env():
@@ -102,10 +102,6 @@ def catalogue(mock_items_json):
     return Catalogue(str(mock_items_json))
 
 @pytest.fixture
-def id_gen():
-    return IDGenerator()
-
-@pytest.fixture
 def conveyor_factory(env):
     """Create conveyor with 3 slots and cycle time of 1."""
     def _factory(conveyor_id, start, end, cycle_time=1):
@@ -148,11 +144,10 @@ def depalletizer_factory(env):
     return _factory
 
 @pytest.fixture
-def builder_factory(env, id_gen):
+def builder_factory(env):
     def _factory(builder_id, coordinate, batch_process_time = 1):
         batch_builder = BatchBuilder(
             env=env,
-            id_gen=id_gen,
             builder_id=builder_id,
             coordinate=coordinate,
             batch_process_time=batch_process_time
@@ -179,7 +174,7 @@ def pallet_factory():
     def _factory(pallet_id, dest=(0,0)):
         return SystemPallet(
             pallet_id=pallet_id,
-            actual_location=Location("",dest))
+            current_location=Location("", dest))
     return _factory
 
 @pytest.fixture
@@ -188,7 +183,7 @@ def batch_factory():
     def _factory(batch_id, item_id, dest=(0,0)):
         batch = ItemBatch(
             batch_id=batch_id,
-            actual_location=Location("",dest)
+            current_location=Location("", dest)
         )
         batch._items = {item_id : 10}
         batch._item_count = 10
@@ -212,13 +207,27 @@ def item_warehouse(env):
     )
 
 @pytest.fixture
-def inventory_manager(env, id_gen, catalogue, warehouse, item_warehouse):
+def inventory_manager(env, catalogue, warehouse, item_warehouse):
     """Initialize order service with warehouse"""
     return InventoryManager(
         env=env,
-        id_gen=id_gen,
         catalogue=catalogue,
         warehouse=warehouse,
         item_warehouse=item_warehouse,
         refill_scan_interval=1
     )
+
+@pytest.fixture(scope="function")
+def db_manager(tmp_path):
+    """
+    Pytest fixture to create a DatabaseManager instance with a temporary,
+    isolated SQLite database for each test function.
+    """
+    db_file = tmp_path / "test_simulation.db"
+    db_url = f"sqlite:///{db_file}"
+
+    manager = DatabaseManager(db_url=db_url)
+    manager.setup_database(fresh_start=True)
+
+    # Yield the manager to the test function
+    yield manager

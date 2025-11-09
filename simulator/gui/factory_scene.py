@@ -1,8 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsScene
-from simulator.gui.component_items import BaseComponentItem, BasePayloadItem, PalletItem, BatchItem, WarehouseItem
+from simulator.gui.component_items import BasePayloadItem, PalletItem, BatchItem
 from simulator.gui.loader import load_items
 from simulator.core.factory.factory import Factory
-from simulator.gui.event_bus import EventBus
 
 PAYLOAD_ITEM_TYPES = {
         "SystemPallet" : PalletItem,
@@ -11,7 +10,8 @@ PAYLOAD_ITEM_TYPES = {
 
 class FactoryScene(QGraphicsScene):
     """
-
+    Main scene for visualizing factory simulation.
+    Implements event handlers to update gui based on simulation events.
     """
     def __init__(self, factory: Factory):
         super().__init__()
@@ -19,17 +19,12 @@ class FactoryScene(QGraphicsScene):
         self.component_items: dict[str, "BaseComponentItem"] = {}
         self.payload_items: dict[int, "BasePayloadItem"] = {}
 
-        self.event_bus = EventBus()
+        # Store instance for event bus
+        self.event_bus = factory.event_bus
 
         # Load items based on factory layout
         load_items(component_items=self.component_items,
-                   factory=factory,
-                   event_bus=self.event_bus)
-
-        # Pass event bus for simulator
-        # Important to pass after component creation, since eventbus injection
-        # already triggers events, updating components
-        factory.inject_eventbus(self.event_bus)
+                   factory=factory)
 
         self.scale = 0.0  # Calculated when scaling scene to screen
 
@@ -96,7 +91,7 @@ class FactoryScene(QGraphicsScene):
         self._add_components()
 
     # --------------
-    # Event handlers
+    # Scene updating
     # --------------
 
     def create_payload(self, payload_id: int, payload_type: str):

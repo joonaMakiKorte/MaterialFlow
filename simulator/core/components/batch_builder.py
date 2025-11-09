@@ -4,9 +4,9 @@ from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.transportation_units.transportation_unit import Location
 from simulator.core.transportation_units.item_batch import ItemBatch
 from simulator.config import BATCH_BUFFER_PROCESS_TIME, BATCH_MAX_WAIT_TIME
-from simulator.core.utils.id_gen import IDGenerator
+from simulator.core.utils.id_gen_config import id_generator
 from simulator.gui.component_items import BatchState
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.core.utils.logging_config import log_manager
 
 
@@ -18,8 +18,6 @@ class BatchBuilder(Component):
 
     Additional Attributes
     ---------------------
-    id_gen : IDGenerator
-        For accessing central ID-generator.
     process_main : simpy.Process
         SimPy process instance for main batch building loop.
     coordinate : Tuple[int,int]
@@ -29,11 +27,10 @@ class BatchBuilder(Component):
     current_batch : ItemBatch
         Current batch being built
     """
-    def __init__(self, env: simpy.Environment, id_gen: IDGenerator, builder_id: str,
+    def __init__(self, env: simpy.Environment, builder_id: str,
                  coordinate : tuple[int,int],
                  batch_process_time: float = BATCH_BUFFER_PROCESS_TIME):
         super().__init__(env, component_id=builder_id)
-        self._id_gen = id_gen
         self.process_main = env.process(self._build_loop()) # Register run loop
         self._coordinate = coordinate
         self._batch_process_time = batch_process_time
@@ -92,13 +89,13 @@ class BatchBuilder(Component):
         Return truth value indicating load success
         """
         if self._buffer.can_load():
-            batch_id = self._id_gen.generate_id(type_digit=2, length=8)
-            new_batch = ItemBatch(batch_id=batch_id, actual_location=Location(self._component_id, self._coordinate))
+            batch_id = id_generator.generate_id(type_digit=2, length=8)
+            new_batch = ItemBatch(batch_id=batch_id, current_location=Location(self._component_id, self._coordinate))
 
             if self.event_bus is not None:
                 self.event_bus.emit("create_batch", {"id": batch_id})
 
-                log_manager.log(f"Created {new_batch}", f"{self}", sim_time=self.env.now)
+            log_manager.log(f"Created {new_batch}", f"{self}", sim_time=self.env.now)
 
             self._buffer.load(new_batch)
             self._current_batch = new_batch # Save instance internally
@@ -116,7 +113,9 @@ class BatchBuilder(Component):
         yield from self._buffer.handoff()
 
         if self.event_bus is not None:
-            self.event_bus.emit("update_payload_state", {"id": self._current_batch.id, "state": BatchState.READY})
+            self.event_bus.emit("update_payload", {
+                "id": self._current_batch.id,
+                "state": BatchState.READY})
 
         self._current_batch = None # Clear current batch
 

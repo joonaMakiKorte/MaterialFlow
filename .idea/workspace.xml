@@ -4,27 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Test scripts for auto orders and item warehosue">
-      <change afterPath="$PROJECT_DIR$/simulator/core/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/core/utils/logging_config.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Order creation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/batch_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/component.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/component.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_buffer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/payload_conveyor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/id_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/id_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/factory/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/factory/log_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/utils/log_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/inventory_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/item_warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/stock.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/stock.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/stock/warehouse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/dialogs.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dialogs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_listener.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_order.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_order.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,13 +58,14 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.app.executor": "Run",
     "Python.component_items.executor": "Run",
+    "Python.database_listener.executor": "Run",
     "Python.factory_scene.executor": "Run",
     "Python.inventory_manager.executor": "Run",
     "Python.main_window.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "log__update",
+    "git-widget-placeholder": "database",
     "ignore.virus.scanning.warn.message": "true",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
@@ -298,7 +286,47 @@
       <option name="project" value="LOCAL" />
       <updated>1761914083400</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Skeleton for database connection">
+      <option name="closed" value="true" />
+      <created>1762262271956</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1762262271956</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Pallet database updating implemented">
+      <option name="closed" value="true" />
+      <created>1762455130856</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1762455130856</updated>
+    </task>
+    <task id="LOCAL-00027" summary="New tables, more intuitive app initialization">
+      <option name="closed" value="true" />
+      <created>1762520920355</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1762520920355</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Created items table">
+      <option name="closed" value="true" />
+      <created>1762523750617</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1762523750617</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Order creation">
+      <option name="closed" value="true" />
+      <created>1762609477173</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1762609477173</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -313,8 +341,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add gitignore" />
-    <MESSAGE value="Core class modelling" />
     <MESSAGE value="Implementing Order-class logic" />
     <MESSAGE value="Core class modelling, json for items" />
     <MESSAGE value="Conveyor logic, conveyor tests" />
@@ -335,6 +361,11 @@
     <MESSAGE value="Process logging implemented" />
     <MESSAGE value="Item warehouse auto-refill" />
     <MESSAGE value="Test scripts for auto orders and item warehosue" />
-    <option name="LAST_COMMIT_MESSAGE" value="Test scripts for auto orders and item warehosue" />
+    <MESSAGE value="Skeleton for database connection" />
+    <MESSAGE value="Pallet database updating implemented" />
+    <MESSAGE value="New tables, more intuitive app initialization" />
+    <MESSAGE value="Created items table" />
+    <MESSAGE value="Order creation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Order creation" />
   </component>
 </project>

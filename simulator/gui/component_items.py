@@ -1,8 +1,8 @@
 from enum import Enum
-from PyQt6.QtWidgets import QGraphicsItem, QGraphicsTextItem
+from PyQt6.QtWidgets import QGraphicsItem
 from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF, QFont, QFontMetrics
 from PyQt6.QtCore import QRectF, Qt, QPointF
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from abc import abstractmethod
 
 # -------------

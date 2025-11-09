@@ -8,7 +8,7 @@ from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.transportation_units.transportation_unit import Location
 from simulator.config import ORDER_MERGE_TIME, WAREHOUSE_MAX_PALLET_CAPACITY, PALLET_BUFFER_PROCESS_TIME
 from simulator.gui.component_items import PALLET_ORDER_STATES
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.core.utils.logging_config import log_manager
 
 
@@ -105,8 +105,15 @@ class Warehouse(Stock):
     def create_pallet(self, pallet_id: int) -> SystemPallet:
         """Create a new pallet in warehouse. Return the pallet instance."""
         new_pallet = SystemPallet(pallet_id=pallet_id,
-                                  actual_location=Location(element_name=self.__class__.__name__,
-                                                           coordinates=self._output_buffer.coordinate))
+                                  current_location=Location(element_name=self.__class__.__name__,
+                                                            coordinates=self._output_buffer.coordinate))
+        if self.event_bus is not None:
+            self.event_bus.emit("create_pallet", {
+                "pallet_id": pallet_id,
+                "location": self.__class__.__name__,
+                "sim_time": self.env.now
+            })
+
         self._pallet_store.put(new_pallet)
         self._pallet_count += 1
         return new_pallet
@@ -117,6 +124,13 @@ class Warehouse(Stock):
         heapq.heappush(self._order_queue, (priority, count, order))
         if self.event_bus is not None:
             self.event_bus.emit("warehouse_order_count", {"count":len(self._order_queue)})
+            self.event_bus.emit("create_order", {
+                "order_id": order.id,
+                "order_time": order.order_time,
+                "type": order.type,
+                "item_id": order.item_id,
+                "qty": order.qty
+            })
 
     def process_order(self, order: RefillOrder):
         """Process order by merging it on the pallet on buffer."""
@@ -126,17 +140,29 @@ class Warehouse(Stock):
             log_manager.log(f"Processing order {order}",
                         component_id=self.__class__.__name__,
                         sim_time=self.env.now)
+
             yield self.env.timeout(self._order_process_time)
-            pallet.merge_order(new_order=order, destination_type="depalletizer")
+            pallet.merge_order(new_order=order, destination_type="Depalletizing")
+
             log_manager.log(f"Merged order {order} on pallet {pallet}",
                         component_id=self.__class__.__name__,
                         sim_time=self.env.now)
             order.status = OrderStatus.IN_PROGRESS # Update order status to pending
 
             if self.event_bus is not None:
-                self.event_bus.emit("update_payload_state",
-                                    {"id": pallet.id, "state": PALLET_ORDER_STATES[order.type]})
-                self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
+                self.event_bus.emit("update_payload",{
+                    "id": pallet.id,
+                    "type": pallet.__class__.__name__,
+                    "order_id": order.id,
+                    "destination": f"{pallet.destination}",
+                    "state": PALLET_ORDER_STATES[order.type],
+                    "sim_time": self.env.now})
+                self.event_bus.emit("update_order", {
+                    "order_id": order.id,
+                    "status": order.status
+                })
+                self.event_bus.emit("warehouse_order_count", {
+                    "count": len(self._order_queue)})
 
             log_manager.log(f"Processed order {order}",
                         component_id=self.__class__.__name__,
@@ -154,10 +180,16 @@ class Warehouse(Stock):
             self._input_buffer.clear() # Clear pallet from buffer
 
             if self.event_bus is not None:
-                self.event_bus.emit("store_payload", {"id":pallet.id})
+                self.event_bus.emit("store_payload", {
+                    "id":pallet.id,
+                    "type": pallet.__class__.__name__,
+                    "location": self.__class__.__name__,
+                    "sim_time": self.env.now})
+
                 fill_percentage = math.ceil(self._pallet_count / self._pallet_capacity) * 100
-                self.event_bus.emit("warehouse_pallet_count",
-                                    {"count": self._pallet_count, "fill": fill_percentage})
+                self.event_bus.emit("warehouse_pallet_count",{
+                    "count": self._pallet_count,
+                    "fill": fill_percentage})
 
             log_manager.log(f"Stored empty pallet {pallet}",
                         component_id=self.__class__.__name__,
@@ -167,8 +199,9 @@ class Warehouse(Stock):
         self.event_bus = event_bus
         # Emit order and pallet count
         fill_percentage = math.ceil(self._pallet_count/self._pallet_capacity) * 100
-        self.event_bus.emit("warehouse_pallet_count",
-                            {"count":self._pallet_count, "fill":fill_percentage})
+        self.event_bus.emit("warehouse_pallet_count",{
+            "count":self._pallet_count,
+            "fill":fill_percentage})
         self.event_bus.emit("warehouse_order_count",{"count":len(self._order_queue)})
 
     def _order_loop(self):
@@ -205,8 +238,9 @@ class Warehouse(Stock):
                 self.event_bus.emit("dispatch_pallet", {"id": pallet.id})
                 pallets_available = math.ceil(
                     self._pallet_count / WAREHOUSE_MAX_PALLET_CAPACITY * 100)
-                self.event_bus.emit("warehouse_pallet_count",
-                                    {"count": self._pallet_count, "fill": pallets_available})
+                self.event_bus.emit("warehouse_pallet_count",{
+                    "count": self._pallet_count,
+                    "fill": pallets_available})
                 self.event_bus.emit("warehouse_order_count", {"count": len(self._order_queue)})
 
             self._output_buffer.load(pallet)

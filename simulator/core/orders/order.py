@@ -1,12 +1,12 @@
 from abc import ABC
-from enum import Enum, auto
+from enum import Enum
 
-class OrderStatus(Enum):
+class OrderStatus(str, Enum):
     """Enumeration of possible order states."""
-    PENDING = auto()
-    IN_PROGRESS = auto()
-    COMPLETED = auto()
-    CANCELLED = auto()
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
 
 class Order(ABC):
     """
@@ -101,4 +101,8 @@ class OpmOrder(Order):
     """
     def __init__(self, order_id: int, order_time: float, requested_items: dict[int, int]):
         super().__init__(order_id, order_time)
-        self.items = requested_items
+        self._items = requested_items
+
+    @property
+    def items(self) -> dict[int, int]:
+        return self._items

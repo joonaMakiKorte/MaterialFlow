@@ -5,7 +5,7 @@ from simulator.core.transportation_units.system_pallet import SystemPallet
 from simulator.core.orders.order import OrderStatus, RefillOrder
 from simulator.config import PALLET_BUFFER_PROCESS_TIME, ITEM_PROCESS_TIME, DEPALLETIZING_DELAY
 import simpy
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 from simulator.gui.component_items import PALLET_ORDER_STATES
 from simulator.core.utils.logging_config import log_manager
 
@@ -181,7 +181,16 @@ class Depalletizer(Component):
             pallet.clear_order()
 
             if self.event_bus is not None:
-                self.event_bus.emit("update_payload_state", {"id": pallet.id, "state": PALLET_ORDER_STATES["Empty"]})
+                self.event_bus.emit("update_payload", {
+                    "id": pallet.id,
+                    "type": pallet.__class__.__name__,
+                    "destination": f"{pallet.destination}",
+                    "state": PALLET_ORDER_STATES["Empty"],
+                    "sim_time": self.env.now})
+                self.event_bus.emit("update_order", {
+                    "order_id": order.id,
+                    "status": order.status
+                })
                 self.event_bus.emit("depalletizer_idle", {"id":self._component_id})
 
             # Send empty pallet downstream

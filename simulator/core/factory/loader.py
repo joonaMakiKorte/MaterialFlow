@@ -7,7 +7,6 @@ from simulator.core.components.payload_conveyor import PayloadConveyor
 from simulator.core.components.payload_buffer import PayloadBuffer
 from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.components.junction import Junction
-from simulator.core.utils.id_gen import IDGenerator
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 
@@ -23,7 +22,6 @@ COMPONENT_TYPES = {
 def load_factory_from_json(
         file_path: str,
         env: simpy.Environment,
-        id_gen: IDGenerator,
         components: dict[str, Component],
         warehouse: Warehouse,
         item_warehouse: ItemWarehouse
@@ -34,7 +32,7 @@ def load_factory_from_json(
     """
     config = _load_config(file_path)
 
-    _load_components(config, env, id_gen, components)
+    _load_components(config, env, components)
     _load_connections(config, components)
     _configure_warehouse(config, components, warehouse)
     _configure_item_warehouse(config, components, item_warehouse)
@@ -50,7 +48,6 @@ def _load_config(file_path: str) -> dict:
 def _load_components(
         config: dict,
         env: simpy.Environment,
-        id_gen: IDGenerator,
         components: dict[str, Component]
 ):
     """Create components from config and add to registry."""
@@ -68,9 +65,7 @@ def _load_components(
         _convert_coordinates(kwargs, comp_id)
 
         # Instantiate component with appropriate constructor
-        if comp_type == "BatchBuilder":
-            component = cls(env, id_gen, comp_id, **kwargs)
-        elif comp_type == "Junction":
+        if comp_type == "Junction":
             ratio = comp_data["ratio"]
             component = cls(env, comp_id, ratio, **kwargs)
         else:

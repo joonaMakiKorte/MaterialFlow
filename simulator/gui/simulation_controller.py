@@ -1,11 +1,12 @@
 from PyQt6.QtCore import QTimer, QObject, pyqtSlot
 import simpy
 from simulator.gui.factory_scene import FactoryScene
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 
 class SimulationController(QObject):
     """
-
+    Controls simulation running.
+    Listens for simulation events and persists them to the factory scene.
     """
     def __init__(self, env: simpy.Environment, scene: FactoryScene):
         super().__init__()
@@ -13,17 +14,18 @@ class SimulationController(QObject):
         self.scene = scene
         self.event_bus: EventBus = scene.event_bus
 
-        # Subscribe to events
-        self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
-        self.event_bus.subscribe("store_payload", self.on_store_payload)
-        self.event_bus.subscribe("move_payload", self.on_move_payload)
-        self.event_bus.subscribe("update_payload_state", self.on_update_payload_state)
-        self.event_bus.subscribe("create_batch", self.on_create_batch)
-
         # Timer for stepping the simulation
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.running = False
+
+    def setup_subscriptions(self):
+        """Subscribe to relevant events from the simulation."""
+        self.event_bus.subscribe("dispatch_pallet", self.on_dispatch_pallet)
+        self.event_bus.subscribe("store_payload", self.on_store_payload)
+        self.event_bus.subscribe("move_payload", self.on_move_payload)
+        self.event_bus.subscribe("update_payload", self.on_update_payload_state)
+        self.event_bus.subscribe("create_batch", self.on_create_batch)
 
     def start(self):
         self.running = True
@@ -55,9 +57,9 @@ class SimulationController(QObject):
             print("Simulation completed (empty schedule).")
             self.stop()
 
-    # --------------------------
-    # Connect events to handlers
-    # --------------------------
+    # --------------
+    # Event handlers
+    # --------------
 
     def on_dispatch_pallet(self, data):
         pallet_id = data["id"]

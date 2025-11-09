@@ -2,7 +2,7 @@ from simulator.core.orders.order import RefillOrder, OpmOrder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.items.catalogue import Catalogue
-from simulator.core.utils.id_gen import IDGenerator
+from simulator.core.utils.id_gen_config import id_generator
 from simulator.config import EURO_PALLET_MAX_WEIGHT, EURO_PALLET_MAX_VOLUME, REQUESTED_ITEM_SCAN_INTERVAL
 import simpy
 
@@ -28,16 +28,14 @@ class InventoryManager:
         Time in simulation units for auto refill order scan interval
     """
     def __init__(self, env: simpy.Environment,
-                 id_gen: IDGenerator,
                  catalogue: Catalogue,
                  warehouse: Warehouse,
                  item_warehouse: ItemWarehouse,
                  refill_scan_interval = REQUESTED_ITEM_SCAN_INTERVAL):
         self.env = env
-        self._id_gen = id_gen
-        self._catalogue = catalogue
-        self._warehouse = warehouse
-        self._item_warehouse = item_warehouse
+        self.catalogue = catalogue
+        self.warehouse = warehouse
+        self.item_warehouse = item_warehouse
         self.process_auto_refill = self.env.process(self._listen_for_requested_items())
         self._refill_scan_interval = refill_scan_interval
 
@@ -57,7 +55,7 @@ class InventoryManager:
         """Place refill order(s) to warehouse queue."""
         # Calculate how many pallets are needed for order
         # Determined by max qty per pallet
-        max_qty_per_pallet = self._catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
+        max_qty_per_pallet = self.catalogue.qty_per_pallet(item_id, EURO_PALLET_MAX_VOLUME, EURO_PALLET_MAX_WEIGHT)
 
         # Get full pallets and leftover qty
         full_pallets_consumed = qty_requested // max_qty_per_pallet
@@ -68,35 +66,35 @@ class InventoryManager:
 
         # Generate full orders
         for _ in range(full_pallets_consumed):
-            order_id = self._id_gen.generate_id(type_digit=5, length=6)
+            order_id = id_generator.generate_id(type_digit=5, length=6)
             new_order = RefillOrder(order_id, order_time, item_id, max_qty_per_pallet)
-            self._warehouse.place_order(order=new_order, priority=order_time)
+            self.warehouse.place_order(order=new_order, priority=order_time)
 
         # Generate the last order from leftover qty
-        order_id = self._id_gen.generate_id(type_digit=5, length=6)
+        order_id = id_generator.generate_id(type_digit=5, length=6)
         new_order = RefillOrder(order_id, order_time, item_id, leftover_qty)
-        self._warehouse.place_order(order=new_order, priority=order_time)
+        self.warehouse.place_order(order=new_order, priority=order_time)
 
     def place_opm_order(self, items: dict[int,int]):
         """Place opm order to item warehouse queue."""
         # Generate the order instance
         order_time = self._sim_time()
-        order_id = self._id_gen.generate_id(type_digit=6, length=6)
+        order_id = id_generator.generate_id(type_digit=6, length=6)
         new_order = OpmOrder(order_id, order_time, items)
-        self._item_warehouse.place_order(new_order, priority=order_time)
+        self.item_warehouse.place_order(new_order, priority=order_time)
 
     def _listen_for_requested_items(self):
         """Listen for requested items in item warehouse."""
         while True:
             yield self.env.timeout(self._refill_scan_interval) # Simulate a scanning interval
 
-            if len(self._item_warehouse.requested_items_queue.items) == 0:
+            if len(self.item_warehouse.requested_items_queue.items) == 0:
                 continue
 
             # Scan the whole request queue for items and their quantities
             requested_items: dict[int,int] = {}
-            while len(self._item_warehouse.requested_items_queue.items) > 0:
-                request = yield self._item_warehouse.requested_items_queue.get()
+            while len(self.item_warehouse.requested_items_queue.items) > 0:
+                request = yield self.item_warehouse.requested_items_queue.get()
                 item_id = request.get('item_id')
                 qty = request.get('qty')
 

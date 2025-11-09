@@ -2,7 +2,7 @@ import simpy
 import heapq
 from abc import ABC, abstractmethod
 from simulator.core.orders.order import Order
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 import itertools
 
 class Stock(ABC):

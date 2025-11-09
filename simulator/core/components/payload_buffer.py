@@ -54,13 +54,18 @@ class PayloadBuffer(Component):
         """Update payload on buffer."""
         if self.can_load():
             self._payload = payload
-            payload.actual_location.update(coordinates=self._coordinate, element_name=f"{self}")
+            payload.location.update(coordinates=self._coordinate, element_name=f"{self}")
 
             log_manager.log(f"Loaded {payload}", f"{self}", sim_time=self.env.now)
 
             # Notify gui of event
             if self.event_bus is not None:
-                self.event_bus.emit("move_payload", {"id":payload.id, "coords":self._coordinate})
+                self.event_bus.emit("move_payload", {
+                    "id": payload.id,
+                    "type": payload.__class__.__name__,
+                    "location": f"{payload.location}",
+                    "sim_time": self.env.now,
+                    "coords": self._coordinate})
 
             # Fire event if buffer owner is waiting
             if self.on_load_event and not self.on_load_event.triggered:

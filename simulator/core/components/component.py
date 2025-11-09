@@ -1,6 +1,6 @@
 import simpy
 from abc import ABC, abstractmethod
-from simulator.gui.event_bus import EventBus
+from simulator.core.utils.event_bus import EventBus
 
 class Component(ABC):
     """

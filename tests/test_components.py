@@ -14,7 +14,7 @@ def test_conveyor_one_pallet(env, conveyor_factory, pallet_factory):
     # At the end, pallet should be in last slot
     slots = [p.id if p else None for p in conveyor.slots]
     assert slots == [None, 10000000]
-    assert pallet.actual_location.coordinates == (0,1)
+    assert pallet.location.coordinates == (0, 1)
 
 def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
     """Load one conveyor with two pallets"""
@@ -35,8 +35,8 @@ def test_conveyor_two_pallets(env, conveyor_factory, pallet_factory):
     # At the end, first pallet should be in last slot and second pallet in the middle
     slots = [p.id if p else None for p in conveyor.slots]
     assert slots == [None, 10000002, 10000001]
-    assert pallet1.actual_location.coordinates == (0, 2)
-    assert pallet2.actual_location.coordinates == (0, 1)
+    assert pallet1.location.coordinates == (0, 2)
+    assert pallet2.location.coordinates == (0, 1)
 
 def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     """Load one conveyor with pallet and transport to linked conveyor."""
@@ -58,8 +58,8 @@ def test_two_conveyors_one_pallet(env, conveyor_factory, pallet_factory):
     slots2 = [p.id if p else None for p in conveyor2.slots]
     assert slots1 == [None, None, None]
     assert slots2 == [None, 10000001]
-    assert pallet.actual_location.coordinates == (2,2)
-    assert pallet.actual_location.element_name == f"{conveyor2}"
+    assert pallet.location.coordinates == (2, 2)
+    assert pallet.location.element_name == f"{conveyor2}"
 
 def test_conveyor_with_buffers(env, conveyor_factory, buffer_factory, pallet_factory):
     """Load a pallet on input buffer -> handoff to conveyor -> load on output buffer."""
@@ -81,7 +81,7 @@ def test_conveyor_with_buffers(env, conveyor_factory, buffer_factory, pallet_fac
     env.run(until=8)
 
     # Assert pallet is on output buffer and other elements are free
-    assert pallet.actual_location.coordinates == (4,0)
+    assert pallet.location.coordinates == (4, 0)
     assert input_buffer.payload is None
     slots = [p.id if p else None for p in conveyor.slots]
     assert slots == [None, None, None]
@@ -105,7 +105,7 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     # Create
     test_order = RefillOrder(order_id=1, order_time=0, item_id=1, qty=50)
     pallet.merge_order(test_order, "depalletizer")
-    pallet.requested_dest.specify(element_id=1)
+    pallet.destination.specify(element_id=1)
 
     # load pallet at t=0
     def loader():
@@ -116,7 +116,7 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     env.run(until=5)
 
     # Assert pallet is being processed in depal
-    assert pallet.actual_location.coordinates == depal.coordinate
+    assert pallet.location.coordinates == depal.coordinate
     assert depal.current_item_id == test_order.item_id
     # There should be 40+ items left at this point
     assert depal.remaining_qty > 40
@@ -131,7 +131,7 @@ def test_one_pallet_depal(env, pallet_factory, depalletizer_factory, conveyor_fa
     assert depal._current_item_id is None and depal.remaining_qty == 0
 
     # Assert pallet is at output conveyor outfeed
-    assert pallet.actual_location.coordinates == output_conv.end
+    assert pallet.location.coordinates == output_conv.end
     assert pallet.order is None  # cleared after depal handoff
 
     # Assert batch builder is empty and item conveyor is full

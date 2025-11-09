@@ -3,15 +3,6 @@ from collections import deque
 from typing import Deque
 import simpy
 
-class ListHandler(logging.Handler):
-    """A logging handler that keeps a list of recent logs."""
-    def __init__(self, log_list: Deque):
-        super().__init__()
-        self.log_list = log_list
-
-    def emit(self, record):
-        self.log_list.append(self.format(record))
-
 def log_context(env: simpy.Environment):
     """Get sim time as log context."""
     return {'sim_time': round(env.now,1)}
@@ -28,7 +19,10 @@ class SimTimeFormatter(logging.Formatter):
             return super().formatTime(record, datefmt)
 
 class LogManager:
-    """Manages the application's logging, storing all logs and allowing for filtering."""
+    """
+    A stateful log system managing the application's logging,
+    storing all logs and allowing for filtering.
+    """
     def __init__(self, max_log_history: int = 100):
         self.all_logs: Deque[logging.LogRecord] = deque(maxlen=max_log_history)
         self.formatter = SimTimeFormatter("[%(asctime)s] [%(name)s] [%(levelname)s] - %(message)s")

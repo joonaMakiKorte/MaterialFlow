@@ -9,23 +9,32 @@ flowchart LR
             Catalogue[Catalogue]
             Component[Components]
             Payloads[Transportation Units]
-            LogManager[Logger]
         end
     end
 
     subgraph GUI["GUI Layer (PyQt)"]
         View[Main Window]
         Scene[Factory Scene]
+        Controller[Scene Controller]
         Items[Gui Items]
     end
 
     subgraph DB["Database Layer (sqlite)"]
+        Manager[Database Manager]
+        Listener[Database Listener]
+        Models[Database Models]
+    end
+
+    subgraph Logging["Log Manager (logging)"]
     end
 
     Config[Configuration] --> SimulationCore
     Data["Data (.json)"] --> SimulationCore
     SimulationCore -->|Event Bus| GUI
     GUI -->|User Interactions| SimulationCore
-    SimulationCore -->|Database Manager| DB
-    DB --> SimulationCore
+    GUI -->|User Interactions| DB
+    DB -->|Queries| GUI
+    SimulationCore -->|Event Bus| DB
+    SimulationCore -->|log| Logging
+```
 

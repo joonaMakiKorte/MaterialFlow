@@ -13,6 +13,7 @@ sequenceDiagram
     participant LogManager
     participant EventBus
     participant GUI
+    participant DatabaseManager
 
     PayloadConveyor1->>PayloadConveyor2: Check if can load
     PayloadConveyor2-->>PayloadConveyor1: Ready to load
@@ -25,6 +26,7 @@ sequenceDiagram
     PayloadConveyor2->>LogManager: log("Loaded payload {payload_id}", "PayloadConveyor2")
     PayloadConveyor2->>EventBus: Emit 'move_payload' event
     EventBus->>GUI: Update payload position on screen
+    EventBus->>DatabaseManager: Update payload location in database
 ```
 
 ### Placing orders in GUI
@@ -42,19 +44,24 @@ sequenceDiagram
     participant ProcurementSystem
     participant DatabaseManager
 
+    Note over GUI, ProcurementSystem: **Architectural Simplification**: For clarity, direct interactions are shown.<br/>In the actual implementation, components communicate via an **EventBus**,<br/>use a central **LogManager**, and the **DatabaseManager** is primarily accessed via event listeners.
+
     %% --- Section 1: Placing a New Order ---
     GUI->>InventoryManager: Place manual order
     InventoryManager->>Catalogue: Get item details
     Catalogue-->>InventoryManager: Item info
 
     InventoryManager->>Stock: Add to order queue
-    InventoryManager->>DatabaseManager: Save order record
+    
+    %% The arrow is now dashed to show an asynchronous event emission
+    InventoryManager-->>DatabaseManager: Save order record (via event)
     Note right of Stock: Order is now in the main queue, pending validation.
 
     %% --- Section 2: Stock's Internal Processing of the Order ---
     alt Stock has sufficient items
         Stock->>Stock: Validate order stock
-        Stock->>FactorySystem: Dispatch processable order
+        %% This is also likely an event
+        Stock-->>FactorySystem: Dispatch processable order (via event)
         Note right of FactorySystem: Order moves to the 'processable' queue.
 
     else Stock has insufficient items
@@ -69,7 +76,8 @@ sequenceDiagram
         Stock-->>InventoryManager: Aggregated list of needed items
         
         opt List is not empty
-            InventoryManager->>ProcurementSystem: Generate and send refill order
+            %% This is also likely an event
+            InventoryManager-->>ProcurementSystem: Generate and send refill order (via event)
             ProcurementSystem-->>InventoryManager: Refill order confirmed
         end
     end

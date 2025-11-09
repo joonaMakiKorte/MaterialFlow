@@ -1,6 +1,6 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from simulator.database.models import Base, Pallet, Order, RefillOrder, OpmOrder, Item
+from simulator.database.models import Base, Pallet, Order, RefillOrder, OpmOrder, Item, OrderStatus
 from simulator.core.utils.logging_config import log_manager
 import os
 
@@ -41,7 +41,7 @@ class DatabaseManager:
                 return
 
             new_item = Item(
-                item_id=item_id,
+                id=item_id,
                 name=name,
                 weight=weight,
                 category=category,
@@ -63,7 +63,7 @@ class DatabaseManager:
                 return
 
             new_pallet = Pallet(
-                pallet_id=pallet_id,
+                id=pallet_id,
                 location=location,
                 destination=destination,
                 order_id=order_id,
@@ -73,7 +73,7 @@ class DatabaseManager:
             session.commit()
 
 
-    def update_pallet(self, pallet_id: str, sim_time: float, **kwargs):
+    def update_pallet(self, pallet_id: int, sim_time: float, **kwargs):
         """
         A generic method to update any combination of pallet attributes.
         """
@@ -105,7 +105,7 @@ class DatabaseManager:
                 return
 
             refill_order = RefillOrder(
-                order_id=order_id,
+                id=order_id,
                 order_time=order_time,
                 item_id=item_id,
                 qty=qty
@@ -123,14 +123,14 @@ class DatabaseManager:
                 return
 
             opm_order = OpmOrder(
-                order_id=order_id,
+                id=order_id,
                 order_time=order_time,
                 items=items
             )
             session.add(opm_order)
             session.commit()
 
-    def update_order(self, order_id: int, status):
+    def update_order(self, order_id: int, status: OrderStatus):
         """Update order status."""
         with self.Session() as session:
             order = session.get(Order, order_id)

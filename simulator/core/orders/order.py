@@ -1,12 +1,12 @@
 from abc import ABC
-from enum import Enum, auto
+from enum import Enum
 
-class OrderStatus(Enum):
+class OrderStatus(str, Enum):
     """Enumeration of possible order states."""
-    PENDING = auto()
-    IN_PROGRESS = auto()
-    COMPLETED = auto()
-    CANCELLED = auto()
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
 
 class Order(ABC):
     """

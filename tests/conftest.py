@@ -12,6 +12,7 @@ from simulator.core.components.batch_builder import BatchBuilder
 from simulator.core.stock.warehouse import Warehouse
 from simulator.core.stock.item_warehouse import ItemWarehouse
 from simulator.core.components.junction import Junction
+from simulator.database.database_manager import DatabaseManager
 
 @pytest.fixture
 def env():
@@ -215,3 +216,18 @@ def inventory_manager(env, catalogue, warehouse, item_warehouse):
         item_warehouse=item_warehouse,
         refill_scan_interval=1
     )
+
+@pytest.fixture(scope="function")
+def db_manager(tmp_path):
+    """
+    Pytest fixture to create a DatabaseManager instance with a temporary,
+    isolated SQLite database for each test function.
+    """
+    db_file = tmp_path / "test_simulation.db"
+    db_url = f"sqlite:///{db_file}"
+
+    manager = DatabaseManager(db_url=db_url)
+    manager.setup_database(fresh_start=True)
+
+    # Yield the manager to the test function
+    yield manager

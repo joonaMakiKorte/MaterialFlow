@@ -1,3 +1,4 @@
+from simulator.core.orders.order import OrderStatus
 from simulator.database.database_manager import DatabaseManager
 from simulator.core.utils.event_bus import EventBus
 
@@ -45,7 +46,6 @@ class DatabaseListener:
         if data.get("type") != "SystemPallet":
             # Assert we only update data if type is SystemPallet
             return
-
         self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
@@ -68,7 +68,7 @@ class DatabaseListener:
         if type != "RefillOrder" and type != "OpmOrder":
             return
 
-        order_id=data['id'],
+        order_id=data['order_id']
         order_time = data['order_time']
 
         if type == "RefillOrder":

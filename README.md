@@ -21,16 +21,28 @@ The simulator manages:
 
 ## Architecture
 
-The project follows a **modular architecture**:
-- **`docs/`**: Full system documentation
-- **`data/`**: Item definitions and layout for the factory
-- **`tests.py`**: Pytest test scipts
-- **`simulator/`**
-  - **`core/`**: Simulation logic (SimPy processes, orders, stock, conveyors)
-  - **`gui/`**: PyQt6 GUI components, scene rendering, event handling
-  - **`database/`**
-  - **`config/`**: Global parameters and constants
-- **`app.py`**: Entry point for running the simulator
+```plaintext
+│
+├── data/                            # Contains static data files, e.g., items.json for seeding the DB.
+├── docs/                            # System documentation.
+├── simulator/                       # Main application source code.
+│   ├── core/                        # The core simulation logic.
+│   │   ├── components/              # The main components representing the physical factory layout.
+│   │   ├── factory/                 # The orchestration layer.
+│   │   ├── items/                   # Item master data.
+│   │   ├── orders/                  # Order classes and interface for placing orders.
+│   │   ├── stock/                   # Stock classes and inventory management logic.
+│   │   ├── transportation_units/    # Transportation units for factory payloads. 
+│   │   └── utils/                   # Core application-wide components (LogManager, EventBus).
+│   ├── database/                    # Database-related code (models, DatabaseManager, DatabaseListener).
+│   ├── simulation/                  # The core simulation logic (Factory, Pallet, Order classes).
+│   ├── gui/                         # PyQt6 user interface components (MainWindow, scenes).
+│   ├── application.py               # The composition root of the application.
+│   └── config.py                    # Simulation-wide constants.
+├── tests/                           # Pytest test suite.
+├── app.py                           # Main application entry point.
+└── README.md                        # This file.
+```
 
 ## Roadmap
 
@@ -40,12 +52,12 @@ The project follows a **modular architecture**:
 - Order-flow demo
   - Ordering from Warehouse to Material Flow system
 
-### v0.5 - Full Simulation Core (IN PROGRESS)
+### v0.5 - Full Simulation Core (DONE)
 - Material Flow routing and automatic orders.
 - Database integration.
-- Order log visualization.
+- Factory log visualization.
 
-### v0.6 — Advanced Visualization
+### v0.6 — Advanced Visualization (IN PROGRESS)
 - Add live speed controls.
 - Add detailed payload tracking overlay.
 - Real-time analytics dashboard.

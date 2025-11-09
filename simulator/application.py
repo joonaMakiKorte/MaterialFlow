@@ -26,7 +26,7 @@ class Application:
         self.factory = Factory(self.env, self.event_bus)
         self.scene = FactoryScene(self.factory)
         self.controller = SimulationController(self.env, self.scene)
-        self.window = MainWindow(self.factory, self.scene, self.controller)
+        self.window = MainWindow(self.factory, self.scene, self.controller, self.db_manager)
 
     def run(self):
         """

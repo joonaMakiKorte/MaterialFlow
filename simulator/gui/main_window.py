@@ -1,9 +1,11 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QMainWindow, QGraphicsView, QApplication, QToolBar
+from PyQt6.QtWidgets import QMainWindow, QGraphicsView, QApplication, QToolBar, QSplitter
 from simulator.gui.factory_scene import FactoryScene
+from simulator.gui.factory_view import FactoryView
 from simulator.gui.simulation_controller import SimulationController
 from simulator.gui.dialogs import SingleItemOrderDialog, MultiItemOrderDialog, LogDialog
+from simulator.gui.dashboard import Dashboard
 from simulator.core.factory.factory import Factory
 import math
 
@@ -11,7 +13,7 @@ class MainWindow(QMainWindow):
     """
 
     """
-    def __init__(self, factory: Factory, scene: FactoryScene, controller: SimulationController):
+    def __init__(self, factory: Factory, scene: FactoryScene, controller: SimulationController, db_manager):
         super().__init__()
         self.setWindowTitle("Material Flow")
         self.controller = controller
@@ -28,12 +30,16 @@ class MainWindow(QMainWindow):
         frame_geom.moveCenter(center_point)
         self.move(frame_geom.topLeft())
 
-        # Factory scene and view setup
-        self.view = QGraphicsView()
         self.scene = scene
-        self.scene.scale_scene(screen_width, screen_height)
-        self.view.setScene(self.scene)
-        self.setCentralWidget(self.view)
+        self.view = FactoryView(self.scene)
+
+        # Add QSpiller for factory and dashboard visualization
+        self.dashboard = Dashboard(db_manager)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(self.view)
+        splitter.addWidget(self.dashboard)
+        splitter.setSizes([int(screen_width * 0.7), int(screen_width * 0.3)])
+        self.setCentralWidget(splitter)
 
         # Initialize dialogs once
         self.refill_order_dialog = SingleItemOrderDialog(factory.inventory_manager, self)

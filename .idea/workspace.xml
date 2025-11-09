@@ -5,13 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Order creation">
+      <change afterPath="$PROJECT_DIR$/simulator/gui/dashboard.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/gui/factory_view.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/core/orders/order.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/orders/order.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/database/database_listener.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/database/database_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/application.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/application.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/factory_scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/factory_scene.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +64,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "database",
+    "git-widget-placeholder": "dashboard",
     "ignore.virus.scanning.warn.message": "true",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }

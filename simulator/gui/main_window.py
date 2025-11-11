@@ -35,11 +35,12 @@ class MainWindow(QMainWindow):
 
         # Add QSpiller for factory and dashboard visualization
         self.dashboard = Dashboard(db_manager)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self.view)
-        splitter.addWidget(self.dashboard)
-        splitter.setSizes([int(screen_width * 0.7), int(screen_width * 0.3)])
-        self.setCentralWidget(splitter)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.splitter.addWidget(self.view)
+        self.splitter.addWidget(self.dashboard)
+        self.splitter.setSizes([int(screen_width * 0.6), int(screen_width * 0.4)])
+
+        self.setCentralWidget(self.splitter)
 
         # Initialize dialogs once
         self.refill_order_dialog = SingleItemOrderDialog(factory.inventory_manager, self)
@@ -86,3 +87,18 @@ class MainWindow(QMainWindow):
         log_action = QAction("View Log", self)
         log_action.triggered.connect(self.log_dialog.show)
         toolbar.addAction(log_action)
+
+        toolbar.addSeparator()
+
+        # Dashboard toggle
+        dashboard_action = QAction("Dashboard", self)
+        dashboard_action.setCheckable(True)  # Make it a toggle button
+        dashboard_action.setChecked(True)  # Start with the dashboard visible
+        dashboard_action.triggered.connect(self.toggle_dashboard)  # Connect to our new method
+        toolbar.addAction(dashboard_action)
+
+    def toggle_dashboard(self, checked: bool):
+        """
+        Shows or hides the dashboard widget based on the checkbox state.
+        """
+        self.dashboard.setVisible(checked)

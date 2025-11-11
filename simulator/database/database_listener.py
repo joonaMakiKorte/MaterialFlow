@@ -88,5 +88,6 @@ class DatabaseListener:
     def on_order_updated(self, data: dict):
         self.db_manager.update_order(
             order_id=data['order_id'],
-            status=data['status']
+            status=data.get('status'),
+            completion_time=data.get('completion_time')
         )

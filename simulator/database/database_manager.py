@@ -80,15 +80,12 @@ class DatabaseManager:
         with self.Session() as session:
             pallet = session.get(Pallet, pallet_id)
             if not pallet:
-                print(f"DATABASE-ERROR: Cannot update non-existent pallet '{pallet_id}'.")
                 return
 
             # Dynamically update attributes from keyword arguments
             for key, value in kwargs.items():
                 if hasattr(pallet, key):
                     setattr(pallet, key, value)
-                else:
-                    print(f"DATABASE-WARN: Ignoring unknown attribute '{key}' for Pallet update.")
 
             # Update sim time
             pallet.last_updated_sim_time = sim_time
@@ -130,12 +127,71 @@ class DatabaseManager:
             session.add(opm_order)
             session.commit()
 
-    def update_order(self, order_id: int, status: OrderStatus):
-        """Update order status."""
+    def update_order(self, order_id: int, **kwargs):
+        """
+        A generic method to update any combination of order attributes.
+        """
         with self.Session() as session:
             order = session.get(Order, order_id)
             if not order:
                 return
 
-            order.status = status
+            # Dynamically update attributes from keyword arguments
+            for key, value in kwargs.items():
+                if hasattr(order, key):
+                    setattr(order, key, value)
             session.commit()
+
+    def query_orders(self, **kwargs) -> list[Order]:
+        """
+        A flexible method to query the orders table with dynamic filters.
+        """
+        with self.Session() as session:
+            try:
+                # Start with a base query on the polymorphic Order class
+                query = session.query(Order)
+
+                # If we need to filter by item_id, we must join with RefillOrder
+                if 'item_id' in kwargs:
+                    query = query.join(RefillOrder)
+
+                # Separate control args from filter args
+                control_args = ['order_by', 'limit']
+                filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
+
+                for key, value in filter_kwargs.items():
+                    if key == 'min_order_time':
+                        query = query.filter(Order.order_time >= value)
+                    elif key == 'max_order_time':
+                        query = query.filter(Order.order_time <= value)
+                    elif key == 'item_id':
+                        query = query.filter(RefillOrder.item_id == value)
+                    elif hasattr(Order, key):
+                        # This handles direct attributes like 'id', 'type', 'status'
+                        query = query.filter(getattr(Order, key) == value)
+                    else:
+                        print(f"Unknown filter key '{key}' ignored in query_orders.")
+
+                # Apply ordering
+                if 'order_by' in kwargs:
+                    order_by_col = kwargs['order_by']
+                    if order_by_col.startswith('-'):
+                        # Descending order
+                        col_name = order_by_col[1:]
+                        if hasattr(Order, col_name):
+                            query = query.order_by(sqlalchemy.desc(getattr(Order, col_name)))
+                    else:
+                        # Ascending order
+                        if hasattr(Order, order_by_col):
+                            query = query.order_by(getattr(Order, order_by_col))
+
+                # --- Apply Limit ---
+                if 'limit' in kwargs:
+                    query = query.limit(kwargs['limit'])
+
+                # Execute the final query
+                return query.all()
+
+            except Exception as e:
+                print("An error occurred during order query.")
+                return []

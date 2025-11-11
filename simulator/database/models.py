@@ -34,6 +34,7 @@ class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column(sqlalchemy.String) # Discriminator column
     order_time: Mapped[float] = mapped_column(sqlalchemy.Float)
+    completion_time: Mapped[float] = mapped_column(sqlalchemy.Float, nullable=True, default=None)
     status: Mapped[OrderStatus] = mapped_column(sqlalchemy.Enum(OrderStatus,
             name="orderstatus",
             values_callable=lambda obj: [e.value for e in obj],

@@ -4,13 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="Order creation">
-      <change afterPath="$PROJECT_DIR$/simulator/gui/dashboard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulator/gui/factory_view.py" afterDir="false" />
+    <list default="true" id="c4e0c265-0f21-444f-8aeb-252076ac4bcb" name="Changes" comment="New dashboard for analytics">
+      <change afterPath="$PROJECT_DIR$/simulator/gui/table_models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/simulator/gui/widgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/application.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/application.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulator/gui/factory_scene.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/factory_scene.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/core/components/depalletizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_listener.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_listener.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/database_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/database_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/database/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulator/gui/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulator/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulator/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,23 +56,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.app.executor": "Run",
-    "Python.component_items.executor": "Run",
-    "Python.database_listener.executor": "Run",
-    "Python.factory_scene.executor": "Run",
-    "Python.inventory_manager.executor": "Run",
-    "Python.main_window.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "dashboard",
-    "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.component_items.executor&quot;: &quot;Run&quot;,
+    &quot;Python.database_listener.executor&quot;: &quot;Run&quot;,
+    &quot;Python.factory_scene.executor&quot;: &quot;Run&quot;,
+    &quot;Python.inventory_manager.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_window.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dashboard&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\joona\PycharmProjects\MaterialFlow\simulator\core\utils" />
@@ -325,7 +329,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762609477173</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="New dashboard for analytics">
+      <option name="closed" value="true" />
+      <created>1762724265349</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1762724265349</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -340,7 +352,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implementing Order-class logic" />
     <MESSAGE value="Core class modelling, json for items" />
     <MESSAGE value="Conveyor logic, conveyor tests" />
     <MESSAGE value="Testing for connected conveyors" />
@@ -365,6 +376,7 @@
     <MESSAGE value="New tables, more intuitive app initialization" />
     <MESSAGE value="Created items table" />
     <MESSAGE value="Order creation" />
-    <option name="LAST_COMMIT_MESSAGE" value="Order creation" />
+    <MESSAGE value="New dashboard for analytics" />
+    <option name="LAST_COMMIT_MESSAGE" value="New dashboard for analytics" />
   </component>
 </project>

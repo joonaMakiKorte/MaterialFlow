@@ -1,23 +1,36 @@
-from PyQt6.QtCore import QTimer, QObject, pyqtSlot
+from PyQt6.QtCore import QTimer, QObject, pyqtSlot, pyqtSignal
 import simpy
+import time
 from simulator.gui.factory_scene import FactoryScene
 from simulator.core.utils.event_bus import EventBus
 
+
 class SimulationController(QObject):
     """
-    Controls simulation running.
+    Controls simulation running with real-time pacing.
     Listens for simulation events and persists them to the factory scene.
     """
+    time_changed = pyqtSignal(int)
+    speed_changed = pyqtSignal(float)
+
     def __init__(self, env: simpy.Environment, scene: FactoryScene):
         super().__init__()
         self.env = env
         self.scene = scene
         self.event_bus: EventBus = scene.event_bus
 
+        # Simulation speed settings
+        self.speeds = [0.5, 1.0, 1.5, 3.0]
+        self.speed_index = 1  # Default to 1.0x
+
         # Timer for stepping the simulation
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.running = False
+        self.last_tick_real_time = 0
+
+        # Interval for GUI smoothness. 20ms = 50 updates/sec
+        self.gui_update_interval_ms = 20
 
     def setup_subscriptions(self):
         """Subscribe to relevant events from the simulation."""
@@ -28,28 +41,51 @@ class SimulationController(QObject):
         self.event_bus.subscribe("create_batch", self.on_create_batch)
 
     def start(self):
+        if self.running:
+            return
         self.running = True
-        self.timer.start(10)  # 20 ticks per second (real time)
+        # Record the current real time to calculate elapsed time in the first tick
+        self.last_tick_real_time = time.time()
+        self.timer.start(self.gui_update_interval_ms)
 
     def stop(self):
         self.running = False
         self.timer.stop()
 
+    def change_speed(self):
+        """Cycles to the next speed."""
+        self.speed_index = (self.speed_index + 1) % len(self.speeds)
+        new_speed = self.speeds[self.speed_index]
+        self.speed_changed.emit(new_speed)
+
     @pyqtSlot()
     def tick(self):
-        """Advance simulation according to sim_speed and update GUI."""
+        """
+        Advances the simulation based on the real time that has passed since the last tick.
+        This ensures 1 simulation unit = 1 second at 1.0x speed.
+        """
         if not self.running:
             return
 
-        try:
-            # Advance until at least one event executes or we reach the target time
-            next_event_time = self.env.peek()
+        current_real_time = time.time()
+        real_time_elapsed = current_real_time - self.last_tick_real_time
+        self.last_tick_real_time = current_real_time
 
-            if next_event_time != float('inf'):
-                # Step the environment once — SimPy will advance its own now correctly
-                self.env.step()
-            else:
-                # No more events left
+        # Get the current speed multiplier
+        current_speed_multiplier = self.speeds[self.speed_index]
+
+        # Calculate how much simulation time should pass
+        # At 1.0x speed, sim_time_to_advance = real_time_elapsed
+        sim_time_to_advance = real_time_elapsed * current_speed_multiplier
+        target_sim_time = self.env.now + sim_time_to_advance
+
+        try:
+            # Run the simulation until the calculated target time
+            self.env.run(until=target_sim_time)
+            self.time_changed.emit(int(self.env.now))
+
+            # Check if the simulation has finished
+            if self.env.peek() == float('inf'):
                 print("Simulation completed.")
                 self.stop()
 

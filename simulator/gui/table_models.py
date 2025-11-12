@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QAbstractTableModel, Qt
-from simulator.database.models import Order
+from simulator.database.models import Order, Item
 
 class OrderTableModel(QAbstractTableModel):
     """
@@ -29,7 +29,6 @@ class OrderTableModel(QAbstractTableModel):
         elif column == 1:
             return order.type
         elif column == 2:
-            # Display the enum member's name
             return order.status.name
         elif column == 3:
             return f"{order.order_time:.2f}"
@@ -44,6 +43,56 @@ class OrderTableModel(QAbstractTableModel):
         return None
 
     def set_data(self, data: list[Order]):
+        """Resets the model with new data."""
+        self.beginResetModel()
+        self._data = data
+        self.endResetModel()
+
+
+class ItemTableModel(QAbstractTableModel):
+    """
+    A custom model to display a list of Item objects in a QTableView.
+    """
+
+    def __init__(self, data: list[Item]):
+        super().__init__()
+        self._data = data
+        self._headers = ["Item ID", "Name", "Weight (kg)", "Category", "Volume (L)", "Stackable"]
+
+    def rowCount(self, parent=None):
+        return len(self._data)
+
+    def columnCount(self, parent=None):
+        return len(self._headers)
+
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
+            return None
+
+        item = self._data[index.row()]
+        column = index.column()
+
+        if column == 0:
+            return item.id
+        elif column == 1:
+            return item.name
+        elif column == 2:
+            return f"{item.weight:.2f}"
+        elif column == 3:
+            return item.category
+        elif column == 4:
+            return f"{item.volume:.2f}"
+        elif column == 5:
+            return "Yes" if item.stackable else "No"
+
+        return None
+
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
+            return self._headers[section]
+        return None
+
+    def set_data(self, data: list[Item]):
         """Resets the model with new data."""
         self.beginResetModel()
         self._data = data

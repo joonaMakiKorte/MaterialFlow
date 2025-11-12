@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer
 from simulator.core.orders.inventory_manager import InventoryManager
 from simulator.core.utils.logging_config import log_manager
+import logging
+logger = logging.getLogger(__name__)
 
 class SingleItemOrderDialog(QDialog):
     def __init__(self, inventory_manager: InventoryManager, parent=None):
@@ -172,7 +174,7 @@ class SingleItemOrderDialog(QDialog):
             self.inventory_manager.place_refill_order(item, quantity)
             self.hide()
         except Exception as e:
-            print(f"Failed to place order: {e}")
+            logger.error(f"Failed to place RefillOrder: {e}")
 
     def show_dialog(self):
         self.show()
@@ -352,7 +354,6 @@ class MultiItemOrderDialog(QDialog):
     def _on_place_order(self):
         """Gathers items and quantities and places the order."""
         if self.order_table.rowCount() == 0:
-            print("No items in the order.")
             return
 
         items_to_order = {}
@@ -361,7 +362,11 @@ class MultiItemOrderDialog(QDialog):
             quantity = int(self.order_table.item(row, 2).text())
             items_to_order[item_id] = quantity
 
-        self.inventory_manager.place_opm_order(items_to_order)
+        try:
+            self.inventory_manager.place_opm_order(items_to_order)
+            self.hide()
+        except Exception as e:
+            logger.error(f"Failed to place OpmOrder: {e}")
 
         # Clear the table and close the dialog after placing the order
         self.order_table.setRowCount(0)
@@ -416,7 +421,6 @@ class LogDialog(QDialog):
             }
         """)
 
-        # --- Layouts and Widgets ---
         layout = QVBoxLayout(self)
 
         # Filter controls
@@ -446,7 +450,7 @@ class LogDialog(QDialog):
         button_layout.addWidget(close_btn)
         layout.addLayout(button_layout)
 
-        # --- Timer for live polling ---
+        # Time for live polling
         self.timer = QTimer(self)
         self.timer.setInterval(self.REFRESH_INTERVAL_MS)
         self.timer.timeout.connect(self._update_logs)

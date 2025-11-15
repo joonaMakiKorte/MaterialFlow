@@ -1,5 +1,6 @@
 from PyQt6.QtCore import Qt
-from simulator.gui.table_models import OrderTableModel, ItemTableModel
+from PyQt6.QtGui import QIntValidator
+from simulator.gui.table_models import OrderTableModel, ItemTableModel, PalletTableModel
 from simulator.database.database_manager import DatabaseManager
 from simulator.database.models import OrderStatus, Order, RefillOrder, OpmOrder
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QPushButton,
@@ -39,6 +40,19 @@ class OrderQueryWidget(QWidget):
         form_layout.addRow("Status:", self.status_combo)
         form_layout.addRow("Type:", self.type_combo)
 
+        self.min_time_input = QLineEdit()
+        self.max_time_input = QLineEdit()
+        self.min_time_input.setPlaceholderText("e.g., 100.5")
+        self.max_time_input.setPlaceholderText("e.g., 500.0")
+
+        # Create a validator to accept integers from 0 to 9999
+        int_validator = QIntValidator(0, 9999, self)
+        self.min_time_input.setValidator(int_validator)
+        self.max_time_input.setValidator(int_validator)
+
+        form_layout.addRow("Min Order Time:", self.min_time_input)
+        form_layout.addRow("Max Order Time:", self.max_time_input)
+
         main_layout.addWidget(filter_groupbox)
 
         self.search_button = QPushButton("Search Orders")
@@ -49,33 +63,88 @@ class OrderQueryWidget(QWidget):
         self.order_table = QTableView()
         self.table_model = OrderTableModel([])
         self.order_table.setModel(self.table_model)
-
-        self.order_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        header = self.order_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         self.order_table.setAlternatingRowColors(True)
 
         main_layout.addWidget(self.order_table, stretch=1)
 
     def _on_search_clicked(self):
         kwargs = {}
+
         status = self.status_combo.currentData()
-        if status: kwargs['status'] = status
+        if status:
+            kwargs['status'] = status
+
         order_type = self.type_combo.currentData()
-        if order_type: kwargs['type'] = order_type
+        if order_type:
+            kwargs['type'] = order_type
+
+        min_time_str = self.min_time_input.text()
+        if min_time_str:
+            kwargs['min_order_time'] = float(min_time_str)
+
+        max_time_str = self.max_time_input.text()
+        if max_time_str:
+            kwargs['max_order_time'] = float(max_time_str)
 
         kwargs['order_by'] = '-order_time'
 
         results = self.db_manager.query_orders(**kwargs)
         self.table_model.set_data(results)
 
+
 class PalletQueryWidget(QWidget):
-    """Placeholder for the Pallet query view."""
+    """
+    A widget to display currently active (non-stored) pallets.
+    """
+
     def __init__(self, db_manager: DatabaseManager, parent=None):
         super().__init__(parent)
         self.db_manager = db_manager
-        layout = QVBoxLayout(self)
-        label = QLabel("Pallet Table View - Coming Soon")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(label)
+        self._init_ui()
+        self._on_refresh_clicked()
+
+    def _init_ui(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        container_box = QGroupBox("Active Pallets")
+        container_layout = QVBoxLayout(container_box)
+        main_layout.addWidget(container_box)
+
+        self.refresh_button = QPushButton("Refresh")
+        self.refresh_button.clicked.connect(self._on_refresh_clicked)
+        container_layout.addWidget(self.refresh_button)
+
+        self.pallet_table = QTableView()
+        self.table_model = PalletTableModel([])
+        self.pallet_table.setModel(self.table_model)
+        header = self.pallet_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        self.pallet_table.setAlternatingRowColors(True)
+        self.pallet_table.setSortingEnabled(False) # Sorting handled by DB query
+
+        container_layout.addWidget(self.pallet_table, stretch=1)
+
+    def _on_refresh_clicked(self):
+        """
+        Queries the database for active pallets and updates the table.
+        """
+        results = self.db_manager.query_pallets(
+            stored=False,
+            order_by='-last_updated_sim_time'
+        )
+        self.table_model.set_data(results)
+        self.pallet_table.resizeColumnsToContents()
 
 
 class ItemQueryWidget(QWidget):
@@ -120,8 +189,7 @@ class ItemQueryWidget(QWidget):
         self.item_table = QTableView()
         self.table_model = ItemTableModel([])  # Assumes ItemTableModel is defined
         self.item_table.setModel(self.table_model)
-
-        self.item_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.item_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.item_table.setSortingEnabled(True)
 
         main_layout.addWidget(self.item_table)
@@ -155,6 +223,7 @@ class ItemQueryWidget(QWidget):
 
         items = self.db_manager.query_items(**kwargs)
         self.table_model.set_data(items)
+
 
 class ChartsWidget(QWidget):
     """Placeholder for the Charts view."""

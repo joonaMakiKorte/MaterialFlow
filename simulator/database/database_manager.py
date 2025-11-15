@@ -82,15 +82,13 @@ class DatabaseManager:
             try:
                 query = session.query(Item)
 
-                control_args = ['order_by', 'limit']
+                control_args = ['order_by']
                 filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
 
                 for key, value in filter_kwargs.items():
                     if key == 'name_contains':
-                        # Use .ilike() for case-insensitive partial string matching
                         query = query.filter(Item.name.ilike(f"%{value}%"))
                     elif hasattr(Item, key):
-                        # Handles direct attribute matches like 'category' and 'stackable'
                         query = query.filter(getattr(Item, key) == value)
                     else:
                         logger.warning(f"Unknown filter key '{key}' ignored in item query.")
@@ -106,12 +104,7 @@ class DatabaseManager:
                         if hasattr(Item, order_by_col):
                             query = query.order_by(getattr(Item, order_by_col))
                 else:
-                    # Sensible default ordering
                     query = query.order_by(Item.id)
-
-                # Apply limit
-                if 'limit' in kwargs:
-                    query = query.limit(kwargs['limit'])
 
                 results = query.all()
                 return results
@@ -123,8 +116,7 @@ class DatabaseManager:
     # Pallet operations
     # -----------------
 
-    def insert_pallet(self, pallet_id: int, location: str, destination: str | None,
-                      order_id: int | None, sim_time: float):
+    def insert_pallet(self, pallet_id: int, location: str, sim_time: float):
         """Insert a new pallet record, rolling back on error."""
         session = self.Session()
         try:
@@ -133,8 +125,7 @@ class DatabaseManager:
                 return
 
             new_pallet = Pallet(
-                id=pallet_id, location=location, destination=destination,
-                order_id=order_id, last_updated_sim_time=sim_time
+                id=pallet_id, location=location, last_updated_sim_time=sim_time
             )
             session.add(new_pallet)
             session.commit()
@@ -169,6 +160,47 @@ class DatabaseManager:
             session.rollback()
         finally:
             session.close()
+
+    def query_pallets(self, **kwargs) -> list[Pallet]:
+        """
+        A flexible method to query the pallets table with dynamic filters.
+        """
+        with self.Session() as session:
+            try:
+                query = session.query(Pallet)
+
+                # Separate control args from filter args
+                control_args = ['order_by']
+                filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
+
+                # Apply dynamic filters
+                for key, value in filter_kwargs.items():
+                    if hasattr(Pallet, key):
+                        query = query.filter(getattr(Pallet, key) == value)
+                    else:
+                        logger.warning(f"Unknown filter key '{key}' ignored in pallet query.")
+
+                # Apply ordering
+                if 'order_by' in kwargs:
+                    order_by_col = kwargs['order_by']
+                    if order_by_col.startswith('-'):
+                        # Descending order (e.g., '-last_updated_sim_time')
+                        col_name = order_by_col[1:]
+                        if hasattr(Pallet, col_name):
+                            query = query.order_by(sqlalchemy.desc(getattr(Pallet, col_name)))
+                    else:
+                        # Ascending order
+                        if hasattr(Pallet, order_by_col):
+                            query = query.order_by(getattr(Pallet, order_by_col))
+                else:
+                    # Default ordering if not specified
+                    query = query.order_by(Pallet.id)
+
+                results = query.all()
+                return results
+            except Exception as e:
+                logger.error(f"An error occurred during pallet query with filters {kwargs}.", exc_info=True)
+                return []
 
     # ----------------
     # Order operations
@@ -249,7 +281,7 @@ class DatabaseManager:
                     query = query.join(RefillOrder)
 
                 # Separate control args from filter args
-                control_args = ['order_by', 'limit']
+                control_args = ['order_by']
                 filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
 
                 for key, value in filter_kwargs.items():
@@ -257,8 +289,6 @@ class DatabaseManager:
                         query = query.filter(Order.order_time >= value)
                     elif key == 'max_order_time':
                         query = query.filter(Order.order_time <= value)
-                    elif key == 'item_id':
-                        query = query.filter(RefillOrder.item_id == value)
                     elif hasattr(Order, key):
                         query = query.filter(getattr(Order, key) == value)
                     else:

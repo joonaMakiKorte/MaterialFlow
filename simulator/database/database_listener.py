@@ -12,7 +12,7 @@ class DatabaseListener:
         """Subscribe to relevant events from the simulation."""
         self.event_bus.subscribe("create_pallet", self.on_pallet_created)
         self.event_bus.subscribe("update_payload", self.on_pallet_updated)
-        self.event_bus.subscribe("store_payload", self.on_pallet_moved)
+        self.event_bus.subscribe("store_payload", self.on_pallet_stored)
         self.event_bus.subscribe("move_payload", self.on_pallet_moved)
         self.event_bus.subscribe("create_item", self.on_item_created)
         self.event_bus.subscribe("create_order", self.on_order_created)
@@ -36,9 +36,7 @@ class DatabaseListener:
     def on_pallet_created(self, data: dict):
         self.db_manager.insert_pallet(
             pallet_id=data['pallet_id'],
-            location=data.get('location'),
-            destination=data.get('destination'),
-            order_id=data.get('order_id'),
+            location=data['location'],
             sim_time=data['sim_time']
         )
 
@@ -50,7 +48,20 @@ class DatabaseListener:
             pallet_id=data['id'],
             sim_time=data['sim_time'],
             order_id=data.get('order_id'),
-            destination=data.get('destination')
+            destination=data.get('destination'),
+            stored=False
+        )
+
+    def on_pallet_stored(self, data: dict):
+        if data.get("type") != "SystemPallet":
+            return
+
+        self.db_manager.update_pallet(
+            pallet_id=data['id'],
+            sim_time=data['sim_time'],
+            location=data.get('location'),
+            destination=None,
+            stored=True
         )
 
     def on_pallet_moved(self, data: dict):
@@ -60,7 +71,7 @@ class DatabaseListener:
         self.db_manager.update_pallet(
             pallet_id=data['id'],
             sim_time=data['sim_time'],
-            location=data.get('location')
+            location=data.get('location'),
         )
 
     def on_order_created(self, data: dict):

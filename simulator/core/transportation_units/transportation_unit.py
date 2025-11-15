@@ -12,7 +12,7 @@ class Destination:
         self.id = element_id
 
     def __repr__(self):
-        return f"{self.type}[{self.id}]"
+        return f"{self.type}" + (f"({self.id}" if self.id else "")
 
 @dataclass
 class Location:
@@ -27,7 +27,7 @@ class Location:
             self.element_name = element_name
 
     def __repr__(self):
-        return f"{self.element_name}({self.coordinates})"
+        return f"{self.element_name}{self.coordinates}"
 
 class TransportationUnit(ABC):
     def __init__(self, unit_id: int, current_location: Location):

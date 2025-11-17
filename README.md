@@ -19,6 +19,18 @@ The simulator manages:
 
 ---
 
+## Simulation Demo
+![Simulation Demo](docs/demo1.gif)
+
+This demo highlights the progress up to version 0.6, demonstrating the complete flow
+from user interaction to data persistence. Key features shown include:
+- **Live Simulation**: Starting, stopping, and controlloing the speed of the discrete-event simulation.
+- **Order Flow**: Placing new material flow orders which are then processed by the factory simulation.
+- **Data Layer**: Querying the database in real-time for active pallets and historical orders via the interactive dashboard.
+- **Log Visualization**: Accessing a detailed log of all simulation events. 
+
+---
+
 ## Architecture
 
 ```plaintext
@@ -47,25 +59,26 @@ The simulator manages:
 ## Roadmap
 
 ### v0.4 — Simulation Core DEMO (DONE)
-- Core simulation & SCADA-style GUI
-- Event bus communication layer
-- Order-flow demo
-  - Ordering from Warehouse to Material Flow system
+- Core simulation & SCADA-style GUI.
+- Event bus communication layer.
+- Order-flow demo.
+  - Ordering from Warehouse to Material Flow system.
 
-### v0.5 - Full Simulation Core (DONE)
-- Material Flow routing and automatic orders.
+### v0.5 — Data Layer (DONE)
 - Database integration.
+- Querying the database.
 - Factory log visualization.
 
 ### v0.6 — Advanced Visualization (IN PROGRESS)
 - Add live speed controls.
-- Add detailed payload tracking overlay.
 - Real-time analytics dashboard.
+- KPI charts
 
 ### v1.0 — Full Material Flow Simulator (GOAL)
-- Support multiple factory layouts.
+- Full Order-flow.
+  - Building full orders from multiple items.
 - Enable data export and analysis.
-- Error logging and handling. 
+- Starting simulation from previous save. 
   
 ## Technologies Used
 

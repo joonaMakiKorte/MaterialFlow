@@ -9,8 +9,29 @@ def log_context(env: simpy.Environment):
 
 class SimTimeFormatter(logging.Formatter):
     """
-    A custom logging formatter for using simulation time as timestamps in logs.
+    A custom logging formatter that uses simulation time as the timestamp
+    and the dynamic component_id as the logger name.
     """
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        Overrides the default format method to dynamically insert component_id.
+        """
+        if hasattr(record, 'component_id'):
+            original_name = record.name
+            record.name = record.component_id
+
+            # Let the parent class do the heavy lifting of formatting
+            formatted_message = super().format(record)
+
+            # Restore the original name in case the record is used elsewhere
+            record.name = original_name
+
+            return formatted_message
+
+        # If no component_id is present, format as usual
+        return super().format(record)
+
     def formatTime(self, record, datefmt=None):
         if 'sim_time' in record.__dict__:
             # Round the simulation time for cleaner display
@@ -26,15 +47,13 @@ class LogManager:
     def __init__(self, max_log_history: int = 100):
         self.all_logs: Deque[logging.LogRecord] = deque(maxlen=max_log_history)
         self.formatter = SimTimeFormatter("[%(asctime)s] [%(name)s] [%(levelname)s] - %(message)s")
-        self._setup_logging()
 
-    def _setup_logging(self):
-        """Configures the root logger."""
-        root_logger = logging.getLogger()
-        root_logger.setLevel(logging.INFO)
+        self.sim_logger = logging.getLogger("simulation_events")
+        self.sim_logger.setLevel(logging.INFO)
+        self.sim_logger.propagate = False
 
-        if root_logger.hasHandlers():
-            root_logger.handlers.clear()
+        if self.sim_logger.hasHandlers():
+            self.sim_logger.handlers.clear()
 
         # A handler that will store all log records in our deque
         class StoreRecordsHandler(logging.Handler):
@@ -46,19 +65,18 @@ class LogManager:
                 self.log_list.append(record)
 
         store_handler = StoreRecordsHandler(self.all_logs)
-        root_logger.addHandler(store_handler)
+        self.sim_logger.addHandler(store_handler)
 
     def log(self, message: str, component_id: str, sim_time: float, level=logging.INFO):
         """
-        Logs a message from a component.
+        Logs a simulation-specific message, storing it for the UI.
         """
         extra = {
             'sim_time': sim_time,
             'component_id': component_id
         }
 
-        logger = logging.getLogger(component_id)
-        logger.log(level, message, extra=extra)
+        self.sim_logger.log(level, message, extra=extra)
 
     def get_unique_component_ids(self) -> list[str]:
         """

@@ -34,6 +34,7 @@ class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column(sqlalchemy.String) # Discriminator column
     order_time: Mapped[float] = mapped_column(sqlalchemy.Float)
+    completion_time: Mapped[float] = mapped_column(sqlalchemy.Float, nullable=True, default=None)
     status: Mapped[OrderStatus] = mapped_column(sqlalchemy.Enum(OrderStatus,
             name="orderstatus",
             values_callable=lambda obj: [e.value for e in obj],
@@ -104,6 +105,7 @@ class Pallet(Base):
     # Columns in the 'pallets' table
     id: Mapped[int] = mapped_column(primary_key=True)
     location: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
-    destination: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True)
-    order_id: Mapped[int] = mapped_column(sqlalchemy.Integer, nullable=True)
-    last_updated_sim_time: Mapped[float] = mapped_column(sqlalchemy.Float)
+    destination: Mapped[str] = mapped_column(sqlalchemy.String, nullable=True, default=None)
+    order_id: Mapped[int] = mapped_column(sqlalchemy.Integer, nullable=True, default=None)
+    stored: Mapped[bool] = mapped_column(sqlalchemy.Boolean, nullable=False, default=True)
+    last_updated_sim_time: Mapped[float] = mapped_column(sqlalchemy.Float, nullable=False)

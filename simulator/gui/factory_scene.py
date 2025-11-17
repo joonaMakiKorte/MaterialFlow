@@ -22,13 +22,23 @@ class FactoryScene(QGraphicsScene):
         # Store instance for event bus
         self.event_bus = factory.event_bus
 
+        self.scale = 0.0
+        self.is_scene_setup = False # Flag to ensure one-time setup
+
         # Load items based on factory layout
         load_items(component_items=self.component_items,
                    factory=factory)
 
-        self.scale = 0.0  # Calculated when scaling scene to screen
+        # Compute factory dimensions once at the start
+        self._compute_factory_dimensions()
 
-
+    def _setup_scene_items(self):
+        """
+        Initial one-time setup to add all graphical items to the scene.
+        """
+        for gui_item in self.component_items.values():
+            self.addItem(gui_item)
+        self.is_scene_setup = True
 
     def _compute_factory_dimensions(self):
         """Get bounding dimensions of factory."""
@@ -40,8 +50,8 @@ class FactoryScene(QGraphicsScene):
         self.factory_w = self.max_x - self.min_x
         self.factory_h = self.max_y - self.min_y
 
-    def _compute_initial_scene_scale(self, screen_w, screen_h):
-        """Compute initial scale based on screen dimensions."""
+    def _compute_scene_scale(self, screen_w, screen_h):
+        """Compute scale based on screen dimensions."""
         # Base pixel scale
         base_scale = 100.0
 
@@ -79,16 +89,28 @@ class FactoryScene(QGraphicsScene):
             self.addItem(gui_item)
 
     def scale_scene(self, view_w: int, view_h: int):
-        """Scale each component to scene."""
-        # Compute factory dimensions from component data
-        self._compute_factory_dimensions()
+        """
+        Calculates the new scale and updates the position and size of all items.
+        This is called by the FactoryView's resizeEvent.
+        """
+        # Ensure items are added to the scene only once
+        if not self.is_scene_setup:
+            self._setup_scene_items()
 
-        # Compute and apply scale
-        scale = self._compute_initial_scene_scale(view_w, view_h)
-        self.scale = scale
+        # Compute and store the new scale
+        self.scale = self._compute_scene_scale(view_w, view_h)
 
-        # Position and scale all items
-        self._add_components()
+        normalized_scale = self.scale / 100.0
+
+        # Update positions and scales of all components
+        for gui_item in self.component_items.values():
+            pixel_x, pixel_y = self._map_to_scene(gui_item.x, gui_item.y)
+            gui_item.setPos(pixel_x, pixel_y)
+            gui_item.setScale(normalized_scale)
+
+        # Update scales of all existing payloads
+        for payload_item in self.payload_items.values():
+            payload_item.setScale(normalized_scale)
 
     # --------------
     # Scene updating

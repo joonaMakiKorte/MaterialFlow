@@ -1,9 +1,9 @@
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from simulator.database.models import Base, Pallet, Order, RefillOrder, OpmOrder, Item, OrderStatus
-from simulator.core.utils.logging_config import log_manager
 import os
-
+import logging
+logger = logging.getLogger(__name__)
 
 # Create the SQLAlchemy URL to point in 'data' directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,124 +18,297 @@ class DatabaseManager:
     Manages the database connection, session, and provides an API for database operations.
     """
     def __init__(self, db_url: str = db_url):
-        self.engine = sqlalchemy.create_engine(db_url)
-        self.Session = sessionmaker(bind=self.engine)
+        try:
+            self.engine = sqlalchemy.create_engine(db_url)
+            self.Session = sessionmaker(bind=self.engine)
+            logger.info(f"DatabaseManager initialized with engine for URL: {db_url}")
+        except Exception as e:
+            logger.critical("Failed to initialize DatabaseManager engine.", exc_info=True)
+            raise  # Re-raise the exception to stop the application if the DB can't be set up
 
     def setup_database(self, fresh_start: bool = True):
         """Creates all tables. If fresh_start, it drops all existing tables first."""
-        if fresh_start:
-            print("INFO: Dropping all tables for a fresh start.")
-            Base.metadata.drop_all(self.engine)
+        try:
+            if fresh_start:
+                logger.info("Dropping all existing database tables.")
+                Base.metadata.drop_all(self.engine)
 
-        Base.metadata.create_all(self.engine)
-        print("INFO: Database tables created successfully.")
+            logger.info("Creating all database tables from models.")
+            Base.metadata.create_all(self.engine)
+            logger.info("Database tables created successfully.")
+        except Exception as e:
+            logger.critical("Failed to setup database tables.", exc_info=True)
+            raise
 
     # ---------------
     # Item operations
     # ---------------
 
     def insert_item(self, item_id: int, name: str, weight: float, category: str, volume: float, stackable: bool):
-        """Insert a new item record"""
-        with self.Session() as session:
+        """Insert a new item record, rolling back on error."""
+        session = self.Session()
+        try:
             if session.get(Item, item_id):
+                logger.debug(f"Skipping duplicate item insertion for ID {item_id}.")
                 return
 
             new_item = Item(
-                id=item_id,
-                name=name,
-                weight=weight,
-                category=category,
-                volume=volume,
-                stackable=stackable
+                id=item_id, name=name, weight=weight,
+                category=category, volume=volume, stackable=stackable
             )
             session.add(new_item)
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to insert item with ID {item_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
+
+    def get_all_item_categories(self) -> list[str]:
+        """Helper function to get a unique, sorted list of all item categories."""
+        with self.Session() as session:
+            try:
+                categories = session.query(Item.category).distinct().order_by(Item.category).all()
+                return [category[0] for category in categories]
+            except Exception as e:
+                logger.error("Failed to retrieve item categories.", exc_info=True)
+                return []
+
+    def query_items(self, **kwargs) -> list[Item]:
+        """
+        A flexible method to query the items table with dynamic filters.
+        """
+        with self.Session() as session:
+            try:
+                query = session.query(Item)
+
+                control_args = ['order_by']
+                filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
+
+                for key, value in filter_kwargs.items():
+                    if key == 'name_contains':
+                        query = query.filter(Item.name.ilike(f"%{value}%"))
+                    elif hasattr(Item, key):
+                        query = query.filter(getattr(Item, key) == value)
+                    else:
+                        logger.warning(f"Unknown filter key '{key}' ignored in item query.")
+
+                # Apply Ordering
+                if 'order_by' in kwargs:
+                    order_by_col = kwargs['order_by']
+                    if order_by_col.startswith('-'):
+                        col_name = order_by_col[1:]
+                        if hasattr(Item, col_name):
+                            query = query.order_by(sqlalchemy.desc(getattr(Item, col_name)))
+                    else:
+                        if hasattr(Item, order_by_col):
+                            query = query.order_by(getattr(Item, order_by_col))
+                else:
+                    query = query.order_by(Item.id)
+
+                results = query.all()
+                return results
+            except Exception as e:
+                logger.error(f"An error occurred during item query with filters {kwargs}.", exc_info=True)
+                return []
 
     # -----------------
     # Pallet operations
     # -----------------
 
-    def insert_pallet(self, pallet_id: int, location: str, destination: str | None,
-                      order_id: int | None, sim_time: float):
-        """Insert a new pallet record into the database upon its creation"""
-        with self.Session() as session:
+    def insert_pallet(self, pallet_id: int, location: str, sim_time: float):
+        """Insert a new pallet record, rolling back on error."""
+        session = self.Session()
+        try:
             if session.get(Pallet, pallet_id):
+                logger.debug(f"Skipping duplicate pallet insertion for ID {pallet_id}.")
                 return
 
             new_pallet = Pallet(
-                id=pallet_id,
-                location=location,
-                destination=destination,
-                order_id=order_id,
-                last_updated_sim_time=sim_time
+                id=pallet_id, location=location, last_updated_sim_time=sim_time
             )
             session.add(new_pallet)
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to insert pallet with ID {pallet_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
 
 
     def update_pallet(self, pallet_id: int, sim_time: float, **kwargs):
         """
         A generic method to update any combination of pallet attributes.
         """
-        with self.Session() as session:
+        session = self.Session()
+        try:
             pallet = session.get(Pallet, pallet_id)
             if not pallet:
-                print(f"DATABASE-ERROR: Cannot update non-existent pallet '{pallet_id}'.")
+                logger.warning(f"Cannot update non-existent pallet '{pallet_id}'.")
                 return
 
-            # Dynamically update attributes from keyword arguments
             for key, value in kwargs.items():
                 if hasattr(pallet, key):
                     setattr(pallet, key, value)
                 else:
-                    print(f"DATABASE-WARN: Ignoring unknown attribute '{key}' for Pallet update.")
+                    logger.warning(f"Ignoring unknown attribute '{key}' for Pallet update.")
 
-            # Update sim time
             pallet.last_updated_sim_time = sim_time
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to update pallet with ID {pallet_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
+
+    def query_pallets(self, **kwargs) -> list[Pallet]:
+        """
+        A flexible method to query the pallets table with dynamic filters.
+        """
+        with self.Session() as session:
+            try:
+                query = session.query(Pallet)
+
+                # Separate control args from filter args
+                control_args = ['order_by']
+                filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
+
+                # Apply dynamic filters
+                for key, value in filter_kwargs.items():
+                    if hasattr(Pallet, key):
+                        query = query.filter(getattr(Pallet, key) == value)
+                    else:
+                        logger.warning(f"Unknown filter key '{key}' ignored in pallet query.")
+
+                # Apply ordering
+                if 'order_by' in kwargs:
+                    order_by_col = kwargs['order_by']
+                    if order_by_col.startswith('-'):
+                        # Descending order (e.g., '-last_updated_sim_time')
+                        col_name = order_by_col[1:]
+                        if hasattr(Pallet, col_name):
+                            query = query.order_by(sqlalchemy.desc(getattr(Pallet, col_name)))
+                    else:
+                        # Ascending order
+                        if hasattr(Pallet, order_by_col):
+                            query = query.order_by(getattr(Pallet, order_by_col))
+                else:
+                    # Default ordering if not specified
+                    query = query.order_by(Pallet.id)
+
+                results = query.all()
+                return results
+            except Exception as e:
+                logger.error(f"An error occurred during pallet query with filters {kwargs}.", exc_info=True)
+                return []
 
     # ----------------
     # Order operations
     # ----------------
 
     def insert_refill_order(self, order_id: int, order_time: float, item_id: int, qty: int):
-        """Insert a refill order record into the database upon its creation."""
-        with self.Session() as session:
+        """Insert a refill order record, rolling back on error."""
+        session = self.Session()
+        try:
             if session.get(RefillOrder, order_id):
+                logger.debug(f"Skipping duplicate RefillOrder insertion for ID {order_id}.")
                 return
 
             refill_order = RefillOrder(
-                id=order_id,
-                order_time=order_time,
-                item_id=item_id,
-                qty=qty
+                id=order_id, order_time=order_time, item_id=item_id, qty=qty
             )
             session.add(refill_order)
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to insert RefillOrder with ID {order_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
 
     def insert_opm_order(self, order_id: int, order_time: float, items: dict[int,int]):
         """
         Insert an opm order record.
         The 'items' proxy on OpmOrder knows how to handle the dict as it is.
         """
-        with self.Session() as session:
+        session = self.Session()
+        try:
             if session.get(OpmOrder, order_id):
+                logger.debug(f"Skipping duplicate OpmOrder insertion for ID {order_id}.")
                 return
 
-            opm_order = OpmOrder(
-                id=order_id,
-                order_time=order_time,
-                items=items
-            )
+            opm_order = OpmOrder(id=order_id, order_time=order_time, items=items)
             session.add(opm_order)
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to insert OpmOrder with ID {order_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
 
-    def update_order(self, order_id: int, status: OrderStatus):
-        """Update order status."""
-        with self.Session() as session:
+    def update_order(self, order_id: int, **kwargs):
+        """
+        A generic method to update any combination of order attributes.
+        """
+        session = self.Session()
+        try:
             order = session.get(Order, order_id)
             if not order:
+                logger.warning(f"Cannot update non-existent order '{order_id}'.")
                 return
 
-            order.status = status
+            for key, value in kwargs.items():
+                if hasattr(order, key):
+                    setattr(order, key, value)
+
             session.commit()
+        except Exception as e:
+            logger.error(f"Failed to update order with ID {order_id}.", exc_info=True)
+            session.rollback()
+        finally:
+            session.close()
+
+    def query_orders(self, **kwargs) -> list[Order]:
+        """
+        A flexible method to query the orders table with dynamic filters.
+        """
+        with self.Session() as session:
+            try:
+                # Start with a base query on the polymorphic Order class
+                query = session.query(Order)
+
+                # If we need to filter by item_id, we must join with RefillOrder
+                if 'item_id' in kwargs:
+                    query = query.join(RefillOrder)
+
+                # Separate control args from filter args
+                control_args = ['order_by']
+                filter_kwargs = {k: v for k, v in kwargs.items() if k not in control_args}
+
+                for key, value in filter_kwargs.items():
+                    if key == 'min_order_time':
+                        query = query.filter(Order.order_time >= value)
+                    elif key == 'max_order_time':
+                        query = query.filter(Order.order_time <= value)
+                    elif hasattr(Order, key):
+                        query = query.filter(getattr(Order, key) == value)
+                    else:
+                        logger.warning(f"Unknown filter key '{key}' ignored in query_orders.")
+
+                # Apply ordering
+                if 'order_by' in kwargs:
+                    order_by_col = kwargs['order_by']
+                    if order_by_col.startswith('-'):
+                        # Descending order
+                        col_name = order_by_col[1:]
+                        if hasattr(Order, col_name):
+                            query = query.order_by(sqlalchemy.desc(getattr(Order, col_name)))
+                    else:
+                        # Ascending order
+                        if hasattr(Order, order_by_col):
+                            query = query.order_by(getattr(Order, order_by_col))
+
+                results = query.all()
+                return results
+            except Exception as e:
+                logger.error(f"An error occurred during order query with filters {kwargs}.", exc_info=True)
+                return []

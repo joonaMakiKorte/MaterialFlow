@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
 from simulator.database.models import Item, Pallet, RefillOrder, OpmOrder, Order, OrderStatus
 
 def test_setup_database(db_manager):
@@ -41,8 +41,7 @@ def test_insert_item(db_manager):
 def test_insert_pallet(db_manager):
     """Tests inserting a new pallet."""
     db_manager.insert_pallet(
-        pallet_id=1, location="A1", destination="B2",
-        order_id=None, sim_time=123.45
+        pallet_id=1, location="A1", sim_time=123.45
     )
 
     # Assert
@@ -50,15 +49,15 @@ def test_insert_pallet(db_manager):
         pallet = session.get(Pallet, 1)
         assert pallet is not None
         assert pallet.location == "A1"
-        assert pallet.destination == "B2"
+        assert pallet.destination is None
         assert pallet.order_id is None
+        assert pallet.stored == True
         assert pallet.last_updated_sim_time == 123.45
 
 def test_update_pallet(db_manager):
     """Tests updating an existing pallet's attributes."""
     db_manager.insert_pallet(
-        pallet_id=1, location="A1", destination=None,
-        order_id=None, sim_time=100.0
+        pallet_id=1, location="A1", sim_time=100.0
     )
 
     db_manager.update_pallet(
@@ -71,6 +70,8 @@ def test_update_pallet(db_manager):
         assert pallet.location == "C3"
         assert pallet.destination == "D4"
         assert pallet.last_updated_sim_time == 200.5
+
+
 
 def test_insert_refill_order(db_manager):
     """Tests inserting a RefillOrder, which involves two tables."""

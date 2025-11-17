@@ -189,7 +189,8 @@ class Depalletizer(Component):
                     "sim_time": self.env.now})
                 self.event_bus.emit("update_order", {
                     "order_id": order.id,
-                    "status": order.status
+                    "status": order.status,
+                    "completion_time": self.env.now
                 })
                 self.event_bus.emit("depalletizer_idle", {"id":self._component_id})
 

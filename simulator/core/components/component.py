@@ -72,4 +72,4 @@ class Component(ABC):
         self.event_bus = event_bus
 
     def __repr__(self):
-        return f"{self._type}(id={self._component_id})"
+        return f"{self._type}({self._component_id})"

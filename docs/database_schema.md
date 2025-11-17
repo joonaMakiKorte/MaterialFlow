@@ -40,6 +40,7 @@ erDiagram
         string location "Current location identifier"
         string destination "Target destination identifier"
         int order_id "Nullable link to an Order"
+        bool stored "Is pallet in storage"
         float last_updated_sim_time "Last update time"
     }
 
